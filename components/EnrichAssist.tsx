@@ -17,17 +17,19 @@ export default function EnrichAssist() {
   }
 
   return (
-    <div style={{ display: "grid", gap: 6, marginBottom: 10 }}>
+    <div style={{ background: "var(--brand-tint-2)", border: "1px solid var(--brand-tint)", borderRadius: 8, padding: 12, marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 6 }}>
-        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste a product page URL to scan" style={{ flex: 1 }} />
-        <button type="button" onClick={run} disabled={loading || !url}>{loading ? "Scanning…" : "Scan"}</button>
+        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste a product page URL to scan for known terms" />
+        <button type="button" className="btn--sm btn--primary" onClick={run} disabled={loading || !url}>{loading ? "Scanning…" : "Scan"}</button>
       </div>
-      {error && <p style={{ fontSize: 12, color: "#A32D2D" }}>{error}</p>}
+      {error && <p style={{ fontSize: 12, color: "var(--danger)", marginTop: 8 }}>{error}</p>}
       {terms.length > 0 && (
-        <p style={{ fontSize: 13 }}>
-          Found: {terms.map((t) => `${t.label} (${t.type})`).join(", ")}.
-          <span style={{ color: "#5F5E5A" }}> Confirm by selecting them in the tag lists below, then save tags.</span>
-        </p>
+        <div style={{ marginTop: 10 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {terms.map((t) => <span key={t.id} className="badge badge--ok">{t.label} · {t.type}</span>)}
+          </div>
+          <p className="muted-xs" style={{ marginTop: 6 }}>Confirm by selecting these in the tag lists below, then save tags.</p>
+        </div>
       )}
     </div>
   );

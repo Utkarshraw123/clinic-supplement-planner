@@ -10,18 +10,22 @@ export default async function HistoryPage({ params }: { params: { id: string } }
   if (!patient) notFound();
   const snaps = await listSnapshotsForPatient(patient.id);
   return (
-    <main style={{ maxWidth: 640, margin: "40px auto" }}>
-      <h1 style={{ fontWeight: 500 }}>{patient.name} — plan history</h1>
-      {snaps.length === 0 ? <p style={{ color: "#5F5E5A" }}>No finalised plans yet.</p> : (
-        <ul>
-          {snaps.map((s) => (
-            <li key={s.id} style={{ padding: "8px 0", borderBottom: "0.5px solid #ddd", display: "flex", justifyContent: "space-between" }}>
-              <span>Sent {s.sent_at ?? s.created_at}{s.sent_to_email ? ` to ${s.sent_to_email}` : ""}</span>
-              <Link href={`/api/snapshots/${s.id}/pdf`}>Download PDF</Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+    <div className="stack" style={{ gap: 16 }}>
+      <div className="row-between">
+        <div>
+          <h1>{patient.name}</h1>
+          <p className="muted" style={{ marginTop: 2 }}>Plan history</p>
+        </div>
+        <Link href={`/patients/${patient.id}`} className="muted">← Back to profile</Link>
+      </div>
+      <div className="card">
+        {snaps.length === 0 ? <p className="muted">No finalised plans yet.</p> : snaps.map((s) => (
+          <div key={s.id} className="list-row">
+            <span>Sent {(s.sent_at ?? s.created_at)?.slice(0, 16).replace("T", " ")}{s.sent_to_email ? ` · ${s.sent_to_email}` : ""}</span>
+            <Link href={`/api/snapshots/${s.id}/pdf`} target="_blank"><button className="btn--sm">Download PDF</button></Link>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
