@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getPatient } from "@/lib/patients";
 import { getOrCreateDraftPlan, getPlan } from "@/lib/plans";
-import { searchProducts } from "@/lib/products";
+import { searchProducts, getProduct } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
+import { suggestForPatient } from "@/lib/recommend";
 import { query } from "@/lib/db";
 import { addItemAction, removeItemAction, chooseAlternativeAction, finaliseAndSendAction } from "@/app/plan/actions";
 import PlanItemDosing from "@/components/PlanItemDosing";
@@ -17,6 +18,10 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
   const plan = await getPlan(planId);
   const presets = await query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id");
   const catalog = await searchProducts("");
+
+  const inPlan = new Set(plan!.items.map((it) => it.product.id));
+  const fullCatalog = (await Promise.all(catalog.map((c) => getProduct(c.id)))).filter((p): p is NonNullable<typeof p> => !!p && !inPlan.has(p.id));
+  const suggestions = suggestForPatient(fullCatalog, patient.attributes, 5);
 
   const itemFlags = plan!.items.map((it) => ({ item: it, flags: flagProductForPatient(it.product, patient.attributes) }));
   const planHasBlock = itemFlags.some(({ flags }) => hasBlock(flags));
@@ -34,6 +39,29 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
           <span key={`mc-${a.termId}`} style={{ fontSize: 12, background: "#FAEEDA", color: "#854F0B", padding: "3px 9px", borderRadius: 8 }}>Caution: {a.label}</span>
         ))}
       </div>
+
+      {suggestions.length > 0 && (
+        <section style={{ marginTop: 8 }}>
+          <h2 style={{ fontWeight: 500, fontSize: 16 }}>Suggested for {patient.name}</h2>
+          <p style={{ fontSize: 12, color: "#5F5E5A" }}>Allergy-safe, ranked by this patient&apos;s goals.</p>
+          <ul>
+            {suggestions.map((sg) => (
+              <li key={sg.product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0" }}>
+                <span>
+                  {sg.product.name} · {sg.product.brand_name}
+                  <span style={{ fontSize: 12, color: "#0F6E56" }}> — {sg.reasons.join(" · ")}</span>
+                </span>
+                <form action={addItemAction}>
+                  <input type="hidden" name="planId" value={planId} />
+                  <input type="hidden" name="patientId" value={patientId} />
+                  <input type="hidden" name="productId" value={sg.product.id} />
+                  <button type="submit">Add</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section style={{ marginTop: 8 }}>
         <h2 style={{ fontWeight: 500, fontSize: 16 }}>Add a product</h2>
