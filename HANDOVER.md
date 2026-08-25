@@ -8,9 +8,18 @@
 
 - **What:** an internal clinical tool for a nutrition clinic (Lorna's) to build client supplement plans, flag allergy/contraindication conflicts, export a branded PDF, and email it to the client. Standalone — NOT part of the Wild Nutrition practitioner-portal (different project; keep separate).
 - **Stack:** Next.js 14 (App Router) · Turso/libSQL (raw SQL, no ORM) · email/password auth · server-side PDF (`@react-pdf/renderer`) · email via `resend` (mock without key).
-- **Repo:** `/Users/utkarshrawat/Wild Dash/supplement-selection-db` (holds `.git`; the parent `Wild Dash/` is NOT a repo). Branch **`main`**, HEAD **`d8d461c`**.
+- **Repo:** `/Users/utkarshrawat/Wild Dash/supplement-selection-db` (holds `.git`; the parent `Wild Dash/` is NOT a repo). Branch **`main`**, HEAD **`22b1977`**.
 - **GitHub:** `https://github.com/Utkarshraw123/clinic-supplement-planner` — **private**, personal account **Utkarshraw123** (auth via macOS keychain; `git push` just works).
-- **State:** **all 5 planned phases built, tested, merged, and pushed. 43/43 vitest tests pass. `npm run build` clean (19 routes).** Feature-complete AND visually polished. Only remaining work is go-live (keys + deploy).
+- **State:** **all 5 planned phases + a 6-item enhancement round built, tested, merged, and pushed. 54/54 vitest tests pass. `npm run build` clean (23 routes).** Feature-complete AND visually polished. Only remaining work is go-live (keys + deploy).
+- **Theme:** re-themed navy → **deep forest green** (2026-08-25). Brand tokens are still named `--navy`/`--navy-2`/`--navy-ink` in `app/globals.css` but hold green values (#1B4332 / #122E23 / #1C3A2E). Renaming them is a possible tidy-up (touches ~9 refs); left as-is to keep the diff small.
+
+### 2026-08-25 enhancement round (all shipped, see commit 22b1977)
+1. **Allergen safety** — loud "Allergen conflict" banner on the plan builder; finalisation hard-refuses a blocked plan (`finalisePlanToSnapshot` throws). Was already blocked at send; now blocked at finalise + explained.
+2. **Optional-email delivery** — finalising always creates a downloadable PDF snapshot; client email is now OPTIONAL. `lib/delivery.ts` split into `finalisePlanToSnapshot` (download-only) + `sendSnapshotEmail` (send later); `finaliseAndSend` kept as a wrapper. Finalise redirects to `/patients/{id}/history`, which shows Sent/Finalised status, View, **Download PDF** (`?download=1` = attachment), and an "Email this plan" form for un-sent snapshots.
+3. **Admin analytics** — `lib/analytics.ts` (`getPractitionerBreakdown`, `getPracticeTotals`). Per-practitioner table (patients / plans built / finalised / sent) on the dashboard (admin only) + dedicated `/admin/analytics` page (admin-only, nav item "Analytics"). Head nutritionist = `admin` role; her nutritionists = `team` (they don't see it).
+4. **Patients UX** — "Add patient" moved into a deep-green section header bar (`components/PageHeader.tsx`, `.page-header` CSS). Same header on catalog + analytics. Fixed invalid `<Link><button>` nesting (now `<Link className="btn ...">`; new `.btn` anchor-button base class).
+5. **Product autofill** — `/catalog/new` is now a full form (`components/ProductForm.tsx`) that scans a pasted product link and auto-fills name/size/form + tags **including allergens** (suggest-and-confirm; practitioner confirms by saving). Link is saved as a supplier link. Parser: `lib/enrich.ts` `parseProductHtml` / `enrichProductFromUrl` (og:title/title, size regex, form keywords, `extractAllKnownTerms`). Live outbound fetch WORKS in this env (verified against a real wildnutrition.com page).
+6. **CSV export** — `lib/csv.ts` (`toCsv`, `csvResponse`) + `/api/export/{patients,products,analytics}` (analytics is admin-only). Export buttons on patients, catalog, analytics headers.
 - **Dev URL:** http://localhost:3200 · **admin login:** `admin@clinic.test` / `wild-admin-2026`.
 
 ### Quick start
@@ -22,7 +31,7 @@ npx tsx scripts/seed-dosing.ts       # standard dosing presets
 npx tsx scripts/seed-demo.ts         # 2 brands + 4 products, magnesium tagged mushroom+sleep
 npx tsx scripts/seed-clinical-demo.ts# patient "Emma Hartley" (mushroom allergy) + a blocked plan
 npm run dev                          # http://localhost:3200  → sign in → lands on /dashboard
-npx vitest run                       # 43 tests, keep green
+npx vitest run                       # 54 tests, keep green
 npm run build                        # production build + typecheck (STOP dev server first)
 ```
 
@@ -94,7 +103,7 @@ lib/
   protocols.ts dashboard.ts     (Plan 5)
   import.ts                     CSV importer
 scripts/                        migrate, seed-admin, seed-dosing, seed-demo, seed-clinical-demo
-test/                           23 test files, 43 tests
+test/                           27 test files, 54 tests
 docs/superpowers/
   specs/2026-08-25-supplement-selection-database-design.md   the approved design spec
   plans/                        the 5 implementation plans (see §5)
@@ -146,7 +155,7 @@ The design spec (approved) is in `docs/superpowers/specs/`.
 
 Deep-navy left sidebar + cream canvas + sand cards + serif display headings; warm, premium, editorial. All tokens live in `app/globals.css` on `:root`:
 
-- `--navy` #10243A · `--navy-2` #0B1B2C (sidebar) · `--navy-ink` #1F2D38 (text)
+- `--navy` #1B4332 · `--navy-2` #122E23 (sidebar) · `--navy-ink` #1C3A2E (text) — deep forest green (formerly navy #10243A/#0B1B2C/#1F2D38)
 - `--cream` #FAF5EE (canvas) · `--sand` #F3EBDF (cards) · `--sand-border` #E7DDCD
 - `--terracotta` #C06A47 (+tint #F3E3DA) — icons, eyebrows, accents
 - `--sage` #8DA06A (+tint #EBEFE1) — suggestions, "ok" badges
@@ -177,7 +186,7 @@ Deck source: `/Users/utkarshrawat/Desktop/Hub Ideas v 2 (6).pdf`. To view it in 
 ## 8. How to verify (evidence, not vibes)
 
 ```bash
-npx vitest run          # expect: 43 passed
+npx vitest run          # expect: 54 passed
 npm run build           # expect: Compiled successfully, 19 routes (stop dev server first)
 ```
 Then in the browser (preview `supplement-db-dev`), log in and check:
