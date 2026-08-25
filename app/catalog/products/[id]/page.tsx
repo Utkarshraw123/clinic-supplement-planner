@@ -4,6 +4,7 @@ import { getProduct, searchProducts } from "@/lib/products";
 import { listBrands } from "@/lib/brands";
 import { listTerms, type TermType } from "@/lib/taxonomies";
 import { saveProductAction, saveTagsAction, addSupplierAction, removeSupplierAction, addAlternativeAction } from "@/app/catalog/products/actions";
+import EnrichAssist from "@/components/EnrichAssist";
 
 const TAG_TYPES: TermType[] = ["ingredient","allergen","concern","diet","caution"];
 
@@ -32,6 +33,7 @@ export default async function ProductEditor({ params }: { params: { id: string }
 
       <section>
         <h2 style={{ fontWeight: 500, fontSize: 16 }}>Tags</h2>
+        <EnrichAssist />
         <form action={saveTagsAction} style={{ display: "grid", gap: 10 }}>
           <input type="hidden" name="productId" value={product.id} />
           {TAG_TYPES.map((type) => {
