@@ -121,3 +121,20 @@ CREATE TABLE IF NOT EXISTS audit_events (
   detail TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS protocols (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS protocol_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  protocol_id INTEGER NOT NULL REFERENCES protocols(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id),
+  dosing_preset_id INTEGER REFERENCES dosing_presets(id),
+  dosing_custom_text TEXT,
+  position INTEGER NOT NULL DEFAULT 0
+);
