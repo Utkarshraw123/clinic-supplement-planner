@@ -9,6 +9,19 @@ export default function SignOutButton() {
     router.refresh();
   }
   return (
-    <button type="button" className="btn--sm" onClick={signOut}>Sign out</button>
+    <button
+      type="button"
+      onClick={signOut}
+      style={{
+        width: "100%",
+        height: 36,
+        fontSize: 13,
+        background: "transparent",
+        color: "rgba(255,255,255,0.8)",
+        border: "1px solid rgba(255,255,255,0.18)",
+      }}
+    >
+      Sign out
+    </button>
   );
 }

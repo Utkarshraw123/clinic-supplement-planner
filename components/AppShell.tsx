@@ -1,87 +1,62 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { getClinicSettings } from "@/lib/settings";
+import SidebarNav, { type NavItem } from "@/components/SidebarNav";
 import SignOutButton from "@/components/SignOutButton";
 
 export default async function AppShell({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-
-  // Login (and any unauthenticated view) renders chrome-free.
   if (!user) return <>{children}</>;
 
+  const settings = await getClinicSettings();
+  const clinicName = settings.clinic_name || "Supplement plans";
+
+  const items: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: "home" },
+    { href: "/patients", label: "Patients", icon: "users" },
+    { href: "/catalog", label: "Catalog", icon: "grid" },
+    { href: "/protocols", label: "Protocols", icon: "layers" },
+  ];
+  if (user.role === "admin") {
+    items.push(
+      { href: "/admin/taxonomies", label: "Taxonomies", icon: "tag" },
+      { href: "/admin/users", label: "Team", icon: "team" },
+      { href: "/admin/settings", label: "Settings", icon: "cog" },
+    );
+  }
+
   return (
-    <>
-      <header
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      <aside
         style={{
-          background: "var(--surface)",
-          borderBottom: "1px solid var(--border)",
+          width: 244,
+          flexShrink: 0,
+          background: "var(--navy-2)",
+          color: "#fff",
+          padding: "26px 16px",
+          display: "flex",
+          flexDirection: "column",
           position: "sticky",
           top: 0,
-          zIndex: 10,
+          height: "100vh",
         }}
       >
-        <div
-          style={{
-            maxWidth: 1040,
-            margin: "0 auto",
-            padding: "0 24px",
-            height: 58,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-          }}
-        >
-          <Link href="/patients" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
-            <span
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 7,
-                background: "var(--brand)",
-                color: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 14,
-                fontWeight: 700,
-              }}
-            >
-              S
-            </span>
-            <span style={{ fontWeight: 600, color: "var(--ink)", fontSize: 15 }}>Supplement plans</span>
-          </Link>
+        <Link href="/dashboard" style={{ textDecoration: "none", color: "#fff", padding: "0 12px", marginBottom: 26, display: "block" }}>
+          <div style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: 19, fontWeight: 600, lineHeight: 1.15 }}>{clinicName}</div>
+          <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(224,150,120,0.95)", marginTop: 3 }}>Practitioner tools</div>
+        </Link>
 
-          <nav style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <NavLink href="/patients" label="Patients" />
-            <NavLink href="/catalog" label="Catalog" />
-            {user.role === "admin" && <NavLink href="/admin/settings" label="Settings" />}
-            {user.role === "admin" && <NavLink href="/admin/taxonomies" label="Taxonomies" />}
-            {user.role === "admin" && <NavLink href="/admin/users" label="Team" />}
-            <span style={{ width: 8 }} />
-            <span className="muted-xs" style={{ marginRight: 8 }}>{user.name}</span>
-            <SignOutButton />
-          </nav>
+        <SidebarNav items={items} />
+
+        <div style={{ marginTop: "auto", paddingTop: 18, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", padding: "0 12px 8px" }}>Signed in as {user.name}</div>
+          <div style={{ padding: "0 8px" }}><SignOutButton /></div>
         </div>
-      </header>
-      <div className="page">{children}</div>
-    </>
-  );
-}
+      </aside>
 
-function NavLink({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      style={{
-        fontSize: 14,
-        fontWeight: 500,
-        color: "var(--ink-2)",
-        padding: "7px 11px",
-        borderRadius: 8,
-        textDecoration: "none",
-      }}
-    >
-      {label}
-    </Link>
+      <main style={{ flex: 1, minWidth: 0 }}>
+        <div className="page">{children}</div>
+      </main>
+    </div>
   );
 }
