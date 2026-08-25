@@ -18,6 +18,34 @@ export async function saveProductAction(formData: FormData) {
   else { const id = await P.createProduct(input); redirect(`/catalog/products/${id}`); }
 }
 
+// Create a product with all details, tags and an optional supplier link in one submit.
+export async function createFullProductAction(formData: FormData) {
+  await requireUser();
+  const id = await P.createProduct({
+    brandId: Number(formData.get("brandId")),
+    name: String(formData.get("name")),
+    packageSize: String(formData.get("packageSize") || ""),
+    form: String(formData.get("form") || ""),
+  });
+
+  const tags: { termId: number; tagType: TermType }[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("tag:")) {
+      const tagType = key.slice(4) as TermType;
+      for (const tid of String(value).split(",").filter(Boolean)) tags.push({ termId: Number(tid), tagType });
+    }
+  }
+  if (tags.length) await P.setProductTags(id, tags);
+
+  const supplierUrl = String(formData.get("supplierUrl") || "").trim();
+  if (supplierUrl) {
+    const label = String(formData.get("supplierLabel") || "").trim() || "Supplier";
+    await P.addSupplierLink(id, label, supplierUrl);
+  }
+
+  redirect(`/catalog/products/${id}`);
+}
+
 export async function saveTagsAction(formData: FormData) {
   await requireUser();
   const productId = Number(formData.get("productId"));

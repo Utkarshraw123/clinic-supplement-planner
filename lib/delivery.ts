@@ -7,34 +7,62 @@ import { getClinicSettings } from "@/lib/settings";
 import { sendPlanEmail } from "@/lib/email";
 import { recordAudit } from "@/lib/audit";
 
-export async function finaliseAndSend(input: { planId: number; email: string; actorId?: number }): Promise<{ snapshotId: number; mocked: boolean }> {
+// Finalise a plan into a downloadable snapshot WITHOUT emailing it. The practitioner
+// can then download the PDF (e.g. to send on WhatsApp) or email it later.
+export async function finalisePlanToSnapshot(input: { planId: number; actorId?: number }): Promise<{ snapshotId: number }> {
   const plan = await getPlan(input.planId);
   if (!plan) throw new Error("Plan not found");
+  if (plan.items.length === 0) throw new Error("Cannot finalise an empty plan");
   const patient = await getPatient(plan.patientId);
   if (!patient) throw new Error("Patient not found");
 
-  // Safety re-check against the CURRENT patient profile.
+  // Hard safety gate: an allergen conflict blocks finalisation outright.
   for (const it of plan.items) {
     if (hasBlock(flagProductForPatient(it.product, patient.attributes))) {
-      throw new Error("Cannot send: plan has a blocked item");
+      throw new Error("Cannot finalise: plan has a blocked item (allergen conflict)");
     }
   }
 
   const pdfData = await buildPlanPdfData(plan, patient);
   const pdf = await renderPlanPdf(pdfData);
-  const settings = await getClinicSettings();
 
   const rs = await execute(
     `INSERT INTO plan_snapshots (plan_id, frozen_json, pdf_base64, sent_to_email, sent_at, sent_by)
-     VALUES (?, ?, ?, ?, datetime('now'), ?)`,
-    [input.planId, JSON.stringify(pdfData), pdf.toString("base64"), input.email, input.actorId ?? null]
+     VALUES (?, ?, ?, NULL, NULL, ?)`,
+    [input.planId, JSON.stringify(pdfData), pdf.toString("base64"), input.actorId ?? null]
   );
   const snapshotId = Number(rs.lastInsertRowid);
 
   await finalisePlan(input.planId);
-  const { mocked } = await sendPlanEmail({ to: input.email, from: settings.email_from ?? "", pdf, patientName: patient.name });
-  await recordAudit({ actorId: input.actorId, action: "finalised_and_sent", entity: "plan", entityId: input.planId, detail: `${plan.items.length} items → ${input.email}${mocked ? " (mock)" : ""}` });
+  await recordAudit({ actorId: input.actorId, action: "finalised", entity: "plan", entityId: input.planId, detail: `${plan.items.length} items (download only)` });
+  return { snapshotId };
+}
 
+// Email an already-finalised snapshot to a client address.
+export async function sendSnapshotEmail(input: { snapshotId: number; email: string; actorId?: number }): Promise<{ mocked: boolean }> {
+  const rows = await query<{ pdf_base64: string; plan_id: number }>(
+    "SELECT pdf_base64, plan_id FROM plan_snapshots WHERE id = ?", [input.snapshotId]
+  );
+  if (!rows[0]) throw new Error("Snapshot not found");
+  const pdf = Buffer.from(rows[0].pdf_base64, "base64");
+  const plan = await getPlan(rows[0].plan_id);
+  const patient = plan ? await getPatient(plan.patientId) : null;
+  const settings = await getClinicSettings();
+
+  const { mocked } = await sendPlanEmail({ to: input.email, from: settings.email_from ?? "", pdf, patientName: patient?.name ?? "" });
+  await execute(
+    "UPDATE plan_snapshots SET sent_to_email = ?, sent_at = datetime('now'), sent_by = COALESCE(sent_by, ?) WHERE id = ?",
+    [input.email, input.actorId ?? null, input.snapshotId]
+  );
+  await recordAudit({ actorId: input.actorId, action: "sent", entity: "snapshot", entityId: input.snapshotId, detail: `→ ${input.email}${mocked ? " (mock)" : ""}` });
+  return { mocked };
+}
+
+// Convenience: finalise AND email in one step (email required). Used by the plan
+// builder when a client email is supplied, and by the delivery tests.
+export async function finaliseAndSend(input: { planId: number; email: string; actorId?: number }): Promise<{ snapshotId: number; mocked: boolean }> {
+  const { snapshotId } = await finalisePlanToSnapshot({ planId: input.planId, actorId: input.actorId });
+  const { mocked } = await sendSnapshotEmail({ snapshotId, email: input.email, actorId: input.actorId });
   return { snapshotId, mocked };
 }
 

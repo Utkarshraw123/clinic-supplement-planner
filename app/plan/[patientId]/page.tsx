@@ -40,6 +40,19 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
         <a href={`/patients/${patientId}`} className="muted">← Back to profile</a>
       </div>
 
+      {planHasBlock && (
+        <div className="safety-banner">
+          <span className="badge badge--danger" style={{ marginTop: 1 }}>Allergen conflict</span>
+          <div>
+            <strong>This plan cannot be finalised or sent.</strong>
+            <div className="safety-banner__body">
+              One or more products conflict with {patient.name}&apos;s recorded allergies (see the red
+              &ldquo;Blocked&rdquo; items below). Remove or swap them for an allergen-safe alternative before finalising.
+            </div>
+          </div>
+        </div>
+      )}
+
       {(patient.attributes.some((a) => a.attrType === "allergy" || a.attrType === "med_condition")) && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
           <span className="section-label" style={{ marginRight: 4 }}>Profile</span>
@@ -166,12 +179,18 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
         ) : plan!.items.length === 0 ? (
           <p className="muted">Add at least one product to finalise this plan.</p>
         ) : (
-          <form action={finaliseAndSendAction} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <form action={finaliseAndSendAction} className="stack" style={{ gap: 8 }}>
             <input type="hidden" name="planId" value={planId} />
             <input type="hidden" name="patientId" value={patientId} />
-            <label className="muted" style={{ whiteSpace: "nowrap" }}>Send to</label>
-            <input name="email" type="email" placeholder="client@email.com" required style={{ flex: 1, minWidth: 200 }} />
-            <button type="submit" className="btn--primary">Finalise &amp; send</button>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <label className="muted" style={{ whiteSpace: "nowrap" }}>Client email <span className="muted-xs">(optional)</span></label>
+              <input name="email" type="email" placeholder="client@email.com" style={{ flex: 1, minWidth: 200 }} />
+              <button type="submit" className="btn--primary">Finalise plan</button>
+            </div>
+            <p className="muted-xs">
+              With an email we generate the PDF and send it to the client. Leave it blank to just finalise and download
+              the PDF (to print or share on WhatsApp) — you can still email it later from the patient&apos;s history.
+            </p>
           </form>
         )}
       </div>

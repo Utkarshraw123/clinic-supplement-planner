@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --navy: #10243A;
-  --navy-2: #0B1B2C;
-  --navy-ink: #1F2D38;
+  --navy: #1B4332;
+  --navy-2: #122E23;
+  --navy-ink: #1C3A2E;
   --cream: #FAF5EE;
   --sand: #F3EBDF;
   --sand-2: #EFE6D6;
@@ -108,6 +108,28 @@ button:active { transform: scale(0.985); }
 button:focus-visible { box-shadow: 0 0 0 3px var(--terracotta-tint); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* Anchors that should look like buttons (Next <Link>, download links). Use
+   className="btn btn--accent" etc. — the .btn base matches class specificity so
+   the colour modifiers below still win by source order. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--sand-border);
+  border-radius: var(--radius-ctl);
+  background: #fff;
+  color: var(--navy-ink);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn:hover { text-decoration: none; background: var(--sand); border-color: var(--terracotta); }
+
 .btn--primary { background: var(--navy); border-color: var(--navy); color: #fff; }
 .btn--primary:hover { background: var(--navy-2); border-color: var(--navy-2); color: #fff; }
 .btn--accent { background: var(--terracotta); border-color: var(--terracotta); color: #fff; }
@@ -161,3 +183,47 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .badge--neutral { background: var(--sand-2); color: var(--ink-2); }
 
 .stat-num { font-family: var(--font-serif), Georgia, serif; font-size: 34px; font-weight: 500; color: var(--navy-ink); line-height: 1; }
+
+/* Green section header bar — the deep-green band that titles a section */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--radius-card);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+}
+.page-header h1 { color: #fff; }
+.page-header .page-header__sub { color: rgba(255, 255, 255, 0.72); font-size: 14px; margin-top: 3px; }
+.page-header .eyebrow { color: rgba(224, 150, 120, 0.95); }
+.page-header__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* Button that sits on the dark-green header bar */
+.btn--on-dark { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.25); color: #fff; }
+.btn--on-dark:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.4); color: #fff; }
+
+/* Loud safety banner for allergen conflicts */
+.safety-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  border-left-width: 4px;
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+  color: var(--danger);
+}
+.safety-banner strong { display: block; font-size: 15px; margin-bottom: 2px; }
+.safety-banner__body { font-size: 13px; color: #7A1C14; line-height: 1.5; }
+
+/* Simple analytics table */
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th, .table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--sand-border); }
+.table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2); font-weight: 600; }
+.table td.num, .table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table tr:last-child td { border-bottom: none; }

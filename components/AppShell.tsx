@@ -19,6 +19,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
   ];
   if (user.role === "admin") {
     items.push(
+      { href: "/admin/analytics", label: "Analytics", icon: "chart" },
       { href: "/admin/taxonomies", label: "Taxonomies", icon: "tag" },
       { href: "/admin/users", label: "Team", icon: "team" },
       { href: "/admin/settings", label: "Settings", icon: "cog" },

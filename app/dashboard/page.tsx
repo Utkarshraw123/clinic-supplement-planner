@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/current-user";
 import { getDashboardStats, recentPatients, recentlySent } from "@/lib/dashboard";
+import { getPractitionerBreakdown } from "@/lib/analytics";
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -14,6 +15,7 @@ export default async function DashboardPage() {
   const stats = await getDashboardStats();
   const patients = await recentPatients();
   const sent = await recentlySent();
+  const team = u.role === "admin" ? await getPractitionerBreakdown() : [];
 
   const cards = [
     { label: "Patients", value: stats.patientCount },
@@ -30,7 +32,7 @@ export default async function DashboardPage() {
           <h1>{greeting()}, {u.name.split(" ")[0]}</h1>
           <p className="muted" style={{ marginTop: 4 }}>Everything you need to build and send today&apos;s supplement plans.</p>
         </div>
-        <Link href="/patients/new"><button className="btn--primary">New patient</button></Link>
+        <Link href="/patients/new" className="btn btn--primary">New patient</Link>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14 }}>
@@ -66,6 +68,45 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {u.role === "admin" && (
+        <div className="card">
+          <div className="row-between" style={{ marginBottom: 8 }}>
+            <div>
+              <p className="eyebrow">Practice oversight</p>
+              <h2 style={{ fontSize: 18 }}>Your team</h2>
+            </div>
+            <Link href="/admin/analytics" className="muted-xs">Full analytics →</Link>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Practitioner</th>
+                  <th className="num">Patients</th>
+                  <th className="num">Plans built</th>
+                  <th className="num">Finalised</th>
+                  <th className="num">Sent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {team.map((r) => (
+                  <tr key={r.userId}>
+                    <td>
+                      <span style={{ fontWeight: 500 }}>{r.name}</span>
+                      {r.role === "admin" && <span className="badge badge--ok" style={{ marginLeft: 8, fontSize: 11 }}>Owner</span>}
+                    </td>
+                    <td className="num">{r.patients}</td>
+                    <td className="num">{r.plansBuilt}</td>
+                    <td className="num">{r.plansFinalised}</td>
+                    <td className="num">{r.plansSent}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

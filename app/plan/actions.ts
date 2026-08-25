@@ -1,8 +1,9 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { addPlanItem, removePlanItem, setItemDosing, setItemAlternative } from "@/lib/plans";
-import { finaliseAndSend } from "@/lib/delivery";
+import { finaliseAndSend, finalisePlanToSnapshot, sendSnapshotEmail } from "@/lib/delivery";
 
 export async function addItemAction(formData: FormData) {
   await requireUser();
@@ -34,10 +35,28 @@ export async function chooseAlternativeAction(formData: FormData) {
 
 export async function finaliseAndSendAction(formData: FormData) {
   const u = await requireUser();
-  await finaliseAndSend({
-    planId: Number(formData.get("planId")),
-    email: String(formData.get("email") || ""),
+  const planId = Number(formData.get("planId"));
+  const patientId = String(formData.get("patientId"));
+  const email = String(formData.get("email") || "").trim();
+
+  // Email is optional: with an address we finalise AND send; without one we still
+  // finalise into a downloadable PDF (for WhatsApp / patients who don't use email).
+  if (email) {
+    await finaliseAndSend({ planId, email, actorId: u.userId });
+  } else {
+    await finalisePlanToSnapshot({ planId, actorId: u.userId });
+  }
+  // Land on history, where the finalised PDF is immediately downloadable.
+  redirect(`/patients/${patientId}/history`);
+}
+
+// Send a previously-finalised snapshot by email (from the history page).
+export async function sendSnapshotAction(formData: FormData) {
+  const u = await requireUser();
+  await sendSnapshotEmail({
+    snapshotId: Number(formData.get("snapshotId")),
+    email: String(formData.get("email") || "").trim(),
     actorId: u.userId,
   });
-  revalidatePath(`/plan/${formData.get("patientId")}`);
+  revalidatePath(`/patients/${formData.get("patientId")}/history`);
 }
