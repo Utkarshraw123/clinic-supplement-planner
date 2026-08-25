@@ -2,15 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getPatient } from "@/lib/patients";
-import { getOrCreateDraftPlan } from "@/lib/plans";
-import { listSnapshots } from "@/lib/delivery";
+import { listSnapshotsForPatient } from "@/lib/delivery";
 
 export default async function HistoryPage({ params }: { params: { id: string } }) {
   await requireUser();
   const patient = await getPatient(Number(params.id));
   if (!patient) notFound();
-  const planId = await getOrCreateDraftPlan(patient.id);
-  const snaps = await listSnapshots(planId);
+  const snaps = await listSnapshotsForPatient(patient.id);
   return (
     <main style={{ maxWidth: 640, margin: "40px auto" }}>
       <h1 style={{ fontWeight: 500 }}>{patient.name} — plan history</h1>

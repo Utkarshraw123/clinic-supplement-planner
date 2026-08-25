@@ -5,7 +5,8 @@ import { createProduct, setProductTags } from "@/lib/products";
 import { addTerm } from "@/lib/taxonomies";
 import { createPatient, setPatientAttributes } from "@/lib/patients";
 import { getOrCreateDraftPlan, addPlanItem } from "@/lib/plans";
-import { finaliseAndSend, listSnapshots, getSnapshotPdf } from "@/lib/delivery";
+import { finaliseAndSend, listSnapshots, listSnapshotsForPatient, getSnapshotPdf } from "@/lib/delivery";
+import { getPlan } from "@/lib/plans";
 
 describe("delivery", () => {
   beforeAll(async () => { await runMigrations(); });
@@ -37,5 +38,25 @@ describe("delivery", () => {
     expect(snaps[0].sent_to_email).toBe("c@example.com");
     const pdf = await getSnapshotPdf(res.snapshotId);
     expect(pdf!.subarray(0, 5).toString("latin1")).toBe("%PDF-");
+  });
+
+  it("finds a finalised plan's snapshot by patient even after the draft rolls over", async () => {
+    const brandId = await createBrand({ name: `Hist ${Date.now()}` });
+    const productId = await createProduct({ brandId, name: "Hist Vit D", form: "capsule" });
+    const patientId = await createPatient({ name: "History P", dob: "1990-01-01" });
+    const planId = await getOrCreateDraftPlan(patientId);
+    await addPlanItem(planId, productId);
+    await finaliseAndSend({ planId, email: "hist@example.com" });
+
+    // Finalising flips the plan out of 'draft'; a fresh draft would have no snapshots.
+    const freshDraft = await getOrCreateDraftPlan(patientId);
+    expect(freshDraft).not.toBe(planId);
+    expect(await listSnapshots(freshDraft)).toHaveLength(0);
+
+    // Patient-scoped lookup still finds the finalised plan's snapshot.
+    const byPatient = await listSnapshotsForPatient(patientId);
+    expect(byPatient).toHaveLength(1);
+    expect(byPatient[0].sent_to_email).toBe("hist@example.com");
+    expect((await getPlan(planId))!.status).toBe("finalised");
   });
 });
