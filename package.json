@@ -17,12 +17,14 @@
   "description": "Internal clinical supplement plan builder",
   "dependencies": {
     "@libsql/client": "^0.17.4",
+    "@react-pdf/renderer": "^4.8.1",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.10",
     "next": "^14.2.35",
     "papaparse": "^5.7.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "resend": "^6.22.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
