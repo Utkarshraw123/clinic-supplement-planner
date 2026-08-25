@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root { --brand: #0F6E56; --brand-tint: #E1F5EE; --ink: #2C2C2A; --muted: #5F5E5A; }
+body { color: var(--ink); background: #fafaf8; }
