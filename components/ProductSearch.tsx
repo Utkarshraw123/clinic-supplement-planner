@@ -16,20 +16,24 @@ export default function ProductSearch({ initial }: { initial: Hit[] }) {
   }, [term]);
   return (
     <div>
-      <input
-        placeholder="Search all products — vitamin D, magnesium…"
-        value={term}
-        onChange={(e) => setTerm(e.target.value)}
-        style={{ width: "100%" }}
-      />
-      <ul style={{ marginTop: 12 }}>
+      <div style={{ position: "relative" }}>
+        <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--ink-muted)", fontSize: 15 }}>⌕</span>
+        <input
+          placeholder="Search all products — vitamin D, magnesium…"
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          style={{ paddingLeft: 32 }}
+        />
+      </div>
+      <div style={{ marginTop: 6 }}>
+        {hits.length === 0 && <p className="muted" style={{ padding: "12px 4px" }}>No products match “{term}”.</p>}
         {hits.map((h) => (
-          <li key={h.id} style={{ padding: "8px 0", borderBottom: "0.5px solid #ddd" }}>
-            <Link href={`/catalog/products/${h.id}`}>{h.name}</Link>
-            <span style={{ color: "#5F5E5A", fontSize: 13 }}> · {h.brand_name}{h.form ? ` · ${h.form}` : ""}</span>
-          </li>
+          <div key={h.id} className="list-row">
+            <Link href={`/catalog/products/${h.id}`} style={{ fontWeight: 500, color: "var(--ink)" }}>{h.name}</Link>
+            <span className="muted-xs">{h.brand_name}{h.form ? ` · ${h.form}` : ""}{h.package_size ? ` · ${h.package_size}` : ""}</span>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

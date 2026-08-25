@@ -63,7 +63,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
           </nav>
         </div>
       </header>
-      {children}
+      <div className="page">{children}</div>
     </>
   );
 }

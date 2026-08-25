@@ -6,19 +6,23 @@ export default async function PatientsPage() {
   await requireUser();
   const patients = await listPatients();
   return (
-    <main style={{ maxWidth: 680, margin: "40px auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ fontWeight: 500 }}>Patients</h1>
-        <Link href="/patients/new">Add patient</Link>
+    <div className="stack" style={{ gap: 18 }}>
+      <div className="row-between">
+        <div>
+          <h1>Patients</h1>
+          <p className="muted" style={{ marginTop: 2 }}>{patients.length} {patients.length === 1 ? "patient" : "patients"}</p>
+        </div>
+        <Link href="/patients/new"><button className="btn--sm btn--primary">Add patient</button></Link>
       </div>
-      <ul style={{ marginTop: 16 }}>
+      <div className="card">
+        {patients.length === 0 && <p className="muted">No patients yet. Add your first to start a plan.</p>}
         {patients.map((p) => (
-          <li key={p.id} style={{ padding: "8px 0", borderBottom: "0.5px solid #ddd" }}>
-            <Link href={`/patients/${p.id}`}>{p.name}</Link>
-            <span style={{ color: "#5F5E5A", fontSize: 13 }}> · DOB {p.dob}</span>
-          </li>
+          <div key={p.id} className="list-row">
+            <Link href={`/patients/${p.id}`} style={{ fontWeight: 500, color: "var(--ink)" }}>{p.name}</Link>
+            <span className="muted-xs">DOB {p.dob}</span>
+          </div>
         ))}
-      </ul>
-    </main>
+      </div>
+    </div>
   );
 }

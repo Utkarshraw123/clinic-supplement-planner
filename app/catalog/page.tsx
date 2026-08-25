@@ -7,18 +7,21 @@ export default async function CatalogPage() {
   await requireUser();
   const initial = await searchProducts("");
   return (
-    <main style={{ maxWidth: 720, margin: "40px auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ fontWeight: 500 }}>Catalog</h1>
-        <nav style={{ display: "flex", gap: 12, fontSize: 14 }}>
-          <Link href="/catalog/brands">Brands</Link>
-          <Link href="/catalog/import">Import</Link>
-          <Link href="/catalog/new">Add product</Link>
+    <div className="stack" style={{ gap: 18 }}>
+      <div className="row-between">
+        <div>
+          <h1>Catalog</h1>
+          <p className="muted" style={{ marginTop: 2 }}>{initial.length} products across all brands</p>
+        </div>
+        <nav style={{ display: "flex", gap: 8 }}>
+          <Link href="/catalog/brands" className="muted" style={{ alignSelf: "center" }}>Brands</Link>
+          <Link href="/catalog/import"><button className="btn--sm">Import</button></Link>
+          <Link href="/catalog/new"><button className="btn--sm btn--primary">Add product</button></Link>
         </nav>
       </div>
-      <div style={{ marginTop: 16 }}>
+      <div className="card">
         <ProductSearch initial={initial} />
       </div>
-    </main>
+    </div>
   );
 }
