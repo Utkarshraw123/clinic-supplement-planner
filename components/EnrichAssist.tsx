@@ -17,7 +17,7 @@ export default function EnrichAssist() {
   }
 
   return (
-    <div style={{ background: "var(--brand-tint-2)", border: "1px solid var(--brand-tint)", borderRadius: 8, padding: 12, marginBottom: 14 }}>
+    <div style={{ background: "var(--sage-tint)", border: "1px solid #D4DCC2", borderRadius: 10, padding: 12, marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 6 }}>
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste a product page URL to scan for known terms" />
         <button type="button" className="btn--sm btn--primary" onClick={run} disabled={loading || !url}>{loading ? "Scanning…" : "Scan"}</button>

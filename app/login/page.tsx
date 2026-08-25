@@ -19,26 +19,26 @@ export default function LoginPage() {
       body: JSON.stringify({ email, password }),
     });
     setBusy(false);
-    if (res.ok) { router.push("/patients"); router.refresh(); }
+    if (res.ok) { router.push("/dashboard"); router.refresh(); }
     else setError((await res.json()).error ?? "Login failed");
   }
 
   return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
-      <div style={{ width: "100%", maxWidth: 380 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 22 }}>
-          <span style={{ width: 34, height: 34, borderRadius: 9, background: "var(--brand)", color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 17 }}>S</span>
-          <span style={{ fontWeight: 600, fontSize: 18 }}>Supplement plans</span>
+    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "var(--cream)" }}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        <div style={{ textAlign: "center", marginBottom: 22 }}>
+          <div style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: 26, fontWeight: 600, color: "var(--navy-ink)" }}>Practitioner tools</div>
+          <p className="muted" style={{ marginTop: 4 }}>The clinic supplement planner</p>
         </div>
-        <div className="card card--pad-lg">
-          <h1 style={{ fontSize: 19, marginBottom: 4 }}>Sign in</h1>
-          <p className="muted" style={{ marginBottom: 18 }}>Practitioner access to the clinic supplement planner.</p>
-          <form onSubmit={submit} className="stack" style={{ gap: 12 }}>
-            <label className="stack" style={{ gap: 5 }}>
+        <div className="card card--plain card--pad-lg" style={{ boxShadow: "var(--shadow-md)" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 4 }}>Sign in</h1>
+          <p className="muted" style={{ marginBottom: 20 }}>Welcome back.</p>
+          <form onSubmit={submit} className="stack" style={{ gap: 14 }}>
+            <label className="stack" style={{ gap: 6 }}>
               <span>Email</span>
               <input type="email" placeholder="name@clinic.co.uk" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </label>
-            <label className="stack" style={{ gap: 5 }}>
+            <label className="stack" style={{ gap: 6 }}>
               <span>Password</span>
               <input type="password" placeholder="Your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </label>

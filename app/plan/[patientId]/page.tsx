@@ -49,7 +49,7 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
       )}
 
       {suggestions.length > 0 && (
-        <div className="card" style={{ background: "var(--brand-tint-2)", borderColor: "var(--brand-tint)" }}>
+        <div className="card" style={{ background: "var(--sage-tint)", borderColor: "#D4DCC2" }}>
           <div className="row-between" style={{ marginBottom: 6 }}>
             <h2>Suggested for {patient.name}</h2>
             <span className="muted-xs">Allergy-safe · ranked by goals</span>
@@ -137,7 +137,7 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
         </div>
       </div>
 
-      <div className="card" style={{ background: "var(--brand-tint-2)" }}>
+      <div className="card card--plain">
         {planHasBlock ? (
           <p style={{ color: "var(--danger)", fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
             <span className="badge badge--danger">Blocked</span>
