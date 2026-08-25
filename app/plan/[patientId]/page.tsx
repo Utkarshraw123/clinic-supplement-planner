@@ -7,6 +7,8 @@ import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
 import { query } from "@/lib/db";
 import { addItemAction, removeItemAction, chooseAlternativeAction, finaliseAndSendAction } from "@/app/plan/actions";
+import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
+import { listProtocols } from "@/lib/protocols";
 import PlanItemDosing from "@/components/PlanItemDosing";
 
 export default async function PlanBuilder({ params }: { params: { patientId: string } }) {
@@ -22,6 +24,8 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
   const inPlan = new Set(plan!.items.map((it) => it.product.id));
   const fullCatalog = (await Promise.all(catalog.map((c) => getProduct(c.id)))).filter((p): p is NonNullable<typeof p> => !!p && !inPlan.has(p.id));
   const suggestions = suggestForPatient(fullCatalog, patient.attributes, 5);
+
+  const protocols = await listProtocols();
 
   const itemFlags = plan!.items.map((it) => ({ item: it, flags: flagProductForPatient(it.product, patient.attributes) }));
   const planHasBlock = itemFlags.some(({ flags }) => hasBlock(flags));
@@ -72,6 +76,22 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {protocols.length > 0 && (
+        <div className="card card--plain">
+          <form action={applyProtocolAction} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <input type="hidden" name="planId" value={planId} />
+            <input type="hidden" name="patientId" value={patientId} />
+            <span style={{ fontWeight: 500, fontSize: 14 }}>Apply a protocol</span>
+            <select name="protocolId" defaultValue="" style={{ flex: 1, minWidth: 200 }}>
+              <option value="">Choose a saved protocol…</option>
+              {protocols.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.itemCount})</option>)}
+            </select>
+            <button type="submit">Apply</button>
+          </form>
+          <p className="muted-xs" style={{ marginTop: 6 }}>Adds the protocol&apos;s products to this plan — each is re-checked against {patient.name}&apos;s profile.</p>
         </div>
       )}
 
@@ -155,6 +175,19 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
           </form>
         )}
       </div>
+
+      {plan!.items.length > 0 && (
+        <details className="card card--plain">
+          <summary style={{ cursor: "pointer", fontWeight: 500, fontSize: 14 }}>Save this plan as a reusable protocol</summary>
+          <form action={saveAsProtocolAction} className="stack" style={{ gap: 8, marginTop: 12 }}>
+            <input type="hidden" name="planId" value={planId} />
+            <input type="hidden" name="patientId" value={patientId} />
+            <input name="name" placeholder="Protocol name — e.g. Postnatal energy support" required />
+            <input name="description" placeholder="Short description (optional)" />
+            <button type="submit" className="btn--accent" style={{ justifySelf: "start" }}>Save as protocol</button>
+          </form>
+        </details>
+      )}
     </div>
   );
 }
