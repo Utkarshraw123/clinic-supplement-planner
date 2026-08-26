@@ -1,0 +1,1332 @@
+[
+  {
+    "name": "Biotic Gummies",
+    "description": "Your child’s mini microbiome has a major impact on their health, which is why supporting it with quality friendly bacteria is key.",
+    "packageSize": "60 gummies",
+    "form": "gummy",
+    "url": "https://www.wildnutrition.com/products/biotic-gummies",
+    "diet": [],
+    "concern": [
+      "Gut Health"
+    ],
+    "ingredients": [
+      "probiotics",
+      "fibre"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Bone + Muscle Support",
+    "description": "Healthy bones need a healthy support structure.",
+    "packageSize": "90 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-bone-and-muscle-support",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Joint & Bone",
+      "Menopause"
+    ],
+    "ingredients": [
+      "magnesium",
+      "zinc",
+      "selenium",
+      "calcium",
+      "copper",
+      "manganese",
+      "molybdenum",
+      "vitamin c",
+      "vitamin b12",
+      "folate",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Breastfeeding Support",
+    "description": "Formulated for mother and baby to support at a nutritionally demanding time.",
+    "packageSize": "90 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-breast-feeding-support",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "New Mother",
+      "Pregnancy"
+    ],
+    "ingredients": [
+      "iron",
+      "zinc",
+      "selenium",
+      "calcium",
+      "vitamin b12",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Child's Daily Multi Nutrient",
+    "description": "This gentle formula provides nutritional support for growing bodies and minds.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-daily-multi-nutrient-child",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "General Wellbeing"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Children's Vitamin D Gummies",
+    "description": "Bursting with the goodness of 13 whole fruits, these delicious berry-flavour Vitamin D Gummies provide reassuringly high-strength support for growing immune systems, bones, muscles and teeth.",
+    "packageSize": "60 gummies",
+    "form": "gummy",
+    "url": "https://www.wildnutrition.com/products/vitamin-d-gummies-children",
+    "diet": [],
+    "concern": [],
+    "ingredients": [
+      "vitamin d",
+      "fibre"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Collagen 500 Plus",
+    "description": "**Award-winning Collagen for firmer-looking skin.** Smaller peptides, smarter formula.",
+    "packageSize": "30 days supply",
+    "form": "powder",
+    "url": "https://www.wildnutrition.com/products/collagen-500-plus",
+    "diet": [],
+    "concern": [
+      "Beauty",
+      "Gut Health",
+      "Joint & Bone"
+    ],
+    "ingredients": [
+      "vitamin c",
+      "vitamin e",
+      "biotin",
+      "collagen"
+    ],
+    "allergens": [
+      "fish"
+    ]
+  },
+  {
+    "name": "Complete Beauty Support",
+    "description": "By reformulating our bestselling Skin Hair & Nails with low molecular weight Hyaluronic Acid, this enhanced formula nourishes deep from within.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/complete-beauty-support",
+    "diet": [],
+    "concern": [
+      "Beauty",
+      "Menopause"
+    ],
+    "ingredients": [
+      "zinc",
+      "selenium",
+      "iodine",
+      "copper",
+      "manganese",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "biotin",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Daily Multi Nutrient 45+ for Men",
+    "description": "Expertly calibrated to support the nutrient demands of men aged 45+, this bespoke formulation supports energy levels, muscle health, testosterone, immune support and heart health.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-daily-multi-nutrient-45-mens",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "General Wellbeing"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "coenzyme q10",
+      "choline",
+      "inositol",
+      "betaine"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Daily Multi Nutrient for Teen Boys",
+    "description": "A full spectrum of nutrients to support your teenage boy’s growth and development.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-daily-multi-nutrient-teenboy",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "General Wellbeing"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "choline",
+      "inositol"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Daily Multi Nutrient for Teen Girls",
+    "description": "A full spectrum of nutrients to support your teenage girl’s transition into adulthood.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-daily-multi-nutrient-teengirl",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "General Wellbeing",
+      "Hormonal Health",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "choline",
+      "inositol"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Endo Support",
+    "description": "Our founder Henrietta Norton spent many years living with debilitating symptoms before understanding the power of nutrition in treating her condition.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-endo-support",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Hormonal Health"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "vitamin e",
+      "vitamin b6",
+      "lactobacillus",
+      "choline",
+      "inositol",
+      "betaine"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Energy Support",
+    "description": "A full suite of active and naturally methylated B Vitamins, providing 360 support for all energy systems including the mitochondria (the powerhouses of your cells), immune system, thyroid, hormones and cognition.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/energy-support",
+    "diet": [],
+    "concern": [
+      "Energy",
+      "Fitness & Recovery",
+      "General Wellbeing",
+      "Hormonal Health",
+      "Immunity",
+      "Menopause",
+      "New Mother",
+      "Perimenopause",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "iodine",
+      "calcium",
+      "manganese",
+      "vitamin c",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "choline",
+      "inositol"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Fertility Support for Men",
+    "description": "Fertility is a nutritionally critical time.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-fertility-men",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Fertility"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin k",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "coenzyme q10",
+      "choline",
+      "inositol"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Fertility Support for Women",
+    "description": "Our bestselling Fertility Support blends botanicals, minerals and vitamins with the recommended 400ug of Folate to provide prenatal nutritional support whilst trying to conceive.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-fertility",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Fertility"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "choline",
+      "inositol"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "High Fibre Plus",
+    "description": "96% of us aren’t getting enough fibre*.",
+    "packageSize": null,
+    "form": "powder",
+    "url": "https://www.wildnutrition.com/products/high-fibre-plus-supplement",
+    "diet": [],
+    "concern": [
+      "Gut Health"
+    ],
+    "ingredients": [
+      "calcium",
+      "fibre"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Immune Support",
+    "description": "With its unique complex of Food-Grown® vitamins, minerals, amino acids, mushrooms and elderberry extract, this much loved supplement is formulated to maintain your body’s immune system.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-immune-support",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "General Wellbeing",
+      "Immunity"
+    ],
+    "ingredients": [
+      "zinc",
+      "selenium",
+      "copper",
+      "chromium",
+      "vitamin c",
+      "niacin",
+      "lactobacillus"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Iron Plus",
+    "description": "There are times when your body may need extra iron, e.g.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-iron-plus",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegan",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Energy",
+      "Hormonal Health",
+      "Immunity",
+      "New Mother",
+      "Pregnancy"
+    ],
+    "ingredients": [
+      "iron",
+      "molybdenum",
+      "vitamin c",
+      "riboflavin"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "KSM-66 Ashwagandha Gummies",
+    "description": "Revered in traditional Ayurvedic practice, Ashwagandha is a beautiful botanical supporting relaxation, emotional balance and gently steadying the mind and body.",
+    "packageSize": "60 gummies",
+    "form": "gummy",
+    "url": "https://www.wildnutrition.com/products/ksm-66%C2%AE-ashwagandha-gummies",
+    "diet": [],
+    "concern": [
+      "Sleep"
+    ],
+    "ingredients": [
+      "ashwagandha"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "KSM-66 Ashwagandha Plus",
+    "description": "Used in natural practice for millennia, Ashwagandha is an adaptogenic herb supporting relaxation and mental wellbeing.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-ksm-66-ashwagandha-plus",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Fitness & Recovery",
+      "General Wellbeing",
+      "Hormonal Health",
+      "Menopause",
+      "Perimenopause",
+      "Sleep",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "magnesium",
+      "ashwagandha",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Lion's Mane Plus",
+    "description": "Modern life asks a lot of your mental reserves.",
+    "packageSize": "90 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/lions-mane-plus",
+    "diet": [],
+    "concern": [
+      "Sleep"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "chromium",
+      "vitamin b12",
+      "vitamin b6",
+      "niacin",
+      "folate",
+      "pantothenic acid",
+      "lion's mane",
+      "lactobacillus",
+      "green tea"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Magnesium",
+    "description": "Magnesium is one of nature’s marvels, supporting your nervous system and psychological function while reducing tiredness and fatigue.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-magnesium",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Energy",
+      "Fitness & Recovery",
+      "General Wellbeing",
+      "Gut Health",
+      "Hormonal Health",
+      "Joint & Bone",
+      "Menopause",
+      "New Mother",
+      "Perimenopause",
+      "Pregnancy",
+      "Sleep",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "magnesium",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Men's Daily Multi Nutrient",
+    "description": "Our Men's Daily Multi Nutrient has had an upgrade.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-daily-multi-nutrient-mens",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "General Wellbeing"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "coenzyme q10",
+      "inositol"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Menopause Complex",
+    "description": "Menopause can be a challenging stage of life which is why our much-loved botanical complex is holistically formulated to support you in mind, body and mood.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown%C2%AE-menopause-complex-new",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Hormonal Health",
+      "Menopause"
+    ],
+    "ingredients": [
+      "magnesium",
+      "vitamin b6",
+      "ashwagandha",
+      "turmeric"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Multi Strain Biotic",
+    "description": "Formulated with 30 billion ‘friendly’ bacteria from eight live bacterial strains, our powerful Multi Strain Biotic naturally complements the flora found in the gut and mouth.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/multi-strain-biotic",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Cleanse",
+      "Gut Health",
+      "Immunity",
+      "Sleep"
+    ],
+    "ingredients": [
+      "lactobacillus",
+      "bifidobacterium"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Natural Glow",
+    "description": "Meet the smart supplement that not only stimulates your skin’s natural sun defences to support against premature ageing, but also enhances a healthy glow.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/natural-glow",
+    "diet": [],
+    "concern": [
+      "Beauty"
+    ],
+    "ingredients": [
+      "copper",
+      "vitamin c",
+      "vitamin e",
+      "biotin",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Omega 3 for Children",
+    "description": "Unless your children are fond of oily fish 2-3 times each week, growing minds and bodies need a high quality source of Omega 3 to support the health of their heart, brain and eyes.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/childs-strength-omega-3",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Nut Free"
+    ],
+    "concern": [],
+    "ingredients": [
+      "omega 3"
+    ],
+    "allergens": [
+      "fish"
+    ]
+  },
+  {
+    "name": "Organic Protein + Superfood Powder",
+    "description": "Fuel your day with the triple power of organic vegan protein powder, supergreens and functional mushrooms.",
+    "packageSize": "14 days supply",
+    "form": "powder",
+    "url": "https://www.wildnutrition.com/products/organic-protein-powder",
+    "diet": [
+      "Vegan",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Energy",
+      "Fitness & Recovery",
+      "General Wellbeing",
+      "Immunity",
+      "Joint & Bone",
+      "Menopause",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "lion's mane"
+    ],
+    "allergens": [
+      "gluten",
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Organic Turmaforte Turmeric",
+    "description": "An award-winning formula of exceptional quality.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/turmaforte-full-spectrum-turmeric",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegan",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Fitness & Recovery",
+      "Gut Health",
+      "Joint & Bone",
+      "Menopause"
+    ],
+    "ingredients": [
+      "turmeric"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Peri + Menopause Biotic",
+    "description": "Just as your hormones fluctuate in peri/menopause, so do your microbiome bacteria.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-peri-menopause-biotic",
+    "diet": [
+      "Vegetarian"
+    ],
+    "concern": [
+      "Gut Health",
+      "Hormonal Health",
+      "Menopause",
+      "Perimenopause",
+      "Sleep",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "lactobacillus",
+      "bifidobacterium"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Perimenopause Complex",
+    "description": "Our landmark research highlights perimenopause as a life stage distinct from menopause with very different nutritional needs.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/perimenopause-complex",
+    "diet": [],
+    "concern": [
+      "Hormonal Health",
+      "Perimenopause"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "molybdenum",
+      "vitamin b6",
+      "pantothenic acid",
+      "shatavari",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Pregnancy + New Mother Biotic",
+    "description": "A unique blend of four probiotic strains for pregnancy and new motherhood.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/pregnancy-new-mother-biotic",
+    "diet": [],
+    "concern": [
+      "Gut Health",
+      "New Mother",
+      "Pregnancy"
+    ],
+    "ingredients": [
+      "lactobacillus",
+      "bifidobacterium"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Pregnancy + New Mother Multi",
+    "description": "Our award-winning pregnancy and postnatal multivitamin delivers 29 Food-Grown® nutrients including essential Folate and Vitamin D at the recommended levels.",
+    "packageSize": "90 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-pregnancy-new-mother-multi",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "New Mother",
+      "Pregnancy"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "coenzyme q10",
+      "choline",
+      "inositol"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Pregnancy + New Mother Omega 3",
+    "description": "An essential fatty acid of exceptional purity, this award-winning, sustainably sourced Omega 3 supports your baby’s eye and brain development, and your health too, with the optimal ratio of EPA (Eicosapentaenoic Acid) and DHA (Docosahexaeno",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/sustainable-omega-3-pregnancy",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Nut Free"
+    ],
+    "concern": [
+      "New Mother",
+      "Pregnancy"
+    ],
+    "ingredients": [
+      "omega 3"
+    ],
+    "allergens": [
+      "fish"
+    ]
+  },
+  {
+    "name": "Premenstrual Support",
+    "description": "Support every day of your cycle with this thoughtful, best-loved blend.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-premenstrual-support",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Hormonal Health"
+    ],
+    "ingredients": [
+      "magnesium",
+      "zinc",
+      "chromium",
+      "vitamin b6",
+      "ashwagandha",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Pure Strength Omega 3",
+    "description": "An essential fatty acid of exceptional quality and purity, Pure Strength Omega 3 supports heart, brain and eye health with the optimal 2:1 ratio of EPA (Eicosapentaenoic Acid) and DHA (Docosahexaenoic Acid).",
+    "packageSize": "120 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/pure-strength-omega-3",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Nut Free"
+    ],
+    "concern": [
+      "Beauty",
+      "Fertility",
+      "Fitness & Recovery",
+      "General Wellbeing",
+      "Gut Health",
+      "Hormonal Health",
+      "Joint & Bone",
+      "Menopause",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "omega 3"
+    ],
+    "allergens": [
+      "fish"
+    ]
+  },
+  {
+    "name": "SRI-81 Shatavari Plus",
+    "description": "Holding women through every chapter, Ayurvedic botanical SRI-81™ Shatavari offers science-backed support from puberty to postmenopause with five gold-standard studies demonstrating its potential.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/sri-81%E2%84%A2-shatavari-plus",
+    "diet": [],
+    "concern": [
+      "Fertility",
+      "Hormonal Health",
+      "Menopause",
+      "Pregnancy"
+    ],
+    "ingredients": [
+      "zinc",
+      "shatavari",
+      "lactobacillus"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Vitamin B12 Plus",
+    "description": "B12 is a hardworking vitamin, supporting healthy blood cells, energy release and the nervous system, too.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-vitamin-b12-plus",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegan",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Beauty",
+      "Energy",
+      "Hormonal Health",
+      "Immunity",
+      "Menopause",
+      "Sleep",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "vitamin b12"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Vitamin C Plus",
+    "description": "A gentle yet effective formula supporting normal energy yielding metabolism as well as the reduction of tiredness and fatigue and the production of collagen.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-vitamin-c-bioflavonoids",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegan",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Beauty",
+      "Gut Health",
+      "Hormonal Health",
+      "Immunity",
+      "Pregnancy"
+    ],
+    "ingredients": [
+      "vitamin c"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Vitamin D",
+    "description": "An independently-published scientific study found that Food-Grown® Vitamin D is 113% better absorbed and 106% better retained than the leading high street tablet.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-vitamin-d",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Beauty",
+      "Energy",
+      "Fertility",
+      "General Wellbeing",
+      "Gut Health",
+      "Immunity",
+      "Joint & Bone",
+      "Pregnancy",
+      "Sleep",
+      "Stress & Mood"
+    ],
+    "ingredients": [
+      "vitamin d"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Vitamin D Gummies",
+    "description": "Essential immune support meets whole fruit goodness.",
+    "packageSize": "60 gummies",
+    "form": "gummy",
+    "url": "https://www.wildnutrition.com/products/vitamin-d-gummies",
+    "diet": [
+      "Kosher",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Fitness & Recovery",
+      "Hormonal Health",
+      "Immunity",
+      "Joint & Bone",
+      "Perimenopause",
+      "Sleep"
+    ],
+    "ingredients": [
+      "vitamin d",
+      "fibre"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Weight Management Support",
+    "description": "Harnessing UK-first Metabolaid®, this weight management supplement is redefining weight management.",
+    "packageSize": "90 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/weight-management-support",
+    "diet": [],
+    "concern": [
+      "Gut Health"
+    ],
+    "ingredients": [
+      "magnesium",
+      "zinc",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin b12",
+      "vitamin b6",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "lactobacillus",
+      "choline"
+    ],
+    "allergens": []
+  },
+  {
+    "name": "Women's 45+ Daily Multi Nutrient",
+    "description": "Daily Multi Nutrient 45+ for Women is a considered combination of vitamins, minerals and botanicals to support the changing needs of women, including hormonal regulation, energy metabolism and reduction of fatigue.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-daily-multi-nutrient-45-womens",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Energy",
+      "General Wellbeing",
+      "Hormonal Health",
+      "Menopause",
+      "Perimenopause"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "pantothenic acid",
+      "turmeric",
+      "lactobacillus",
+      "coenzyme q10",
+      "choline",
+      "inositol",
+      "betaine"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Women's Daily Multi Nutrient",
+    "description": "Our award-winning formula provides a full spectrum of vitamins, minerals and herbs for women managing busy lifestyles.",
+    "packageSize": "60 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-daily-multi-nutrient-womens",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Energy",
+      "General Wellbeing",
+      "Menopause",
+      "Perimenopause"
+    ],
+    "ingredients": [
+      "magnesium",
+      "iron",
+      "zinc",
+      "selenium",
+      "iodine",
+      "calcium",
+      "copper",
+      "manganese",
+      "chromium",
+      "molybdenum",
+      "vitamin c",
+      "vitamin e",
+      "vitamin b12",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "niacin",
+      "folate",
+      "biotin",
+      "pantothenic acid",
+      "lactobacillus",
+      "choline",
+      "inositol"
+    ],
+    "allergens": [
+      "mushroom"
+    ]
+  },
+  {
+    "name": "Zinc Plus",
+    "description": "Food-Grown® Zinc blended with B vitamins provides a suite of nutrients for mind and body.",
+    "packageSize": "30 capsules",
+    "form": "capsule",
+    "url": "https://www.wildnutrition.com/products/food-grown-zinc-plus",
+    "diet": [
+      "Dairy Free",
+      "Gluten Free",
+      "Halal",
+      "Kosher",
+      "Nut Free",
+      "Vegetarian"
+    ],
+    "concern": [
+      "Beauty",
+      "Immunity",
+      "Menopause",
+      "Sleep"
+    ],
+    "ingredients": [
+      "zinc",
+      "vitamin b6",
+      "thiamin",
+      "riboflavin",
+      "lactobacillus"
+    ],
+    "allergens": []
+  }
+]
