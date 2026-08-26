@@ -6,7 +6,7 @@ import { searchProducts, getProduct } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
 import { query } from "@/lib/db";
-import { addItemAction, removeItemAction, chooseAlternativeAction, finaliseAndSendAction } from "@/app/plan/actions";
+import { addItemAction, removeItemAction, chooseAlternativeAction } from "@/app/plan/actions";
 import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
 import { listProtocols } from "@/lib/protocols";
 import PlanItemDosing from "@/components/PlanItemDosing";
@@ -179,19 +179,10 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
         ) : plan!.items.length === 0 ? (
           <p className="muted">Add at least one product to finalise this plan.</p>
         ) : (
-          <form action={finaliseAndSendAction} className="stack" style={{ gap: 8 }}>
-            <input type="hidden" name="planId" value={planId} />
-            <input type="hidden" name="patientId" value={patientId} />
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <label className="muted" style={{ whiteSpace: "nowrap" }}>Client email <span className="muted-xs">(optional)</span></label>
-              <input name="email" type="email" placeholder="client@email.com" style={{ flex: 1, minWidth: 200 }} />
-              <button type="submit" className="btn--primary">Finalise plan</button>
-            </div>
-            <p className="muted-xs">
-              With an email we generate the PDF and send it to the client. Leave it blank to just finalise and download
-              the PDF (to print or share on WhatsApp) — you can still email it later from the patient&apos;s history.
-            </p>
-          </form>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <p className="muted">Products and dosing look good. Next, write up the recommendations and send the guide.</p>
+            <a href={`/plan/${patientId}/prepare`} className="btn btn--primary">Prepare guide →</a>
+          </div>
         )}
       </div>
 

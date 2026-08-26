@@ -9,6 +9,7 @@ const nextConfig = {
     serverComponentsExternalPackages: ["@react-pdf/renderer"],
     outputFileTracingIncludes: {
       "/plan/[patientId]": ["./node_modules/pdfkit/js/**/*"],
+      "/plan/[patientId]/prepare": ["./node_modules/pdfkit/js/**/*"],
       "/patients/[id]/history": ["./node_modules/pdfkit/js/**/*"],
     },
   },

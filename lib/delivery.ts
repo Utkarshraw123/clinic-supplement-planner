@@ -2,7 +2,8 @@ import { execute, query } from "@/lib/db";
 import { getPlan, finalisePlan } from "@/lib/plans";
 import { getPatient } from "@/lib/patients";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
-import { buildPlanPdfData, renderPlanPdf } from "@/lib/pdf";
+import { buildGuidePdfData, renderPlanPdf } from "@/lib/pdf";
+import { getGuideForEditing } from "@/lib/guide";
 import { getClinicSettings } from "@/lib/settings";
 import { sendPlanEmail } from "@/lib/email";
 import { recordAudit } from "@/lib/audit";
@@ -23,7 +24,8 @@ export async function finalisePlanToSnapshot(input: { planId: number; actorId?: 
     }
   }
 
-  const pdfData = await buildPlanPdfData(plan, patient);
+  const guide = await getGuideForEditing(plan, patient);
+  const pdfData = buildGuidePdfData(patient, guide);
   const pdf = await renderPlanPdf(pdfData);
 
   const rs = await execute(

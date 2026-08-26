@@ -138,3 +138,17 @@ CREATE TABLE IF NOT EXISTS protocol_items (
   dosing_custom_text TEXT,
   position INTEGER NOT NULL DEFAULT 0
 );
+
+-- Practitioner-authored fields for the branded Supplement Instruction Guide PDF.
+-- One row per plan. Supplement and meds text start pre-filled but are editable.
+CREATE TABLE IF NOT EXISTS plan_guide (
+  plan_id INTEGER PRIMARY KEY REFERENCES plans(id) ON DELETE CASCADE,
+  consultation_date TEXT,
+  intro TEXT,
+  next_consultation TEXT,
+  lifestyle TEXT,
+  dietary TEXT,
+  supplement_text TEXT,
+  meds_text TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

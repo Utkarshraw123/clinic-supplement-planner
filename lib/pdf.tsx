@@ -1,97 +1,105 @@
-import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
-import { getClinicSettings } from "@/lib/settings";
-import { getProduct } from "@/lib/products";
-import type { PlanDetail } from "@/lib/plans";
 import type { PatientDetail } from "@/lib/patients";
+import type { PlanGuide } from "@/lib/guide";
+import { HEADER_IMAGE, FOOTER_IMAGE } from "@/lib/pdf-assets";
 
-export type PlanPdfData = {
-  clinic: { name: string; address: string; contact: string };
-  patientName: string;
-  patientDob: string;
-  preparedDate: string;
-  items: { name: string; brand: string; packageSize: string|null; dosing: string; alternativeName: string|null; suppliers: { label: string; url: string }[] }[];
+// The branded Supplement Instruction Guide. All practitioner/auto fields arrive already
+// resolved on `PlanGuide`; this module only lays them out.
+export type GuidePdfData = {
+  clientName: string;
+  consultationDate: string;
+  intro: string;
+  nextConsultation: string;
+  lifestyle: string;
+  dietary: string;
+  supplementText: string;
+  medsText: string;
 };
 
-export async function buildPlanPdfData(plan: PlanDetail, patient: PatientDetail): Promise<PlanPdfData> {
-  const settings = await getClinicSettings();
-  const items: PlanPdfData["items"] = [];
-  for (const it of plan.items) {
-    let alternativeName: string|null = null;
-    if (it.chosenAlternativeId) {
-      const alt = await getProduct(it.chosenAlternativeId);
-      alternativeName = alt?.name ?? null;
-    }
-    items.push({
-      name: it.product.name,
-      brand: it.product.brand_name,
-      packageSize: it.product.package_size,
-      dosing: it.dosingText,
-      alternativeName,
-      suppliers: it.product.suppliers.map((s) => ({ label: s.label, url: s.url })),
-    });
-  }
+export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide): GuidePdfData {
+  const s = (v: string | null | undefined) => (v ?? "").trim();
   return {
-    clinic: { name: settings.clinic_name ?? "Your clinic", address: settings.address ?? "", contact: settings.contact ?? "" },
-    patientName: patient.name,
-    patientDob: patient.dob,
-    preparedDate: new Date().toISOString().slice(0, 10),
-    items,
+    clientName: patient.name,
+    consultationDate: s(guide.consultationDate),
+    intro: s(guide.intro),
+    nextConsultation: s(guide.nextConsultation),
+    lifestyle: s(guide.lifestyle),
+    dietary: s(guide.dietary),
+    supplementText: s(guide.supplementText),
+    medsText: s(guide.medsText),
   };
 }
 
+const GOLD = "#A17C3A";
+const INK = "#2C2C2A";
+
 const s = StyleSheet.create({
-  page: { padding: 40, fontSize: 11, color: "#2C2C2A" },
-  header: { flexDirection: "row", justifyContent: "space-between", borderBottomWidth: 2, borderBottomColor: "#0F6E56", paddingBottom: 10 },
-  clinic: { fontSize: 10, color: "#5F5E5A" },
-  title: { fontSize: 16, color: "#0F6E56" },
-  meta: { flexDirection: "row", justifyContent: "space-between", backgroundColor: "#F1EFE8", padding: 8, marginTop: 14 },
-  item: { borderBottomWidth: 0.5, borderBottomColor: "#D3D1C7", paddingVertical: 10 },
-  itemName: { fontSize: 13 },
-  small: { fontSize: 10, color: "#5F5E5A", marginTop: 3 },
-  alt: { fontSize: 10, color: "#0F6E56", backgroundColor: "#E1F5EE", padding: 5, marginTop: 4 },
-  footer: { marginTop: 24, borderTopWidth: 0.5, borderTopColor: "#D3D1C7", paddingTop: 10, fontSize: 9, color: "#888780" },
+  page: { paddingTop: 212, paddingBottom: 200, paddingHorizontal: 44, fontSize: 11, color: INK, lineHeight: 1.5 },
+  headerBox: { position: "absolute", top: 26, left: 44, right: 44 },
+  footerBox: { position: "absolute", bottom: 24, left: 44, right: 44 },
+  bannerImg: { width: "100%" },
+  meta: { marginBottom: 12 },
+  metaRow: { flexDirection: "row", marginBottom: 2 },
+  metaLabel: { fontSize: 11, color: GOLD, width: 118 },
+  metaValue: { fontSize: 11, color: INK },
+  intro: { marginBottom: 4 },
+  sectionTitle: { fontSize: 12, color: GOLD, marginTop: 12, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.4 },
+  line: { fontSize: 11, color: INK },
+  spacer: { height: 6 },
 });
 
-function PlanDoc({ data }: { data: PlanPdfData }) {
+// @react-pdf does not honour "\n" inside a single <Text>; split into lines.
+function Multiline({ text }: { text: string }) {
+  const lines = text.split("\n");
+  return (
+    <View>
+      {lines.map((ln, i) => (ln.trim() === "" ? <View key={i} style={s.spacer} /> : <Text key={i} style={s.line}>{ln}</Text>))}
+    </View>
+  );
+}
+
+function Section({ title, body }: { title: string; body: string }) {
+  if (!body.trim()) return null;
+  return (
+    <View wrap={false}>
+      <Text style={s.sectionTitle}>{title}</Text>
+      <Multiline text={body} />
+    </View>
+  );
+}
+
+function GuideDoc({ data }: { data: GuidePdfData }) {
   return (
     <Document>
       <Page size="A4" style={s.page}>
-        <View style={s.header}>
-          <View>
-            <Text style={{ fontSize: 13, color: "#0F6E56" }}>{data.clinic.name}</Text>
-            <Text style={s.clinic}>{data.clinic.address}</Text>
-            <Text style={s.clinic}>{data.clinic.contact}</Text>
-          </View>
-          <View>
-            <Text style={s.title}>Supplement plan</Text>
-            <Text style={s.clinic}>Prepared {data.preparedDate}</Text>
-          </View>
+        <View fixed style={s.headerBox}>
+          <Image src={HEADER_IMAGE} style={s.bannerImg} />
         </View>
+
         <View style={s.meta}>
-          <Text>Prepared for {data.patientName}</Text>
-          <Text>DOB {data.patientDob}</Text>
+          <View style={s.metaRow}><Text style={s.metaLabel}>Name of client:</Text><Text style={s.metaValue}>{data.clientName}</Text></View>
+          {data.consultationDate ? (
+            <View style={s.metaRow}><Text style={s.metaLabel}>Date of consultation:</Text><Text style={s.metaValue}>{data.consultationDate}</Text></View>
+          ) : null}
         </View>
-        <View style={{ marginTop: 14 }}>
-          {data.items.map((it, i) => (
-            <View key={i} style={s.item}>
-              <Text style={s.itemName}>{i + 1}  {it.name}</Text>
-              <Text style={s.small}>{it.brand}{it.packageSize ? ` · ${it.packageSize}` : ""}</Text>
-              {it.dosing ? <Text style={s.small}>How to take: {it.dosing}</Text> : null}
-              {it.alternativeName ? <Text style={s.alt}>You can take this or, if you prefer, {it.alternativeName}.</Text> : null}
-              {it.suppliers.length > 0 ? <Text style={s.small}>Order: {it.suppliers.map((sp) => `${sp.label} (${sp.url})`).join("  ·  ")}</Text> : null}
-            </View>
-          ))}
+
+        {data.intro ? <View style={s.intro}><Multiline text={data.intro} /></View> : null}
+        {data.nextConsultation ? <View style={s.intro}><Multiline text={data.nextConsultation} /></View> : null}
+
+        <Section title="Lifestyle & Other Recommendations" body={data.lifestyle} />
+        <Section title="Dietary Recommendations" body={data.dietary} />
+        <Section title="Supplement Plan" body={data.supplementText} />
+        <Section title="Medications / Hormones / Contraception" body={data.medsText} />
+
+        <View fixed style={s.footerBox}>
+          <Image src={FOOTER_IMAGE} style={s.bannerImg} />
         </View>
-        <Text style={s.footer}>
-          This plan was prepared by your practitioner for your personal use and reflects your consultation.
-          It is not a substitute for medical advice. Please tell your practitioner about any medications or changes to your health.
-        </Text>
       </Page>
     </Document>
   );
 }
 
-export async function renderPlanPdf(data: PlanPdfData): Promise<Buffer> {
-  return renderToBuffer(<PlanDoc data={data} />);
+export async function renderPlanPdf(data: GuidePdfData): Promise<Buffer> {
+  return renderToBuffer(<GuideDoc data={data} />);
 }
