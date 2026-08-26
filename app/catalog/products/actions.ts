@@ -3,14 +3,23 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import * as P from "@/lib/products";
+import { findOrCreateBrand } from "@/lib/brands";
 import type { TermType } from "@/lib/taxonomies";
+
+// Prefer a typed brand name (create-if-new); fall back to a selected brandId.
+async function resolveBrandId(fd: FormData): Promise<number> {
+  const name = String(fd.get("brandName") || "").trim();
+  if (name) return findOrCreateBrand(name);
+  return Number(fd.get("brandId"));
+}
 
 export async function saveProductAction(formData: FormData) {
   await requireUser();
   const idRaw = formData.get("id");
   const input = {
-    brandId: Number(formData.get("brandId")),
+    brandId: await resolveBrandId(formData),
     name: String(formData.get("name")),
+    description: String(formData.get("description") || ""),
     packageSize: String(formData.get("packageSize") || ""),
     form: String(formData.get("form") || ""),
     defaultNote: String(formData.get("defaultNote") || ""),
@@ -23,8 +32,9 @@ export async function saveProductAction(formData: FormData) {
 export async function createFullProductAction(formData: FormData) {
   await requireUser();
   const id = await P.createProduct({
-    brandId: Number(formData.get("brandId")),
+    brandId: await resolveBrandId(formData),
     name: String(formData.get("name")),
+    description: String(formData.get("description") || ""),
     packageSize: String(formData.get("packageSize") || ""),
     form: String(formData.get("form") || ""),
     defaultNote: String(formData.get("defaultNote") || ""),

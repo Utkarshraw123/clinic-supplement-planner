@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   brand_id INTEGER NOT NULL REFERENCES brands(id),
   name TEXT NOT NULL,
+  description TEXT,
   package_size TEXT,
   form TEXT,
   default_note TEXT,

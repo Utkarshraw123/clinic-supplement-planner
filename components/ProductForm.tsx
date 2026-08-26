@@ -75,8 +75,9 @@ export default function ProductForm({ brands, terms, snippets }: { brands: Brand
 
       {/* Details */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <label className="stack" style={{ gap: 5 }}><span>Brand</span>
-          <select name="brandId" required defaultValue={brands[0]?.id}>{brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select>
+        <label className="stack" style={{ gap: 5 }}><span>Brand <span className="muted-xs">· type a new one or pick existing</span></span>
+          <input name="brandName" list="brandOptions" required placeholder="e.g. Wild Nutrition" autoComplete="off" />
+          <datalist id="brandOptions">{brands.map((b) => <option key={b.id} value={b.name} />)}</datalist>
         </label>
         <label className="stack" style={{ gap: 5 }}><span>Name</span>
           <input name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Product name" required />
@@ -88,6 +89,11 @@ export default function ProductForm({ brands, terms, snippets }: { brands: Brand
           <input name="form" value={form} onChange={(e) => setForm(e.target.value)} placeholder="capsule / liquid / powder" />
         </label>
       </div>
+
+      <label className="stack" style={{ gap: 5 }}>
+        <span>Description <span className="muted-xs">· internal catalog reference (not shown on the client PDF)</span></span>
+        <textarea name="description" rows={2} placeholder="e.g. Food-grown magnesium; supports sleep & muscle relaxation" />
+      </label>
 
       {/* Standard note — auto-appears whenever this product is used on a plan */}
       <label className="stack" style={{ gap: 5 }}>

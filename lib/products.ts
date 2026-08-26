@@ -1,9 +1,9 @@
 import { query, execute } from "@/lib/db";
 import type { TermType } from "@/lib/taxonomies";
 
-export type ProductInput = { brandId: number; name: string; packageSize?: string; form?: string; defaultNote?: string };
+export type ProductInput = { brandId: number; name: string; description?: string; packageSize?: string; form?: string; defaultNote?: string };
 export type ProductDetail = {
-  id: number; brand_id: number; brand_name: string; name: string;
+  id: number; brand_id: number; brand_name: string; name: string; description: string|null;
   package_size: string|null; form: string|null; default_note: string|null; status: string;
   tags: { termId: number; label: string; tagType: TermType }[];
   suppliers: { id: number; label: string; url: string }[];
@@ -12,16 +12,16 @@ export type ProductDetail = {
 
 export async function createProduct(input: ProductInput): Promise<number> {
   const rs = await execute(
-    "INSERT INTO products (brand_id, name, package_size, form, default_note) VALUES (?, ?, ?, ?, ?)",
-    [input.brandId, input.name.trim(), input.packageSize?.trim() || null, input.form?.trim() || null, input.defaultNote?.trim() || null]
+    "INSERT INTO products (brand_id, name, description, package_size, form, default_note) VALUES (?, ?, ?, ?, ?, ?)",
+    [input.brandId, input.name.trim(), input.description?.trim() || null, input.packageSize?.trim() || null, input.form?.trim() || null, input.defaultNote?.trim() || null]
   );
   return Number(rs.lastInsertRowid);
 }
 
 export async function updateProduct(id: number, input: ProductInput): Promise<void> {
   await execute(
-    "UPDATE products SET brand_id = ?, name = ?, package_size = ?, form = ?, default_note = ? WHERE id = ?",
-    [input.brandId, input.name.trim(), input.packageSize?.trim() || null, input.form?.trim() || null, input.defaultNote?.trim() || null, id]
+    "UPDATE products SET brand_id = ?, name = ?, description = ?, package_size = ?, form = ?, default_note = ? WHERE id = ?",
+    [input.brandId, input.name.trim(), input.description?.trim() || null, input.packageSize?.trim() || null, input.form?.trim() || null, input.defaultNote?.trim() || null, id]
   );
 }
 
@@ -58,7 +58,7 @@ export async function linkAlternative(productId: number, altId: number): Promise
 
 export async function getProduct(id: number): Promise<ProductDetail | null> {
   const base = await query<Omit<ProductDetail,"tags"|"suppliers"|"alternatives">>(
-    `SELECT p.id, p.brand_id, b.name AS brand_name, p.name, p.package_size, p.form, p.default_note, p.status
+    `SELECT p.id, p.brand_id, b.name AS brand_name, p.name, p.description, p.package_size, p.form, p.default_note, p.status
      FROM products p JOIN brands b ON b.id = p.brand_id WHERE p.id = ?`, [id]
   );
   if (!base[0]) return null;

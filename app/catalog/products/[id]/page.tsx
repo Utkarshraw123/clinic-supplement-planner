@@ -36,13 +36,18 @@ export default async function ProductEditor({ params }: { params: { id: string }
         <form action={saveProductAction} className="stack" style={{ gap: 10 }}>
           <input type="hidden" name="id" value={product.id} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <label className="stack" style={{ gap: 5 }}><span>Brand</span>
-              <select name="brandId" defaultValue={product.brand_id}>{brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select>
+            <label className="stack" style={{ gap: 5 }}><span>Brand <span className="muted-xs">· type a new one or pick existing</span></span>
+              <input name="brandName" list="brandOptions" defaultValue={product.brand_name} autoComplete="off" />
+              <datalist id="brandOptions">{brands.map((b) => <option key={b.id} value={b.name} />)}</datalist>
             </label>
             <label className="stack" style={{ gap: 5 }}><span>Name</span><input name="name" defaultValue={product.name} /></label>
             <label className="stack" style={{ gap: 5 }}><span>Package size</span><input name="packageSize" defaultValue={product.package_size ?? ""} placeholder="e.g. 60 capsules" /></label>
             <label className="stack" style={{ gap: 5 }}><span>Form</span><input name="form" defaultValue={product.form ?? ""} placeholder="capsule / liquid / powder" /></label>
           </div>
+          <label className="stack" style={{ gap: 5 }}>
+            <span>Description <span className="muted-xs">· internal catalog reference (not shown on the client PDF)</span></span>
+            <textarea name="description" rows={2} defaultValue={product.description ?? ""} placeholder="e.g. Food-grown magnesium; supports sleep & muscle relaxation" />
+          </label>
           <label className="stack" style={{ gap: 5 }}>
             <span>Standard note <span className="muted-xs">· auto-appears on the plan whenever this product is used (editable/removable per patient)</span></span>
             <SnippetTextarea name="defaultNote" defaultValue={product.default_note ?? ""} snippets={snippets} rows={2} placeholder="e.g. Only take at night" />

@@ -18,6 +18,7 @@ export async function runMigrations(): Promise<void> {
 
   // Idempotent column additions for tables that predate a column.
   await ensureColumn("products", "default_note", "TEXT");
+  await ensureColumn("products", "description", "TEXT");
 }
 
 if (process.argv[1] && process.argv[1].endsWith("migrate.ts")) {
