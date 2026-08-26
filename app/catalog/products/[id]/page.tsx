@@ -45,7 +45,7 @@ export default async function ProductEditor({ params }: { params: { id: string }
             <label className="stack" style={{ gap: 5 }}><span>Form</span><input name="form" defaultValue={product.form ?? ""} placeholder="capsule / liquid / powder" /></label>
           </div>
           <label className="stack" style={{ gap: 5 }}>
-            <span>Description <span className="muted-xs">· internal catalog reference (not shown on the client PDF)</span></span>
+            <span>Description <span className="muted-xs">· a short line shown under this product on the client's guide (editable/removable per patient)</span></span>
             <textarea name="description" rows={2} defaultValue={product.description ?? ""} placeholder="e.g. Food-grown magnesium; supports sleep & muscle relaxation" />
           </label>
           <label className="stack" style={{ gap: 5 }}>

@@ -91,7 +91,7 @@ export default function ProductForm({ brands, terms, snippets }: { brands: Brand
       </div>
 
       <label className="stack" style={{ gap: 5 }}>
-        <span>Description <span className="muted-xs">· internal catalog reference (not shown on the client PDF)</span></span>
+        <span>Description <span className="muted-xs">· a short line shown under this product on the client's guide (editable/removable per patient)</span></span>
         <textarea name="description" rows={2} placeholder="e.g. Food-grown magnesium; supports sleep & muscle relaxation" />
       </label>
 

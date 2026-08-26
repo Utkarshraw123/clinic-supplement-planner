@@ -26,6 +26,19 @@ describe("plan guide", () => {
     expect(text).toContain("2. Food-Grown Vitamin D");
   });
 
+  it("adds a product's description as a line beneath its supplement", async () => {
+    const brandId = await createBrand({ name: `GD ${Date.now()}` });
+    const pid = await createProduct({ brandId, name: "GD Magnesium", form: "capsule", description: "Supports sleep & muscle relaxation" });
+    const patientId = await createPatient({ name: "Desc Guide P", dob: "1990-01-01" });
+    const planId = await getOrCreateDraftPlan(patientId);
+    await addPlanItem(planId, pid);
+    const plan = (await getPlan(planId))!;
+
+    const text = defaultSupplementText(plan);
+    expect(text).toContain("1. GD Magnesium");
+    expect(text).toContain("\nSupports sleep & muscle relaxation");
+  });
+
   it("builds a bullet meds list from the patient's med_condition attributes", async () => {
     const patientId = await createPatient({ name: "Meds P", dob: "1990-01-01" });
     const t1 = await addTerm("caution", `levothyroxine-${Date.now()}`);
