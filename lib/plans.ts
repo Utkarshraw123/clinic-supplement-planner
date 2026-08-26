@@ -1,7 +1,7 @@
 import { query, execute } from "@/lib/db";
 import { getProduct, type ProductDetail } from "@/lib/products";
 
-export type PlanItemDetail = { id: number; product: ProductDetail; dosingText: string; chosenAlternativeId: number|null; position: number };
+export type PlanItemDetail = { id: number; product: ProductDetail; dosingText: string; note: string|null; chosenAlternativeId: number|null; position: number };
 export type PlanDetail = { id: number; patientId: number; status: "draft"|"finalised"; items: PlanItemDetail[] };
 
 export async function getOrCreateDraftPlan(patientId: number, authorId?: number): Promise<number> {
@@ -30,6 +30,10 @@ export async function setItemAlternative(itemId: number, altProductId: number|nu
   await execute("UPDATE plan_items SET chosen_alternative_id = ? WHERE id = ?", [altProductId, itemId]);
 }
 
+export async function setItemNote(itemId: number, note: string|null): Promise<void> {
+  await execute("UPDATE plan_items SET note = ? WHERE id = ?", [note && note.trim() ? note.trim() : null, itemId]);
+}
+
 export async function dosingTextFor(presetId: number|null, customText: string|null): Promise<string> {
   if (customText && customText.trim()) return customText.trim();
   if (presetId) {
@@ -44,8 +48,8 @@ export async function getPlan(planId: number): Promise<PlanDetail | null> {
     "SELECT id, patient_id, status FROM plans WHERE id = ?", [planId]
   );
   if (!base[0]) return null;
-  const itemRows = await query<{ id: number; product_id: number; dosing_preset_id: number|null; dosing_custom_text: string|null; chosen_alternative_id: number|null; position: number }>(
-    "SELECT id, product_id, dosing_preset_id, dosing_custom_text, chosen_alternative_id, position FROM plan_items WHERE plan_id = ? ORDER BY position", [planId]
+  const itemRows = await query<{ id: number; product_id: number; dosing_preset_id: number|null; dosing_custom_text: string|null; note: string|null; chosen_alternative_id: number|null; position: number }>(
+    "SELECT id, product_id, dosing_preset_id, dosing_custom_text, note, chosen_alternative_id, position FROM plan_items WHERE plan_id = ? ORDER BY position", [planId]
   );
   const items: PlanItemDetail[] = [];
   for (const r of itemRows) {
@@ -55,6 +59,7 @@ export async function getPlan(planId: number): Promise<PlanDetail | null> {
       id: r.id,
       product,
       dosingText: await dosingTextFor(r.dosing_preset_id, r.dosing_custom_text),
+      note: r.note,
       chosenAlternativeId: r.chosen_alternative_id,
       position: r.position,
     });

@@ -75,6 +75,29 @@ export async function getProduct(id: number): Promise<ProductDetail | null> {
   return { ...base[0], tags, suppliers, alternatives };
 }
 
+// Batched load of every active product WITH its tags in 2 queries (not N×getProduct).
+// Suppliers/alternatives are left empty — callers that only need tags (flagging,
+// recommendations, the plan-builder catalog list) use this to avoid ~4 queries per product.
+export async function listActiveProductsWithTags(): Promise<ProductDetail[]> {
+  const base = await query<Omit<ProductDetail, "tags"|"suppliers"|"alternatives">>(
+    `SELECT p.id, p.brand_id, b.name AS brand_name, p.name, p.description, p.package_size, p.form, p.default_note, p.status
+     FROM products p JOIN brands b ON b.id = p.brand_id
+     WHERE p.status = 'active' ORDER BY b.name, p.name`
+  );
+  const tagRows = await query<{ product_id: number; termId: number; label: string; tagType: TermType }>(
+    `SELECT pt.product_id, t.id AS termId, t.label AS label, pt.tag_type AS tagType
+     FROM product_tags pt JOIN taxonomy_terms t ON t.id = pt.taxonomy_term_id
+     JOIN products p ON p.id = pt.product_id WHERE p.status = 'active'`
+  );
+  const byProduct = new Map<number, { termId: number; label: string; tagType: TermType }[]>();
+  for (const r of tagRows) {
+    const list = byProduct.get(r.product_id) ?? [];
+    list.push({ termId: r.termId, label: r.label, tagType: r.tagType });
+    byProduct.set(r.product_id, list);
+  }
+  return base.map((b) => ({ ...b, tags: byProduct.get(b.id) ?? [], suppliers: [], alternatives: [] }));
+}
+
 export async function searchProducts(term: string): Promise<{ id: number; name: string; brand_name: string; form: string|null; package_size: string|null }[]> {
   const like = `%${term.trim()}%`;
   return query(

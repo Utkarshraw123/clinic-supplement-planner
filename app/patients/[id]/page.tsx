@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getPatient, type AttrType } from "@/lib/patients";
 import { listTerms, type TermType } from "@/lib/taxonomies";
-import { savePatientBasicsAction, savePatientAttributesAction } from "@/app/patients/actions";
+import { savePatientBasicsAction } from "@/app/patients/actions";
+import ClinicalProfileForm, { type Section } from "@/components/ClinicalProfileForm";
+import Toaster from "@/components/Toaster";
 
 const ATTR_MAP: { attr: AttrType; term: TermType; label: string; hint: string }[] = [
   { attr: "allergy", term: "allergen", label: "Allergies / intolerances", hint: "Hard-blocks matching products" },
@@ -19,8 +21,15 @@ export default async function PatientProfile({ params }: { params: { id: string 
   if (!patient) notFound();
   const allTerms = await listTerms();
 
+  const sections: Section[] = ATTR_MAP.map(({ attr, term, label, hint }) => ({
+    attr, term, label, hint,
+    options: allTerms.filter((t) => t.type === term).map((t) => ({ id: t.id, label: t.label })),
+    selected: patient.attributes.filter((a) => a.attrType === attr).map((a) => a.termId),
+  }));
+
   return (
     <div className="stack" style={{ gap: 20 }}>
+      <Toaster />
       <div className="row-between">
         <div>
           <h1>{patient.name}</h1>
@@ -44,27 +53,8 @@ export default async function PatientProfile({ params }: { params: { id: string 
 
       <div className="card">
         <h2 style={{ marginBottom: 2 }}>Clinical profile</h2>
-        <p className="muted" style={{ marginBottom: 14 }}>Terms come from admin → taxonomies. These drive flagging and suggestions.</p>
-        <form action={savePatientAttributesAction} className="stack" style={{ gap: 16 }}>
-          <input type="hidden" name="patientId" value={patient.id} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            {ATTR_MAP.map(({ attr, term, label, hint }) => {
-              const selected = patient.attributes.filter((a) => a.attrType === attr).map((a) => String(a.termId));
-              return (
-                <label key={attr} className="stack" style={{ gap: 5 }}>
-                  <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span>{label}</span>
-                    <span className="muted-xs">{hint}</span>
-                  </span>
-                  <select name={`attr:${attr}`} multiple defaultValue={selected}>
-                    {allTerms.filter((t) => t.type === term).map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-                  </select>
-                </label>
-              );
-            })}
-          </div>
-          <button type="submit" className="btn--primary" style={{ justifySelf: "start" }}>Save profile</button>
-        </form>
+        <p className="muted" style={{ marginBottom: 14 }}>Click to select any number in each section. Missing an option? Add it inline — it&apos;s saved to the taxonomy for next time.</p>
+        <ClinicalProfileForm patientId={patient.id} sections={sections} />
       </div>
     </div>
   );

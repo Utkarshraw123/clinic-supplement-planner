@@ -2,14 +2,16 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getPatient } from "@/lib/patients";
 import { getOrCreateDraftPlan, getPlan } from "@/lib/plans";
-import { searchProducts, getProduct } from "@/lib/products";
+import { listActiveProductsWithTags } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
 import { query } from "@/lib/db";
-import { addItemAction, removeItemAction, chooseAlternativeAction } from "@/app/plan/actions";
+import { removeItemAction, chooseAlternativeAction, saveItemNoteAction } from "@/app/plan/actions";
 import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
 import { listProtocols } from "@/lib/protocols";
 import PlanItemDosing from "@/components/PlanItemDosing";
+import AddToPlanButton from "@/components/AddToPlanButton";
+import Toaster from "@/components/Toaster";
 
 export default async function PlanBuilder({ params }: { params: { patientId: string } }) {
   const u = await requireUser();
@@ -19,11 +21,13 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
   const planId = await getOrCreateDraftPlan(patientId, u.userId);
   const plan = await getPlan(planId);
   const presets = await query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id");
-  const catalog = await searchProducts("");
 
+  // One batched load (2 queries) instead of ~4 queries per product — this is what
+  // made adding/removing an item feel slow when the catalogue grew to ~44 products.
+  const allProducts = await listActiveProductsWithTags();
   const inPlan = new Set(plan!.items.map((it) => it.product.id));
-  const fullCatalog = (await Promise.all(catalog.map((c) => getProduct(c.id)))).filter((p): p is NonNullable<typeof p> => !!p && !inPlan.has(p.id));
-  const suggestions = suggestForPatient(fullCatalog, patient.attributes, 5);
+  const catalog = allProducts.filter((p) => !inPlan.has(p.id));
+  const suggestions = suggestForPatient(catalog, patient.attributes, 5);
 
   const protocols = await listProtocols();
 
@@ -32,6 +36,7 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
 
   return (
     <div className="stack" style={{ gap: 20 }}>
+      <Toaster />
       <div className="row-between">
         <div>
           <h1>{patient.name}</h1>
@@ -80,12 +85,7 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
                     {sg.reasons.map((r, i) => <span key={i} className="badge badge--ok" style={{ fontSize: 11 }}>{r}</span>)}
                   </div>
                 </div>
-                <form action={addItemAction}>
-                  <input type="hidden" name="planId" value={planId} />
-                  <input type="hidden" name="patientId" value={patientId} />
-                  <input type="hidden" name="productId" value={sg.product.id} />
-                  <button type="submit" className="btn--sm btn--primary">Add</button>
-                </form>
+                <AddToPlanButton planId={planId} patientId={patientId} productId={sg.product.id} className="btn--sm btn--primary" />
               </div>
             ))}
           </div>
@@ -109,25 +109,23 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
       )}
 
       <div className="card">
-        <h2 style={{ marginBottom: 8 }}>Add a product</h2>
+        <div className="row-between" style={{ marginBottom: 8 }}>
+          <h2>Add products to the prescription</h2>
+          <span className="muted-xs">{catalog.length} available</span>
+        </div>
         <div>
           {catalog.slice(0, 50).map((c) => (
             <div key={c.id} className="list-row">
               <span style={{ fontSize: 14 }}>{c.name} <span className="muted-xs">· {c.brand_name}{c.form ? ` · ${c.form}` : ""}</span></span>
-              <form action={addItemAction}>
-                <input type="hidden" name="planId" value={planId} />
-                <input type="hidden" name="patientId" value={patientId} />
-                <input type="hidden" name="productId" value={c.id} />
-                <button type="submit" className="btn--sm">Add</button>
-              </form>
+              <AddToPlanButton planId={planId} patientId={patientId} productId={c.id} />
             </div>
           ))}
         </div>
       </div>
 
       <div>
-        <h2 style={{ marginBottom: 10 }}>Plan — {plan!.items.length} {plan!.items.length === 1 ? "item" : "items"}</h2>
-        {plan!.items.length === 0 && <p className="muted">No items yet. Add products from the suggestions or catalog above.</p>}
+        <h2 style={{ marginBottom: 10 }}>Prescription — {plan!.items.length} {plan!.items.length === 1 ? "product" : "products"}</h2>
+        {plan!.items.length === 0 && <p className="muted">Nothing added yet. Add products from the suggestions or catalogue above — they&apos;ll appear here for you to set dosing and notes.</p>}
         <div className="stack" style={{ gap: 10 }}>
           {itemFlags.map(({ item, flags }) => (
             <div key={item.id} className="card" style={{ borderColor: hasBlock(flags) ? "var(--danger)" : "var(--border)" }}>
@@ -165,6 +163,12 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
               <div style={{ marginTop: 10 }}>
                 <PlanItemDosing itemId={item.id} patientId={patientId} presets={presets} currentText={item.dosingText} />
               </div>
+              <form action={saveItemNoteAction} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
+                <input type="hidden" name="itemId" value={item.id} />
+                <input type="hidden" name="patientId" value={patientId} />
+                <input name="note" placeholder="Comment for this product (appears on the guide)" defaultValue={item.note ?? ""} style={{ flex: 1, minWidth: 220 }} />
+                <button type="submit" className="btn--sm">Save note</button>
+              </form>
             </div>
           ))}
         </div>

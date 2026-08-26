@@ -18,7 +18,7 @@ export default async function ProductEditor({ params }: { params: { id: string }
   if (!product) notFound();
   const brands = await listBrands();
   const allTerms = await listTerms();
-  const snippets = await listSnippets();
+  const snippets = await listSnippets("supplement");
   const others = (await searchProducts("")).filter((p) => p.id !== id);
 
   return (

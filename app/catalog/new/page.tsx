@@ -9,7 +9,7 @@ export default async function NewProductPage() {
   await requireUser();
   const brands = await listBrands();
   const terms = (await listTerms()).map((t) => ({ id: t.id, label: t.label, type: t.type as string }));
-  const snippets = await listSnippets();
+  const snippets = await listSnippets("supplement");
   return (
     <div className="stack" style={{ gap: 16, maxWidth: 720 }}>
       <div className="row-between">

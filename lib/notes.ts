@@ -1,15 +1,22 @@
 import { query, execute } from "@/lib/db";
 
-export type NoteSnippet = { id: number; text: string };
+export type SnippetCategory = "supplement" | "lifestyle" | "dietary" | "general";
+export type NoteSnippet = { id: number; text: string; category: SnippetCategory };
 
-export async function listSnippets(): Promise<NoteSnippet[]> {
-  return query<NoteSnippet>("SELECT id, text FROM note_snippets ORDER BY text");
+// List reusable snippets, optionally filtered to one category. Rows with no category
+// (older data) are treated as "supplement" so existing supplement notes keep showing.
+export async function listSnippets(category?: SnippetCategory): Promise<NoteSnippet[]> {
+  const rows = await query<{ id: number; text: string; category: string | null }>(
+    "SELECT id, text, category FROM note_snippets ORDER BY text"
+  );
+  const mapped = rows.map((r) => ({ id: r.id, text: r.text, category: (r.category ?? "supplement") as SnippetCategory }));
+  return category ? mapped.filter((s) => s.category === category) : mapped;
 }
 
-export async function createSnippet(text: string, createdBy?: number): Promise<number> {
+export async function createSnippet(text: string, category: SnippetCategory = "supplement", createdBy?: number): Promise<number> {
   const rs = await execute(
-    "INSERT INTO note_snippets (text, created_by) VALUES (?, ?)",
-    [text.trim(), createdBy ?? null]
+    "INSERT INTO note_snippets (text, category, created_by) VALUES (?, ?, ?)",
+    [text.trim(), category, createdBy ?? null]
   );
   return Number(rs.lastInsertRowid);
 }

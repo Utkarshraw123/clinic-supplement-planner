@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS note_snippets (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   text TEXT NOT NULL,
+  category TEXT DEFAULT 'supplement',
   created_by INTEGER REFERENCES users(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -108,6 +109,7 @@ CREATE TABLE IF NOT EXISTS plan_items (
   product_id INTEGER NOT NULL REFERENCES products(id),
   dosing_preset_id INTEGER REFERENCES dosing_presets(id),
   dosing_custom_text TEXT,
+  note TEXT,
   chosen_alternative_id INTEGER REFERENCES products(id),
   position INTEGER NOT NULL DEFAULT 0
 );

@@ -1,12 +1,16 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/current-user";
-import { createSnippet, deleteSnippet } from "@/lib/notes";
+import { createSnippet, deleteSnippet, type SnippetCategory } from "@/lib/notes";
+
+const CATEGORIES: SnippetCategory[] = ["supplement", "lifestyle", "dietary", "general"];
 
 export async function addSnippetAction(formData: FormData) {
   const u = await requireAdmin();
   const text = String(formData.get("text") || "").trim();
-  if (text) await createSnippet(text, u.userId);
+  const raw = String(formData.get("category") || "supplement") as SnippetCategory;
+  const category = CATEGORIES.includes(raw) ? raw : "supplement";
+  if (text) await createSnippet(text, category, u.userId);
   revalidatePath("/admin/notes");
 }
 

@@ -25,7 +25,9 @@ export function defaultSupplementText(plan: PlanDetail): string {
   return plan.items
     .map((it, i) => {
       const dosing = it.dosingText?.trim();
-      const note = it.product.default_note?.trim();
+      // Per-product comment set on the plan (it.note) takes precedence; otherwise the
+      // product's saved default note. Either way it's editable here before sending.
+      const note = (it.note?.trim()) || it.product.default_note?.trim();
       const desc = it.product.description?.trim();
       const alt = it.chosenAlternativeId ? " (an alternative format is available on request)" : "";
       const head = `${i + 1}. ${it.product.name}${dosing ? ` — ${dosing}` : ""}${note ? ` · ${note}` : ""}${alt}`;

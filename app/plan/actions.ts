@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
-import { addPlanItem, removePlanItem, setItemDosing, setItemAlternative } from "@/lib/plans";
+import { addPlanItem, removePlanItem, setItemDosing, setItemAlternative, setItemNote } from "@/lib/plans";
 import { finaliseAndSend, finalisePlanToSnapshot, sendSnapshotEmail } from "@/lib/delivery";
 
 export async function addItemAction(formData: FormData) {
@@ -23,6 +23,12 @@ export async function saveDosingAction(formData: FormData) {
   const presetRaw = String(formData.get("presetId") || "");
   const custom = String(formData.get("customText") || "");
   await setItemDosing(Number(formData.get("itemId")), presetRaw ? Number(presetRaw) : null, custom || null);
+  revalidatePath(`/plan/${formData.get("patientId")}`);
+}
+
+export async function saveItemNoteAction(formData: FormData) {
+  await requireUser();
+  await setItemNote(Number(formData.get("itemId")), String(formData.get("note") || ""));
   revalidatePath(`/plan/${formData.get("patientId")}`);
 }
 

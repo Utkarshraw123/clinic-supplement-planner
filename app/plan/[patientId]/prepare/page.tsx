@@ -18,7 +18,9 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
   const plan = await getPlan(planId);
   const planHasBlock = plan!.items.some((it) => hasBlock(flagProductForPatient(it.product, patient.attributes)));
   const guide = await getGuideForEditing(plan!, patient);
-  const snippets = await listSnippets();
+  const supplementSnips = await listSnippets("supplement");
+  const lifestyleSnips = await listSnippets("lifestyle");
+  const dietarySnips = await listSnippets("dietary");
 
   const ta = { minHeight: 90 } as const;
 
@@ -68,18 +70,18 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
           </div>
 
           <div className="card stack" style={{ gap: 12 }}>
-            <label className="stack" style={{ gap: 5 }}><span>Lifestyle &amp; Other Recommendations <span className="muted-xs">(optional)</span></span>
-              <textarea name="lifestyle" style={ta} defaultValue={guide.lifestyle ?? ""} />
+            <label className="stack" style={{ gap: 5 }}><span>Lifestyle &amp; Other Recommendations <span className="muted-xs">(optional · click a chip to insert)</span></span>
+              <SnippetTextarea name="lifestyle" defaultValue={guide.lifestyle ?? ""} snippets={lifestyleSnips} rows={4} />
             </label>
-            <label className="stack" style={{ gap: 5 }}><span>Dietary Recommendations <span className="muted-xs">(optional)</span></span>
-              <textarea name="dietary" style={ta} defaultValue={guide.dietary ?? ""} />
+            <label className="stack" style={{ gap: 5 }}><span>Dietary Recommendations <span className="muted-xs">(optional · click a chip to insert)</span></span>
+              <SnippetTextarea name="dietary" defaultValue={guide.dietary ?? ""} snippets={dietarySnips} rows={4} />
             </label>
           </div>
 
           <div className="card stack" style={{ gap: 12 }}>
             <label className="stack" style={{ gap: 5 }}>
               <span>Supplement Plan <span className="muted-xs">· pre-filled from the plan builder (incl. product notes) — edit the wording if you like</span></span>
-              <SnippetTextarea name="supplementText" defaultValue={guide.supplementText ?? ""} snippets={snippets} rows={7} />
+              <SnippetTextarea name="supplementText" defaultValue={guide.supplementText ?? ""} snippets={supplementSnips} rows={7} />
             </label>
             <label className="stack" style={{ gap: 5 }}>
               <span>Medications / Hormones / Contraception <span className="muted-xs">· pre-filled from the patient record</span></span>

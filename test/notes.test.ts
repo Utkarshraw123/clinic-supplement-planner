@@ -30,4 +30,17 @@ describe("product default notes + snippet library", () => {
     await deleteSnippet(id);
     expect((await listSnippets()).some((s) => s.text === t)).toBe(false);
   });
+
+  it("filters snippets by category so each guide field shows its own presets", async () => {
+    const stamp = Date.now();
+    const life = `Sleep 8 hours ${stamp}`;
+    const diet = `Drink water ${stamp}`;
+    await createSnippet(life, "lifestyle");
+    await createSnippet(diet, "dietary");
+    const lifestyle = await listSnippets("lifestyle");
+    const dietary = await listSnippets("dietary");
+    expect(lifestyle.some((s) => s.text === life)).toBe(true);
+    expect(lifestyle.some((s) => s.text === diet)).toBe(false);
+    expect(dietary.some((s) => s.text === diet)).toBe(true);
+  });
 });

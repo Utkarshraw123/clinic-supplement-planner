@@ -4,7 +4,7 @@ import { createBrand } from "@/lib/brands";
 import { createProduct } from "@/lib/products";
 import { addTerm } from "@/lib/taxonomies";
 import { createPatient, setPatientAttributes, getPatient } from "@/lib/patients";
-import { getOrCreateDraftPlan, addPlanItem, setItemDosing, getPlan } from "@/lib/plans";
+import { getOrCreateDraftPlan, addPlanItem, setItemDosing, setItemNote, getPlan } from "@/lib/plans";
 import { defaultSupplementText, defaultMedsText, savePlanGuide, getPlanGuide, getGuideForEditing, todayIso } from "@/lib/guide";
 
 describe("plan guide", () => {
@@ -37,6 +37,20 @@ describe("plan guide", () => {
     const text = defaultSupplementText(plan);
     expect(text).toContain("1. GD Magnesium");
     expect(text).toContain("\nSupports sleep & muscle relaxation");
+  });
+
+  it("uses a per-item practitioner note in the supplement line (over the default note)", async () => {
+    const brandId = await createBrand({ name: `GN ${Date.now()}` });
+    const pid = await createProduct({ brandId, name: "GN Iron", form: "capsule", defaultNote: "Take with food" });
+    const patientId = await createPatient({ name: "Note Guide P", dob: "1990-01-01" });
+    const planId = await getOrCreateDraftPlan(patientId);
+    const itemId = await addPlanItem(planId, pid);
+    await setItemNote(itemId, "Take one capsule with breakfast");
+    const plan = (await getPlan(planId))!;
+
+    const text = defaultSupplementText(plan);
+    expect(text).toContain("1. GN Iron · Take one capsule with breakfast");
+    expect(text).not.toContain("Take with food"); // per-item note overrides the product default
   });
 
   it("builds a bullet meds list from the patient's med_condition attributes", async () => {
