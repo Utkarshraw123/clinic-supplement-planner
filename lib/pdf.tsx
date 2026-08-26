@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, Link, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
 import type { PatientDetail } from "@/lib/patients";
 import type { PlanGuide } from "@/lib/guide";
@@ -6,6 +6,7 @@ import { HEADER_IMAGE, FOOTER_IMAGE } from "@/lib/pdf-assets";
 
 // The branded Supplement Instruction Guide. All practitioner/auto fields arrive already
 // resolved on `PlanGuide`; this module only lays them out.
+export type GuideLink = { name: string; url: string };
 export type GuidePdfData = {
   clientName: string;
   consultationDate: string;
@@ -15,9 +16,10 @@ export type GuidePdfData = {
   dietary: string;
   supplementText: string;
   medsText: string;
+  links: GuideLink[];
 };
 
-export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide): GuidePdfData {
+export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide, links: GuideLink[] = []): GuidePdfData {
   const s = (v: string | null | undefined) => (v ?? "").trim();
   return {
     clientName: patient.name,
@@ -28,6 +30,7 @@ export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide): Gui
     dietary: s(guide.dietary),
     supplementText: s(guide.supplementText),
     medsText: s(guide.medsText),
+    links: links.filter((l) => l.url.trim()),
   };
 }
 
@@ -47,7 +50,16 @@ const s = StyleSheet.create({
   sectionTitle: { fontSize: 12, color: GOLD, marginTop: 12, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.4 },
   line: { fontSize: 11, color: INK },
   spacer: { height: 6 },
+  buyRow: { flexDirection: "row", marginBottom: 3 },
+  buyName: { fontSize: 11, color: INK, width: 200 },
+  buyLink: { fontSize: 11, color: GOLD, textDecoration: "underline" },
+  buyNote: { fontSize: 9.5, color: "#6B6B66", marginTop: 3 },
 });
+
+// Readable host for a link's visible text (e.g. "wildnutrition.com").
+function linkHost(url: string): string {
+  try { return new URL(url).host.replace(/^www\./, ""); } catch { return url; }
+}
 
 // @react-pdf does not honour "\n" inside a single <Text>; split into lines.
 function Multiline({ text }: { text: string }) {
@@ -90,6 +102,20 @@ function GuideDoc({ data }: { data: GuidePdfData }) {
         <Section title="Lifestyle & Other Recommendations" body={data.lifestyle} />
         <Section title="Dietary Recommendations" body={data.dietary} />
         <Section title="Supplement Plan" body={data.supplementText} />
+
+        {data.links.length > 0 ? (
+          <View wrap={false}>
+            <Text style={s.sectionTitle}>Where to buy your supplements</Text>
+            {data.links.map((l, i) => (
+              <View key={i} style={s.buyRow}>
+                <Text style={s.buyName}>{l.name}</Text>
+                <Link src={l.url} style={s.buyLink}>{linkHost(l.url)}</Link>
+              </View>
+            ))}
+            <Text style={s.buyNote}>Tap a link to open the product page.</Text>
+          </View>
+        ) : null}
+
         <Section title="Medications / Hormones / Contraception" body={data.medsText} />
 
         <View fixed style={s.footerBox}>

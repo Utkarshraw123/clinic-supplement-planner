@@ -25,7 +25,12 @@ export async function finalisePlanToSnapshot(input: { planId: number; actorId?: 
   }
 
   const guide = await getGuideForEditing(plan, patient);
-  const pdfData = buildGuidePdfData(patient, guide);
+  // One purchase link per prescribed product (its first supplier link) for the
+  // "Where to buy" section of the guide — so the client can actually order them.
+  const links = plan.items
+    .map((it) => ({ name: it.product.name, url: it.product.suppliers[0]?.url ?? "" }))
+    .filter((l) => l.url);
+  const pdfData = buildGuidePdfData(patient, guide, links);
   const pdf = await renderPlanPdf(pdfData);
 
   const rs = await execute(

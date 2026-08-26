@@ -13,21 +13,27 @@ describe("pdf", () => {
       dietary: "Reduce caffeine.",
       supplementText: "1. Food-Grown Magnesium — 1 capsule with evening meal",
       medsText: "- Levothyroxine 50mcg",
+      links: [{ name: "Food-Grown Magnesium", url: "https://www.wildnutrition.com/products/food-grown-magnesium" }],
     };
     const buf = await renderPlanPdf(data);
     expect(buf.length).toBeGreaterThan(500);
     expect(buf.subarray(0, 5).toString("latin1")).toBe("%PDF-");
   });
 
-  it("maps a patient + guide into pdf data, trimming blanks", () => {
+  it("maps a patient + guide into pdf data, trimming blanks and keeping only real links", () => {
     const patient = { id: 1, name: "Emma Hartley", dob: "1988-03-14", attributes: [] } as PatientDetail;
     const data = buildGuidePdfData(patient, {
       consultationDate: "2026-08-26", intro: "  hi  ", nextConsultation: null,
       lifestyle: null, dietary: null, supplementText: "1. Magnesium", medsText: null,
-    });
+    }, [
+      { name: "Magnesium", url: "https://www.wildnutrition.com/products/food-grown-magnesium" },
+      { name: "No link", url: "" },
+    ]);
     expect(data.clientName).toBe("Emma Hartley");
     expect(data.intro).toBe("hi");
     expect(data.nextConsultation).toBe("");
     expect(data.supplementText).toBe("1. Magnesium");
+    expect(data.links).toHaveLength(1);
+    expect(data.links[0].name).toBe("Magnesium");
   });
 });
