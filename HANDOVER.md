@@ -34,8 +34,9 @@ npm run seed                         # migrations + seed admin (admin@clinic.tes
 npx tsx scripts/seed-dosing.ts       # standard dosing presets
 npx tsx scripts/seed-demo.ts         # 2 brands + 4 products, magnesium tagged mushroom+sleep
 npx tsx scripts/seed-clinical-demo.ts# patient "Emma Hartley" (mushroom allergy) + a blocked plan
+npx tsx scripts/seed-notes.ts        # reusable note snippets
 npm run dev                          # http://localhost:3200  → sign in → lands on /dashboard
-npx vitest run                       # 58 tests, keep green
+npx vitest run                       # 60 tests, keep green
 npm run build                        # production build + typecheck (STOP dev server first)
 ```
 
