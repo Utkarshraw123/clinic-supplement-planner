@@ -259,21 +259,56 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
-/* Multi-select attribute chips (patient clinical profile) */
+/* Clinical profile — multi-select tag sections */
+.attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 720px) { .attr-grid { grid-template-columns: 1fr; } }
+.attr-section {
+  background: #fff;
+  border: 1px solid var(--sand-border, #E7DDCD);
+  border-radius: 12px;
+  padding: 14px;
+}
+.attr-section__head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 11px; }
+.attr-section__title { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13.5px; color: var(--brand-ink, #1C3A2E); }
+.attr-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.attr-dot--danger { background: var(--danger, #B42318); }
+.attr-dot--ok { background: var(--sage, #8DA06A); }
+.attr-dot--accent { background: var(--terracotta, #C06A47); }
+.attr-dot--warn { background: var(--warn, #98590B); }
+
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 999px;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: 8px;
   border: 1px solid var(--sand-border, #E7DDCD);
-  background: #fff;
+  background: var(--cream, #FAF5EE);
   font-size: 13px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--brand-ink, #1C3A2E);
   cursor: pointer;
   user-select: none;
   transition: background 90ms, border-color 90ms, color 90ms;
 }
-.chip-toggle input { display: none; }
-.chip-toggle:hover { border-color: var(--brand, #1B4332); }
+.chip-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.chip-toggle:hover { border-color: var(--brand, #1B4332); background: #fff; }
 .chip-toggle.is-on { background: var(--brand, #1B4332); border-color: var(--brand, #1B4332); color: #fff; }
-.chip-group { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip-toggle__check { flex: none; }
+.chip-toggle:focus-within { outline: 2px solid var(--brand, #1B4332); outline-offset: 1px; }
+
+/* Inline "add a term" row */
+.attr-add { display: flex; gap: 6px; margin-top: 11px; }
+.attr-add input {
+  flex: 1; min-width: 100px; height: 34px; padding: 0 10px;
+  font-size: 13px; border-radius: 8px; border: 1px dashed var(--sand-border, #E7DDCD);
+  background: transparent;
+}
+.attr-add input:focus { border-style: solid; border-color: var(--brand, #1B4332); background: #fff; }
+.attr-add button {
+  height: 34px; padding: 0 12px; font-size: 13px; border-radius: 8px;
+  border: 1px solid var(--sand-border, #E7DDCD); background: #fff; color: var(--brand-ink); font-weight: 500;
+}
+.attr-add button:hover { border-color: var(--brand, #1B4332); color: var(--brand, #1B4332); }
