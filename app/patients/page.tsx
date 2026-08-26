@@ -23,7 +23,7 @@ export default async function PatientsPage() {
         {patients.length === 0 && <p className="muted">No patients yet. Add your first to start a plan.</p>}
         {patients.map((p) => (
           <div key={p.id} className="list-row">
-            <Link href={`/patients/${p.id}`} style={{ fontWeight: 500, color: "var(--navy-ink)" }}>{p.name}</Link>
+            <Link href={`/patients/${p.id}`} style={{ fontWeight: 500, color: "var(--brand-ink)" }}>{p.name}</Link>
             <span className="muted-xs">DOB {p.dob}</span>
           </div>
         ))}

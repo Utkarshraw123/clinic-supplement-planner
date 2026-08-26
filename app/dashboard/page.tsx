@@ -52,7 +52,7 @@ export default async function DashboardPage() {
           </div>
           {patients.length === 0 ? <p className="muted">No patients yet.</p> : patients.map((p) => (
             <div key={p.id} className="list-row">
-              <Link href={`/plan/${p.id}`} style={{ fontWeight: 500, color: "var(--navy-ink)" }}>{p.name}</Link>
+              <Link href={`/plan/${p.id}`} style={{ fontWeight: 500, color: "var(--brand-ink)" }}>{p.name}</Link>
               <span className="muted-xs">DOB {p.dob}</span>
             </div>
           ))}

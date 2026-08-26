@@ -32,7 +32,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
         style={{
           width: 244,
           flexShrink: 0,
-          background: "var(--navy-2)",
+          background: "var(--brand-2)",
           color: "#fff",
           padding: "26px 16px",
           display: "flex",

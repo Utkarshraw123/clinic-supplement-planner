@@ -27,7 +27,7 @@ export default function LoginPage() {
     <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "var(--cream)" }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 22 }}>
-          <div style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: 26, fontWeight: 600, color: "var(--navy-ink)" }}>Practitioner tools</div>
+          <div style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: 26, fontWeight: 600, color: "var(--brand-ink)" }}>Practitioner tools</div>
           <p className="muted" style={{ marginTop: 4 }}>The clinic supplement planner</p>
         </div>
         <div className="card card--plain card--pad-lg" style={{ boxShadow: "var(--shadow-md)" }}>

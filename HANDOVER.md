@@ -11,7 +11,7 @@
 - **Repo:** `/Users/utkarshrawat/Wild Dash/supplement-selection-db` (holds `.git`; the parent `Wild Dash/` is NOT a repo). Branch **`main`**, HEAD **`22b1977`**.
 - **GitHub:** `https://github.com/Utkarshraw123/clinic-supplement-planner` — **private**, personal account **Utkarshraw123** (auth via macOS keychain; `git push` just works).
 - **State:** **all 5 planned phases + a 6-item enhancement round built, tested, merged, and pushed. 54/54 vitest tests pass. `npm run build` clean (23 routes).** Feature-complete AND visually polished. Only remaining work is go-live (keys + deploy).
-- **Theme:** re-themed navy → **deep forest green** (2026-08-25). Brand tokens are still named `--navy`/`--navy-2`/`--navy-ink` in `app/globals.css` but hold green values (#1B4332 / #122E23 / #1C3A2E). Renaming them is a possible tidy-up (touches ~9 refs); left as-is to keep the diff small.
+- **Theme:** re-themed navy → **deep forest green** (2026-08-25) and brand tokens renamed `--navy*` → **`--brand`/`--brand-2`/`--brand-ink`** in `app/globals.css` (#1B4332 / #122E23 / #1C3A2E). No `--navy*` tokens remain anywhere.
 
 ### 2026-08-25 enhancement round (all shipped, see commit 22b1977)
 1. **Allergen safety** — loud "Allergen conflict" banner on the plan builder; finalisation hard-refuses a blocked plan (`finalisePlanToSnapshot` throws). Was already blocked at send; now blocked at finalise + explained.
@@ -39,7 +39,7 @@ npm run build                        # production build + typecheck (STOP dev se
 
 ## 1. Product summary (what it does)
 
-A practitioner signs in and works from a **navy-sidebar dashboard**. They:
+A practitioner signs in and works from a **deep-green-sidebar dashboard**. They:
 1. Maintain a **product catalog** — brands → products, each tagged from controlled vocabularies (ingredients, allergens, concerns, diets, cautions), with multiple supplier links and alternative-format links. Import via CSV; a paste-a-URL "enrichment assist" suggests known terms.
 2. Maintain **patient records** — Name + DOB only as identifiers, plus clinical attributes (allergies, health goals, dietary prefs, meds/conditions).
 3. Build a **supplement plan** per patient in the plan builder: add products (or accept **allergy-safe ranked suggestions**), set dosing (preset or custom), offer alternative formats. **Deterministic flagging** hard-**blocks** any product whose ingredient/allergen matches the patient's allergy and soft-**warns** on caution/diet mismatches.
@@ -155,7 +155,7 @@ The design spec (approved) is in `docs/superpowers/specs/`.
 
 Deep-navy left sidebar + cream canvas + sand cards + serif display headings; warm, premium, editorial. All tokens live in `app/globals.css` on `:root`:
 
-- `--navy` #1B4332 · `--navy-2` #122E23 (sidebar) · `--navy-ink` #1C3A2E (text) — deep forest green (formerly navy #10243A/#0B1B2C/#1F2D38)
+- `--brand` #1B4332 · `--brand-2` #122E23 (sidebar) · `--brand-ink` #1C3A2E (text) — deep forest green (renamed from --navy*, formerly navy #10243A/#0B1B2C/#1F2D38)
 - `--cream` #FAF5EE (canvas) · `--sand` #F3EBDF (cards) · `--sand-border` #E7DDCD
 - `--terracotta` #C06A47 (+tint #F3E3DA) — icons, eyebrows, accents
 - `--sage` #8DA06A (+tint #EBEFE1) — suggestions, "ok" badges
