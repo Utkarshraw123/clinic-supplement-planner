@@ -1,6 +1,6 @@
 # Clinic Supplement Planner — Master Handover
 
-**Read this first.** Single, self-contained entry point for a fresh session. Last written **2026-08-25**.
+**Read this first.** Single, self-contained entry point for a fresh session. Last written **2026-08-26**.
 
 ---
 
@@ -203,13 +203,22 @@ Then in the browser (preview `supplement-db-dev`), log in and check:
 
 ---
 
-## 9. Go-live (the only remaining work)
+## 9. ALREADY LIVE — open items & operations
 
-1. **Turso prod DB:** create it, set `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`, run migrations against it (`TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… npm run migrate`), seed an admin (`… npm run seed`, ideally with a strong `SEED_ADMIN_PASSWORD`).
-2. **Email:** set `RESEND_API_KEY` (+ verify a sending domain); set the send-from in `/admin/settings`.
-3. **Branding:** `/admin/settings` — clinic name (drives sidebar + PDF), address, contact. Dev value is "Lorna's Nutrition Clinic".
-4. **Auth secret:** set a strong `SESSION_SECRET` (≥32 chars).
-5. **Deploy to Vercel** (same pattern as the user's other projects; Vercel CLI is authed on this machine for other accounts — confirm which account/team for this repo). Set the env vars above in Vercel.
+**The app is deployed and working in production** (see §0 LIVE bullet). Everything below is what's left / how to operate it.
+
+### Open items (UAT → real go-live)
+1. **Change the admin password.** Prod admin is `admin@clinic.test` with a strong password generated at deploy (given to the user in chat, NOT stored anywhere). Change it via the app (Team) or reseed. Optionally create Lorna's real email as a second admin.
+2. **Verify a Resend sending domain.** `email_from` is currently `onboarding@resend.dev` (Resend test sender → delivers ONLY to the Resend account owner's email). For real client emails: Resend → Domains → add + verify a domain, then set the from-address in `/admin/settings` (or update `clinic_settings.email_from`).
+3. **Clear demo/sample data before real clients.** Prod currently holds UAT demo data: patients **Emma Hartley** (mushroom-allergy demo, has a blocked plan) + **"Sarah Mitchell (sample)"** (the emailed sample guide); 2 brands, 4 products; Magnesium (id 1) has a demo default_note ("Only take at night") + description. Wipe when ready (e.g. `DELETE FROM patients; DELETE FROM plan_snapshots;` via `turso db shell`, keep products/brands/taxonomy/dosing/snippets or reseed as desired).
+
+### How to operate (all verified this session)
+- **Deploy:** `npx --yes vercel deploy --prod --yes` (from repo dir). GitHub is connected so a plain `git push` to `main` ALSO auto-deploys. If the CLI deploy prints `status:error`, it likely raced the auto-deploy — just re-run.
+- **Migrate prod DB:** `set -a; source <(grep -E '^(TURSO_DATABASE_URL|TURSO_AUTH_TOKEN)=' <envfile>); set +a; npm run migrate` — idempotent (CREATE IF NOT EXISTS + `ensureColumn`). New env values: mint a token with `~/.turso/turso db tokens create clinic-supplement-planner`. (This session stored the prod URL/token/secret in a session scratchpad `prod.env` — that's gone next session; re-mint the token.)
+- **Prod Vercel env vars:** `npx vercel env ls production`; add with `printf '%s' "$VALUE" | npx vercel env add NAME production` then redeploy. Currently set: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `SESSION_SECRET`, `RESEND_API_KEY`.
+- **Prod runtime errors:** `npx vercel logs https://clinic-supplement-planner.vercel.app` (prints recent + exits; NO `timeout` on macOS — don't wrap it).
+- **Turso shell:** `~/.turso/turso db shell clinic-supplement-planner "SQL"` (CLI logged in as `utkarshraw123`; if a fresh session isn't logged in, run `turso auth login`).
+- **Vercel:** authed as `utkarshrawatofficial-2811`; CLI not global → use `npx --yes vercel`.
 
 Env reference is in `.env.example`.
 
