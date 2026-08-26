@@ -5,7 +5,9 @@ import { getPatient } from "@/lib/patients";
 import { getOrCreateDraftPlan, getPlan } from "@/lib/plans";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { getGuideForEditing } from "@/lib/guide";
+import { listSnippets } from "@/lib/notes";
 import { saveGuideAction, finaliseGuideAction } from "@/app/plan/prepare-actions";
+import SnippetTextarea from "@/components/SnippetTextarea";
 
 export default async function PrepareGuidePage({ params }: { params: { patientId: string } }) {
   const u = await requireUser();
@@ -16,6 +18,7 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
   const plan = await getPlan(planId);
   const planHasBlock = plan!.items.some((it) => hasBlock(flagProductForPatient(it.product, patient.attributes)));
   const guide = await getGuideForEditing(plan!, patient);
+  const snippets = await listSnippets();
 
   const ta = { minHeight: 90 } as const;
 
@@ -75,8 +78,8 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
 
           <div className="card stack" style={{ gap: 12 }}>
             <label className="stack" style={{ gap: 5 }}>
-              <span>Supplement Plan <span className="muted-xs">· pre-filled from the plan builder — edit the wording if you like</span></span>
-              <textarea name="supplementText" style={{ minHeight: 140 }} defaultValue={guide.supplementText ?? ""} />
+              <span>Supplement Plan <span className="muted-xs">· pre-filled from the plan builder (incl. product notes) — edit the wording if you like</span></span>
+              <SnippetTextarea name="supplementText" defaultValue={guide.supplementText ?? ""} snippets={snippets} rows={7} />
             </label>
             <label className="stack" style={{ gap: 5 }}>
               <span>Medications / Hormones / Contraception <span className="muted-xs">· pre-filled from the patient record</span></span>

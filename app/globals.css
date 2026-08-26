@@ -227,3 +227,16 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2); font-weight: 600; }
 .table td.num, .table th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .table tr:last-child td { border-bottom: none; }
+
+/* One-click reusable note chips */
+.snippet-chip {
+  height: auto;
+  padding: 4px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  background: var(--sage-tint);
+  border: 1px solid #D4DCC2;
+  color: var(--ok);
+}
+.snippet-chip:hover { background: #E0E7CE; border-color: var(--sage); color: var(--ok); }

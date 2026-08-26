@@ -13,6 +13,7 @@ export async function saveProductAction(formData: FormData) {
     name: String(formData.get("name")),
     packageSize: String(formData.get("packageSize") || ""),
     form: String(formData.get("form") || ""),
+    defaultNote: String(formData.get("defaultNote") || ""),
   };
   if (idRaw) { await P.updateProduct(Number(idRaw), input); revalidatePath(`/catalog/products/${idRaw}`); }
   else { const id = await P.createProduct(input); redirect(`/catalog/products/${id}`); }
@@ -26,6 +27,7 @@ export async function createFullProductAction(formData: FormData) {
     name: String(formData.get("name")),
     packageSize: String(formData.get("packageSize") || ""),
     form: String(formData.get("form") || ""),
+    defaultNote: String(formData.get("defaultNote") || ""),
   });
 
   const tags: { termId: number; tagType: TermType }[] = [];

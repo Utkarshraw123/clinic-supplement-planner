@@ -2,12 +2,14 @@
 import { useState } from "react";
 import { enrichProductAction } from "@/app/catalog/products/enrich-actions";
 import { createFullProductAction } from "@/app/catalog/products/actions";
+import SnippetTextarea from "@/components/SnippetTextarea";
 
 type Brand = { id: number; name: string };
 type Term = { id: number; label: string; type: string };
+type Snippet = { id: number; text: string };
 const TAG_TYPES = ["ingredient", "allergen", "concern", "diet", "caution"] as const;
 
-export default function ProductForm({ brands, terms }: { brands: Brand[]; terms: Term[] }) {
+export default function ProductForm({ brands, terms, snippets }: { brands: Brand[]; terms: Term[]; snippets: Snippet[] }) {
   const [name, setName] = useState("");
   const [packageSize, setPackageSize] = useState("");
   const [form, setForm] = useState("");
@@ -86,6 +88,12 @@ export default function ProductForm({ brands, terms }: { brands: Brand[]; terms:
           <input name="form" value={form} onChange={(e) => setForm(e.target.value)} placeholder="capsule / liquid / powder" />
         </label>
       </div>
+
+      {/* Standard note — auto-appears whenever this product is used on a plan */}
+      <label className="stack" style={{ gap: 5 }}>
+        <span>Standard note <span className="muted-xs">· auto-appears on the plan whenever this product is used (editable/removable per patient)</span></span>
+        <SnippetTextarea name="defaultNote" snippets={snippets} rows={2} placeholder="e.g. Only take at night" />
+      </label>
 
       {/* Tags */}
       <div>

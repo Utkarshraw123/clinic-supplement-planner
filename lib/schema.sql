@@ -20,7 +20,17 @@ CREATE TABLE IF NOT EXISTS products (
   name TEXT NOT NULL,
   package_size TEXT,
   form TEXT,
+  default_note TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Reusable comment snippets ("Only take at night", "Add to water", ...) the
+-- practitioner can insert into any supplement line or product default note.
+CREATE TABLE IF NOT EXISTS note_snippets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  text TEXT NOT NULL,
+  created_by INTEGER REFERENCES users(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

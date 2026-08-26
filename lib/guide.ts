@@ -18,13 +18,15 @@ const EMPTY: PlanGuide = {
 };
 
 // Numbered supplement list from the structured plan items — the editable starting point.
+// Each product's saved default note ("only take at night", …) auto-appends to its line.
 export function defaultSupplementText(plan: PlanDetail): string {
   if (plan.items.length === 0) return "";
   return plan.items
     .map((it, i) => {
       const dosing = it.dosingText?.trim();
+      const note = it.product.default_note?.trim();
       const alt = it.chosenAlternativeId ? " (an alternative format is available on request)" : "";
-      return `${i + 1}. ${it.product.name}${dosing ? ` — ${dosing}` : ""}${alt}`;
+      return `${i + 1}. ${it.product.name}${dosing ? ` — ${dosing}` : ""}${note ? ` · ${note}` : ""}${alt}`;
     })
     .join("\n");
 }
