@@ -50,15 +50,20 @@ const s = StyleSheet.create({
   sectionTitle: { fontSize: 12, color: GOLD, marginTop: 12, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.4 },
   line: { fontSize: 11, color: INK },
   spacer: { height: 6 },
-  buyRow: { flexDirection: "row", marginBottom: 3 },
-  buyName: { fontSize: 11, color: INK, width: 200 },
-  buyLink: { fontSize: 11, color: GOLD, textDecoration: "underline" },
-  buyNote: { fontSize: 9.5, color: "#6B6B66", marginTop: 3 },
+  buyInline: { fontSize: 10, color: GOLD, textDecoration: "underline" },
 });
 
-// Readable host for a link's visible text (e.g. "wildnutrition.com").
-function linkHost(url: string): string {
-  try { return new URL(url).host.replace(/^www\./, ""); } catch { return url; }
+// Attach each product's purchase link to the first supplement line that names it
+// (case-insensitive; longest name wins so "Magnesium Plus" beats "Magnesium").
+// Each link is used once, so a product's description line underneath won't also grab it.
+export function attachLinksToLines(text: string, links: GuideLink[]): { text: string; url?: string }[] {
+  const sorted = [...links].sort((a, b) => b.name.length - a.name.length);
+  const used = new Set<string>();
+  return text.split("\n").map((line) => {
+    const hit = sorted.find((l) => l.url && !used.has(l.url) && line.toLowerCase().includes(l.name.toLowerCase()));
+    if (hit) { used.add(hit.url); return { text: line, url: hit.url }; }
+    return { text: line };
+  });
 }
 
 // @react-pdf does not honour "\n" inside a single <Text>; split into lines.
@@ -77,6 +82,27 @@ function Section({ title, body }: { title: string; body: string }) {
     <View wrap={false}>
       <Text style={s.sectionTitle}>{title}</Text>
       <Multiline text={body} />
+    </View>
+  );
+}
+
+// The supplement plan, with a clickable "Buy online" link inline on each product line.
+function SupplementSection({ text, links }: { text: string; links: GuideLink[] }) {
+  if (!text.trim()) return null;
+  const lines = attachLinksToLines(text, links);
+  return (
+    <View wrap={false}>
+      <Text style={s.sectionTitle}>Supplement Plan</Text>
+      {lines.map((ln, i) =>
+        ln.text.trim() === "" ? (
+          <View key={i} style={s.spacer} />
+        ) : (
+          <Text key={i} style={s.line}>
+            {ln.text}
+            {ln.url ? <Link src={ln.url} style={s.buyInline}>{"   Buy online"}</Link> : null}
+          </Text>
+        )
+      )}
     </View>
   );
 }
@@ -101,21 +127,7 @@ function GuideDoc({ data }: { data: GuidePdfData }) {
 
         <Section title="Lifestyle & Other Recommendations" body={data.lifestyle} />
         <Section title="Dietary Recommendations" body={data.dietary} />
-        <Section title="Supplement Plan" body={data.supplementText} />
-
-        {data.links.length > 0 ? (
-          <View wrap={false}>
-            <Text style={s.sectionTitle}>Where to buy your supplements</Text>
-            {data.links.map((l, i) => (
-              <View key={i} style={s.buyRow}>
-                <Text style={s.buyName}>{l.name}</Text>
-                <Link src={l.url} style={s.buyLink}>{linkHost(l.url)}</Link>
-              </View>
-            ))}
-            <Text style={s.buyNote}>Tap a link to open the product page.</Text>
-          </View>
-        ) : null}
-
+        <SupplementSection text={data.supplementText} links={data.links} />
         <Section title="Medications / Hormones / Contraception" body={data.medsText} />
 
         <View fixed style={s.footerBox}>

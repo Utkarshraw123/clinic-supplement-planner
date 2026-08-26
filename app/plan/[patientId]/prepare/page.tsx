@@ -88,7 +88,7 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
               <span>Supplement plan <span className="muted-xs">· pre-filled from the plan builder (incl. product notes) — edit the wording if you like</span></span>
               <SnippetTextarea name="supplementText" defaultValue={guide.supplementText ?? ""} snippets={supplementSnips} rows={7} />
             </label>
-            <p className="muted-xs">The guide automatically adds a <strong>“Where to buy”</strong> section with a clickable link for each product (from its catalogue supplier link), so the client can order them.</p>
+            <p className="muted-xs">Each product line in the guide gets a clickable <strong>“Buy online →”</strong> link (from its catalogue supplier link), so the client can order it straight from the PDF.</p>
             <label className="stack" style={{ gap: 5 }}>
               <span>Medications / hormones / contraception <span className="muted-xs">· pre-filled from the patient record</span></span>
               <textarea name="medsText" style={ta} defaultValue={guide.medsText ?? ""} />

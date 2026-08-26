@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { renderPlanPdf, buildGuidePdfData, type GuidePdfData } from "@/lib/pdf";
+import { renderPlanPdf, buildGuidePdfData, attachLinksToLines, type GuidePdfData } from "@/lib/pdf";
 import type { PatientDetail } from "@/lib/patients";
 
 describe("pdf", () => {
@@ -35,5 +35,16 @@ describe("pdf", () => {
     expect(data.supplementText).toBe("1. Magnesium");
     expect(data.links).toHaveLength(1);
     expect(data.links[0].name).toBe("Magnesium");
+  });
+
+  it("attaches each product link once, to the line that names it (longest name wins)", () => {
+    const text = "1. Magnesium Plus — 2 caps\nSupports relaxation\n2. Magnesium — 1 cap at night";
+    const lines = attachLinksToLines(text, [
+      { name: "Magnesium", url: "https://x/mag" },
+      { name: "Magnesium Plus", url: "https://x/magplus" },
+    ]);
+    expect(lines[0].url).toBe("https://x/magplus"); // "Magnesium Plus" line → the Plus link
+    expect(lines[1].url).toBeUndefined();            // description line gets no link
+    expect(lines[2].url).toBe("https://x/mag");      // plain "Magnesium" line → the mag link
   });
 });
