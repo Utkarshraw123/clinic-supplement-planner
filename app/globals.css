@@ -228,13 +228,18 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .table td.num, .table th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .table tr:last-child td { border-bottom: none; }
 
+/* Section header inside a Prepare-guide card */
+.prep-head { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--sand-border, #E7DDCD); }
+.prep-head h2 { font-size: 15px; margin: 0; }
+.prep-head .muted-xs { margin-left: auto; }
+
 /* One-click reusable note chips */
 .snippet-chip {
   height: auto;
-  padding: 4px 11px;
-  font-size: 12px;
+  padding: 5px 11px;
+  font-size: 12.5px;
   font-weight: 500;
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--sage-tint);
   border: 1px solid #D4DCC2;
   color: var(--ok);

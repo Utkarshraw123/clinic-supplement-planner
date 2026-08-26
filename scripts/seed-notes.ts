@@ -23,6 +23,14 @@ const STARTERS: { text: string; category: SnippetCategory }[] = [
   { text: "Reduce refined sugar and ultra-processed foods", category: "dietary" },
   { text: "Limit caffeine to before midday", category: "dietary" },
   { text: "Include oily fish or an omega-3 source 2–3 times a week", category: "dietary" },
+  // Personal intro openers (personalise the name, then edit as needed)
+  { text: "Lovely to see you today. Below is your personalised plan following our consultation — take it at your own pace.", category: "intro" },
+  { text: "Thank you for your time today. Here is everything we discussed, laid out step by step.", category: "intro" },
+  { text: "It was a pleasure to see you. This guide summarises your recommendations and how to get started.", category: "intro" },
+  // Next-consultation lines
+  { text: "I'd suggest we reconnect in 6–8 weeks to review your progress and adjust the plan.", category: "next" },
+  { text: "Let's schedule a follow-up in 4 weeks to see how you're getting on.", category: "next" },
+  { text: "At your next consultation we'll review your symptoms and fine-tune the plan.", category: "next" },
 ];
 
 async function main() {

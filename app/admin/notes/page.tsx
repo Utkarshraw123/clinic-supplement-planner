@@ -21,6 +21,8 @@ export default async function NotesPage() {
             <option value="supplement">Supplement / product note</option>
             <option value="lifestyle">Lifestyle recommendation</option>
             <option value="dietary">Dietary recommendation</option>
+            <option value="intro">Personal intro</option>
+            <option value="next">Next consultation</option>
             <option value="general">General</option>
           </select>
           <button type="submit" className="btn--primary">Add</button>

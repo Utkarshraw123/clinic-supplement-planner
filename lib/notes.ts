@@ -1,6 +1,6 @@
 import { query, execute } from "@/lib/db";
 
-export type SnippetCategory = "supplement" | "lifestyle" | "dietary" | "general";
+export type SnippetCategory = "supplement" | "lifestyle" | "dietary" | "intro" | "next" | "general";
 export type NoteSnippet = { id: number; text: string; category: SnippetCategory };
 
 // List reusable snippets, optionally filtered to one category. Rows with no category

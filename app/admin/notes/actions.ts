@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/current-user";
 import { createSnippet, deleteSnippet, type SnippetCategory } from "@/lib/notes";
 
-const CATEGORIES: SnippetCategory[] = ["supplement", "lifestyle", "dietary", "general"];
+const CATEGORIES: SnippetCategory[] = ["supplement", "lifestyle", "dietary", "intro", "next", "general"];
 
 export async function addSnippetAction(formData: FormData) {
   const u = await requireAdmin();

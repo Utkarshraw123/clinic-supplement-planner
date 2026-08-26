@@ -21,6 +21,8 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
   const supplementSnips = await listSnippets("supplement");
   const lifestyleSnips = await listSnippets("lifestyle");
   const dietarySnips = await listSnippets("dietary");
+  const introSnips = await listSnippets("intro");
+  const nextSnips = await listSnippets("next");
 
   const ta = { minHeight: 90 } as const;
 
@@ -52,44 +54,48 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
           <input type="hidden" name="planId" value={planId} />
           <input type="hidden" name="patientId" value={patientId} />
 
-          <div className="card stack" style={{ gap: 12 }}>
+          <div className="card stack" style={{ gap: 14 }}>
+            <div className="prep-head"><span className="attr-dot attr-dot--ok" /><h2>Consultation</h2></div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <label className="stack" style={{ gap: 5 }}><span>Client name (auto)</span>
+              <label className="stack" style={{ gap: 5 }}><span>Client name <span className="muted-xs">(auto)</span></span>
                 <input value={patient.name} disabled />
               </label>
               <label className="stack" style={{ gap: 5 }}><span>Date of consultation</span>
                 <input name="consultationDate" type="date" defaultValue={guide.consultationDate ?? ""} />
               </label>
             </div>
-            <label className="stack" style={{ gap: 5 }}><span>Personal intro</span>
-              <textarea name="intro" style={ta} defaultValue={guide.intro ?? ""} placeholder="e.g. Here we go, Jane — lovely to see you today…" />
+            <label className="stack" style={{ gap: 5 }}><span>Personal intro <span className="muted-xs">· click a chip to insert, then personalise</span></span>
+              <SnippetTextarea name="intro" defaultValue={guide.intro ?? ""} snippets={introSnips} rows={3} placeholder="e.g. Here we go, Jane — lovely to see you today…" />
             </label>
-            <label className="stack" style={{ gap: 5 }}><span>Next consultation <span className="muted-xs">(optional)</span></span>
-              <textarea name="nextConsultation" style={ta} defaultValue={guide.nextConsultation ?? ""} placeholder="e.g. Next consultation, we will discuss a gut cleanse." />
+            <label className="stack" style={{ gap: 5 }}><span>Next consultation <span className="muted-xs">(optional · click a chip to insert)</span></span>
+              <SnippetTextarea name="nextConsultation" defaultValue={guide.nextConsultation ?? ""} snippets={nextSnips} rows={3} placeholder="e.g. Next consultation, we will discuss a gut cleanse." />
             </label>
           </div>
 
-          <div className="card stack" style={{ gap: 12 }}>
-            <label className="stack" style={{ gap: 5 }}><span>Lifestyle &amp; Other Recommendations <span className="muted-xs">(optional · click a chip to insert)</span></span>
+          <div className="card stack" style={{ gap: 14 }}>
+            <div className="prep-head"><span className="attr-dot attr-dot--accent" /><h2>Recommendations</h2><span className="muted-xs">optional · click a chip to insert</span></div>
+            <label className="stack" style={{ gap: 5 }}><span>Lifestyle &amp; other recommendations</span>
               <SnippetTextarea name="lifestyle" defaultValue={guide.lifestyle ?? ""} snippets={lifestyleSnips} rows={4} />
             </label>
-            <label className="stack" style={{ gap: 5 }}><span>Dietary Recommendations <span className="muted-xs">(optional · click a chip to insert)</span></span>
+            <label className="stack" style={{ gap: 5 }}><span>Dietary recommendations</span>
               <SnippetTextarea name="dietary" defaultValue={guide.dietary ?? ""} snippets={dietarySnips} rows={4} />
             </label>
           </div>
 
-          <div className="card stack" style={{ gap: 12 }}>
+          <div className="card stack" style={{ gap: 14 }}>
+            <div className="prep-head"><span className="attr-dot attr-dot--danger" /><h2>Supplement plan &amp; medications</h2></div>
             <label className="stack" style={{ gap: 5 }}>
-              <span>Supplement Plan <span className="muted-xs">· pre-filled from the plan builder (incl. product notes) — edit the wording if you like</span></span>
+              <span>Supplement plan <span className="muted-xs">· pre-filled from the plan builder (incl. product notes) — edit the wording if you like</span></span>
               <SnippetTextarea name="supplementText" defaultValue={guide.supplementText ?? ""} snippets={supplementSnips} rows={7} />
             </label>
             <label className="stack" style={{ gap: 5 }}>
-              <span>Medications / Hormones / Contraception <span className="muted-xs">· pre-filled from the patient record</span></span>
+              <span>Medications / hormones / contraception <span className="muted-xs">· pre-filled from the patient record</span></span>
               <textarea name="medsText" style={ta} defaultValue={guide.medsText ?? ""} />
             </label>
           </div>
 
-          <div className="card card--plain stack" style={{ gap: 10 }}>
+          <div className="card stack" style={{ gap: 12 }}>
+            <div className="prep-head"><span className="attr-dot attr-dot--warn" /><h2>Send the guide</h2></div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <label className="muted" style={{ whiteSpace: "nowrap" }}>Client email <span className="muted-xs">(optional)</span></label>
               <input name="email" type="email" placeholder="client@email.com" style={{ flex: 1, minWidth: 200 }} />
