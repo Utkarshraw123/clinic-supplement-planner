@@ -4,7 +4,16 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import * as P from "@/lib/products";
 import { findOrCreateBrand } from "@/lib/brands";
-import type { TermType } from "@/lib/taxonomies";
+import { addTerm, type TermType } from "@/lib/taxonomies";
+
+// Add a taxonomy term inline from the product tag editor (idempotent).
+export async function addTagTermAction(termType: TermType, label: string): Promise<{ id: number; label: string }> {
+  await requireUser();
+  const clean = label.trim();
+  if (!clean) throw new Error("A label is required");
+  const id = await addTerm(termType, clean);
+  return { id, label: clean };
+}
 
 // Prefer a typed brand name (create-if-new); fall back to a selected brandId.
 async function resolveBrandId(fd: FormData): Promise<number> {

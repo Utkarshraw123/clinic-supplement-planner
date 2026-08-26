@@ -5,11 +5,19 @@ import { getProduct, searchProducts } from "@/lib/products";
 import { listBrands } from "@/lib/brands";
 import { listTerms, type TermType } from "@/lib/taxonomies";
 import { listSnippets } from "@/lib/notes";
-import { saveProductAction, saveTagsAction, addSupplierAction, removeSupplierAction, addAlternativeAction } from "@/app/catalog/products/actions";
+import { saveProductAction, addSupplierAction, removeSupplierAction, addAlternativeAction } from "@/app/catalog/products/actions";
 import EnrichAssist from "@/components/EnrichAssist";
 import SnippetTextarea from "@/components/SnippetTextarea";
+import ProductTagsForm, { type TagSection } from "@/components/ProductTagsForm";
+import Toaster from "@/components/Toaster";
 
-const TAG_TYPES: TermType[] = ["ingredient", "allergen", "concern", "diet", "caution"];
+const TAG_META: { type: TermType; label: string; hint: string }[] = [
+  { type: "ingredient", label: "Ingredients", hint: "Active nutrients · safety flags" },
+  { type: "allergen", label: "Allergens", hint: "Hard-blocks matching allergies" },
+  { type: "concern", label: "Health concerns", hint: "Drives suggestions" },
+  { type: "diet", label: "Dietary suitability", hint: "Filters unsuitable" },
+  { type: "caution", label: "Cautions", hint: "Raises warnings" },
+];
 
 export default async function ProductEditor({ params }: { params: { id: string } }) {
   await requireUser();
@@ -21,8 +29,15 @@ export default async function ProductEditor({ params }: { params: { id: string }
   const snippets = await listSnippets("supplement");
   const others = (await searchProducts("")).filter((p) => p.id !== id);
 
+  const tagSections: TagSection[] = TAG_META.map(({ type, label, hint }) => ({
+    type, label, hint,
+    options: allTerms.filter((t) => t.type === type).map((t) => ({ id: t.id, label: t.label })),
+    selected: product.tags.filter((t) => t.tagType === type).map((t) => t.termId),
+  }));
+
   return (
     <div className="stack" style={{ gap: 20 }}>
+      <Toaster />
       <div className="row-between">
         <div>
           <h1>{product.name}</h1>
@@ -58,25 +73,9 @@ export default async function ProductEditor({ params }: { params: { id: string }
 
       <div className="card">
         <h2 style={{ marginBottom: 4 }}>Tags</h2>
-        <p className="muted" style={{ marginBottom: 12 }}>The matching backbone — allergens and ingredients drive safety flags. Missing a term? Add it in admin → taxonomies.</p>
+        <p className="muted" style={{ marginBottom: 12 }}>The matching backbone — allergens and ingredients drive safety flags. Click to toggle; add a missing term inline.</p>
         <EnrichAssist />
-        <form action={saveTagsAction} className="stack" style={{ gap: 14 }}>
-          <input type="hidden" name="productId" value={product.id} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            {TAG_TYPES.map((type) => {
-              const selected = product.tags.filter((t) => t.tagType === type).map((t) => String(t.termId));
-              return (
-                <label key={type} className="stack" style={{ gap: 5 }}>
-                  <span style={{ textTransform: "capitalize" }}>{type}</span>
-                  <select name={`tag:${type}`} multiple defaultValue={selected}>
-                    {allTerms.filter((t) => t.type === type).map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-                  </select>
-                </label>
-              );
-            })}
-          </div>
-          <button type="submit" className="btn--primary" style={{ justifySelf: "start" }}>Save tags</button>
-        </form>
+        <ProductTagsForm productId={product.id} sections={tagSections} />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>

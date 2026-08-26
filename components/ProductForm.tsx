@@ -7,7 +7,22 @@ import SnippetTextarea from "@/components/SnippetTextarea";
 type Brand = { id: number; name: string };
 type Term = { id: number; label: string; type: string };
 type Snippet = { id: number; text: string };
-const TAG_TYPES = ["ingredient", "allergen", "concern", "diet", "caution"] as const;
+const TAG_META = [
+  { type: "ingredient", label: "Ingredients", hint: "Active nutrients · safety flags", dot: "info" },
+  { type: "allergen", label: "Allergens", hint: "Hard-blocks matching allergies", dot: "danger" },
+  { type: "concern", label: "Health concerns", hint: "Drives suggestions", dot: "ok" },
+  { type: "diet", label: "Dietary suitability", hint: "Filters unsuitable", dot: "accent" },
+  { type: "caution", label: "Cautions", hint: "Raises warnings", dot: "warn" },
+] as const;
+const TAG_TYPES = TAG_META.map((m) => m.type);
+
+function Check() {
+  return (
+    <svg className="chip-toggle__check" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function ProductForm({ brands, terms, snippets }: { brands: Brand[]; terms: Term[]; snippets: Snippet[] }) {
   const [name, setName] = useState("");
@@ -106,22 +121,36 @@ export default function ProductForm({ brands, terms, snippets }: { brands: Brand
         <label style={{ display: "block", marginBottom: 8 }}>
           Tags — <span style={{ color: "var(--danger)" }}>allergens</span> and ingredients drive the safety flags when prescribing.
         </label>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          {TAG_TYPES.map((type) => (
-            <label key={type} className="stack" style={{ gap: 5 }}>
-              <span style={{ textTransform: "capitalize" }}>{type}</span>
-              <select
-                name={`tag:${type}`}
-                multiple
-                value={sel(type)}
-                onChange={(e) => setSel(type, Array.from(e.target.selectedOptions).map((o) => o.value))}
-              >
-                {termsByType(type).map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-              </select>
-            </label>
+        <div className="attr-grid">
+          {TAG_META.map(({ type, label, hint, dot }) => (
+            <div key={type} className="attr-section">
+              <div className="attr-section__head">
+                <span className="attr-section__title"><span className={`attr-dot attr-dot--${dot}`} />{label}</span>
+                <span className="muted-xs">{hint}</span>
+              </div>
+              <div className="chip-group">
+                {termsByType(type).length === 0 && <span className="muted-xs">No terms yet.</span>}
+                {termsByType(type).map((t) => {
+                  const on = sel(type).includes(String(t.id));
+                  return (
+                    <label key={t.id} className={`chip-toggle${on ? " is-on" : ""}`}>
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() => setSel(type, on ? sel(type).filter((x) => x !== String(t.id)) : [...sel(type), String(t.id)])}
+                      />
+                      {on && <Check />}
+                      {t.label}
+                    </label>
+                  );
+                })}
+              </div>
+              {/* Hidden inputs carry the selection into the create submit */}
+              {sel(type).map((id) => <input key={id} type="hidden" name={`tag:${type}`} value={id} />)}
+            </div>
           ))}
         </div>
-        <p className="muted-xs" style={{ marginTop: 6 }}>Hold ⌘/Ctrl to select multiple. Missing a term? Add it in Admin → Taxonomies.</p>
+        <p className="muted-xs" style={{ marginTop: 6 }}>Click to toggle. Missing a term? Add it on the product after creating, or in Admin → Taxonomies.</p>
       </div>
 
       <button type="submit" className="btn--primary" style={{ justifySelf: "start" }}>Create product</button>

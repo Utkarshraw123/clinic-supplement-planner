@@ -280,6 +280,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .attr-dot--ok { background: var(--sage, #8DA06A); }
 .attr-dot--accent { background: var(--terracotta, #C06A47); }
 .attr-dot--warn { background: var(--warn, #98590B); }
+.attr-dot--info { background: var(--brand, #1B4332); }
 
 .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip-toggle {
