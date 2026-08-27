@@ -29,8 +29,17 @@ export function defaultSupplementText(plan: PlanDetail): string {
       // product's saved default note. Either way it's editable here before sending.
       const note = (it.note?.trim()) || it.product.default_note?.trim();
       const desc = it.product.description?.trim();
+      // Course length: "Finish off, no repeat" reads verbatim; everything else as "for 3 months".
+      const dur = it.duration?.trim();
+      const durText = dur ? (/^finish off/i.test(dur) ? dur.toLowerCase() : `for ${dur}`) : "";
+      const code = it.orderCode?.trim();
       const alt = it.chosenAlternativeId ? " (an alternative format is available on request)" : "";
-      const head = `${i + 1}. ${it.product.name}${dosing ? ` — ${dosing}` : ""}${note ? ` · ${note}` : ""}${alt}`;
+      const head = `${i + 1}. ${it.product.name}`
+        + `${dosing ? ` — ${dosing}` : ""}`
+        + `${note ? ` · ${note}` : ""}`
+        + `${durText ? ` · ${durText}` : ""}`
+        + `${code ? ` · order code: ${code}` : ""}`
+        + `${alt}`;
       return desc ? `${head}\n${desc}` : head;
     })
     .join("\n");

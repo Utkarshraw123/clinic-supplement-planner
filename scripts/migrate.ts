@@ -20,6 +20,8 @@ export async function runMigrations(): Promise<void> {
   await ensureColumn("products", "default_note", "TEXT");
   await ensureColumn("products", "description", "TEXT");
   await ensureColumn("plan_items", "note", "TEXT");          // per-product practitioner comment
+  await ensureColumn("plan_items", "duration", "TEXT");      // per-item course length (e.g. "3 months")
+  await ensureColumn("plan_items", "order_code", "TEXT");    // per-item discount / coupon code
   await ensureColumn("note_snippets", "category", "TEXT");   // supplement | lifestyle | dietary | general
 }
 

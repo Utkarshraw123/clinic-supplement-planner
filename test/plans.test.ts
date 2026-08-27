@@ -53,6 +53,24 @@ describe("plans", () => {
     expect(first.alternatives.map((a) => a.name)).toContain("Batch Omega 3");
   });
 
+  it("sets and reads back per-item duration and order code (empty → null)", async () => {
+    const planId = await Plans.getOrCreateDraftPlan(patientId);
+    const itemId = await Plans.addPlanItem(planId, productId);
+    await Plans.setItemDuration(itemId, "3 months");
+    await Plans.setItemOrderCode(itemId, "WN10");
+    let plan = await Plans.getPlan(planId);
+    let item = plan!.items.find((i) => i.id === itemId)!;
+    expect(item.duration).toBe("3 months");
+    expect(item.orderCode).toBe("WN10");
+
+    await Plans.setItemDuration(itemId, "   ");
+    await Plans.setItemOrderCode(itemId, "");
+    plan = await Plans.getPlan(planId);
+    item = plan!.items.find((i) => i.id === itemId)!;
+    expect(item.duration).toBeNull();
+    expect(item.orderCode).toBeNull();
+  });
+
   it("finalises a plan", async () => {
     const planId = await Plans.getOrCreateDraftPlan(patientId);
     await Plans.finalisePlan(planId);

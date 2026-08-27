@@ -6,10 +6,10 @@ import { listActiveProductsWithTags } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
 import { query } from "@/lib/db";
-import { removeItemAction, chooseAlternativeAction, saveItemNoteAction } from "@/app/plan/actions";
+import { removeItemAction, chooseAlternativeAction } from "@/app/plan/actions";
 import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
 import { listProtocols } from "@/lib/protocols";
-import PlanItemDosing from "@/components/PlanItemDosing";
+import PlanItemFields from "@/components/PlanItemFields";
 import AddToPlanButton from "@/components/AddToPlanButton";
 import Toaster from "@/components/Toaster";
 
@@ -150,26 +150,31 @@ export default async function PlanBuilder({ params }: { params: { patientId: str
                   ))}
                 </div>
               )}
-              {item.product.alternatives.length > 0 && (
-                <form action={chooseAlternativeAction} style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center" }}>
-                  <input type="hidden" name="itemId" value={item.id} />
-                  <input type="hidden" name="patientId" value={patientId} />
-                  <select name="altId" defaultValue={item.chosenAlternativeId ?? ""} style={{ maxWidth: 320 }}>
-                    <option value="">Offer an alternative format…</option>
-                    {item.product.alternatives.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-                  </select>
-                  <button type="submit" className="btn--sm">Set</button>
-                </form>
-              )}
-              <div style={{ marginTop: 10 }}>
-                <PlanItemDosing itemId={item.id} patientId={patientId} presets={presets} currentText={item.dosingText} />
+              <div className="rx-details">
+                {item.product.alternatives.length > 0 && (
+                  <form action={chooseAlternativeAction} className="rx-alt">
+                    <label className="field" style={{ flex: 1, minWidth: 220 }}>
+                      <span className="field__label">Alternative format</span>
+                      <input type="hidden" name="itemId" value={item.id} />
+                      <input type="hidden" name="patientId" value={patientId} />
+                      <select name="altId" defaultValue={item.chosenAlternativeId ?? ""}>
+                        <option value="">No alternative offered</option>
+                        {item.product.alternatives.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+                      </select>
+                    </label>
+                    <button type="submit" className="btn--sm">Set</button>
+                  </form>
+                )}
+                <PlanItemFields
+                  itemId={item.id}
+                  patientId={patientId}
+                  presets={presets}
+                  currentText={item.dosingText}
+                  currentDuration={item.duration}
+                  currentOrderCode={item.orderCode}
+                  currentNote={item.note}
+                />
               </div>
-              <form action={saveItemNoteAction} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
-                <input type="hidden" name="itemId" value={item.id} />
-                <input type="hidden" name="patientId" value={patientId} />
-                <input name="note" placeholder="Comment for this product (appears on the guide)" defaultValue={item.note ?? ""} style={{ flex: 1, minWidth: 220 }} />
-                <button type="submit" className="btn--sm">Save note</button>
-              </form>
             </div>
           ))}
         </div>

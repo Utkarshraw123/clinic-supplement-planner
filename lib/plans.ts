@@ -1,7 +1,9 @@
 import { query, execute } from "@/lib/db";
 import { getProductsByIds, type ProductDetail } from "@/lib/products";
 
-export type PlanItemDetail = { id: number; product: ProductDetail; dosingText: string; note: string|null; chosenAlternativeId: number|null; position: number };
+export { DURATION_OPTIONS } from "@/lib/durations";
+
+export type PlanItemDetail = { id: number; product: ProductDetail; dosingText: string; note: string|null; duration: string|null; orderCode: string|null; chosenAlternativeId: number|null; position: number };
 export type PlanDetail = { id: number; patientId: number; status: "draft"|"finalised"; items: PlanItemDetail[] };
 
 export async function getOrCreateDraftPlan(patientId: number, authorId?: number): Promise<number> {
@@ -34,6 +36,14 @@ export async function setItemNote(itemId: number, note: string|null): Promise<vo
   await execute("UPDATE plan_items SET note = ? WHERE id = ?", [note && note.trim() ? note.trim() : null, itemId]);
 }
 
+export async function setItemDuration(itemId: number, duration: string|null): Promise<void> {
+  await execute("UPDATE plan_items SET duration = ? WHERE id = ?", [duration && duration.trim() ? duration.trim() : null, itemId]);
+}
+
+export async function setItemOrderCode(itemId: number, code: string|null): Promise<void> {
+  await execute("UPDATE plan_items SET order_code = ? WHERE id = ?", [code && code.trim() ? code.trim() : null, itemId]);
+}
+
 export async function dosingTextFor(presetId: number|null, customText: string|null): Promise<string> {
   if (customText && customText.trim()) return customText.trim();
   if (presetId) {
@@ -48,8 +58,8 @@ export async function getPlan(planId: number): Promise<PlanDetail | null> {
   const [base, itemRows, presets] = await Promise.all([
     query<{ id: number; patient_id: number; status: "draft"|"finalised" }>(
       "SELECT id, patient_id, status FROM plans WHERE id = ?", [planId]),
-    query<{ id: number; product_id: number; dosing_preset_id: number|null; dosing_custom_text: string|null; note: string|null; chosen_alternative_id: number|null; position: number }>(
-      "SELECT id, product_id, dosing_preset_id, dosing_custom_text, note, chosen_alternative_id, position FROM plan_items WHERE plan_id = ? ORDER BY position", [planId]),
+    query<{ id: number; product_id: number; dosing_preset_id: number|null; dosing_custom_text: string|null; note: string|null; duration: string|null; order_code: string|null; chosen_alternative_id: number|null; position: number }>(
+      "SELECT id, product_id, dosing_preset_id, dosing_custom_text, note, duration, order_code, chosen_alternative_id, position FROM plan_items WHERE plan_id = ? ORDER BY position", [planId]),
     query<{ id: number; text: string }>("SELECT id, text FROM dosing_presets"),
   ]);
   if (!base[0]) return null;
@@ -65,7 +75,7 @@ export async function getPlan(planId: number): Promise<PlanDetail | null> {
     const dosingText = r.dosing_custom_text?.trim()
       ? r.dosing_custom_text.trim()
       : (r.dosing_preset_id ? (presetText.get(r.dosing_preset_id) ?? "") : "");
-    items.push({ id: r.id, product, dosingText, note: r.note, chosenAlternativeId: r.chosen_alternative_id, position: r.position });
+    items.push({ id: r.id, product, dosingText, note: r.note, duration: r.duration, orderCode: r.order_code, chosenAlternativeId: r.chosen_alternative_id, position: r.position });
   }
   return { id: base[0].id, patientId: base[0].patient_id, status: base[0].status, items };
 }
