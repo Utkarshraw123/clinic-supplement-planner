@@ -5,7 +5,7 @@ import { createProduct } from "@/lib/products";
 import { createPatient } from "@/lib/patients";
 import { getOrCreateDraftPlan, addPlanItem, setItemDosing, getPlan } from "@/lib/plans";
 import { execute } from "@/lib/db";
-import { savePlanAsProtocol, listProtocols, getProtocol, applyProtocolToPlan } from "@/lib/protocols";
+import { savePlanAsProtocol, listProtocols, getProtocol, applyProtocolToPlan, createProtocol, addProtocolItem, removeProtocolItem, setProtocolItemDosing, updateProtocolMeta } from "@/lib/protocols";
 
 describe("protocols", () => {
   let productA = 0, productB = 0, presetId = 0, patientId = 0;
@@ -45,5 +45,33 @@ describe("protocols", () => {
     const plan = await getPlan(targetPlan);
     expect(plan!.items).toHaveLength(2);
     expect(plan!.items.map((it) => it.dosingText).sort()).toEqual(["Take 1 in the morning.", "Take 2 with dinner."].sort());
+  });
+
+  it("builds a protocol from scratch (no patient), edits it, and applies it", async () => {
+    const protocolId = await createProtocol("Menopause Starter", "First 8 weeks");
+    const it1 = await addProtocolItem(protocolId, productA);
+    const it2 = await addProtocolItem(protocolId, productB);
+    await setProtocolItemDosing(it1, presetId, null);
+    await setProtocolItemDosing(it2, null, "Take 2 with dinner.");
+
+    let detail = await getProtocol(protocolId);
+    expect(detail!.name).toBe("Menopause Starter");
+    expect(detail!.items).toHaveLength(2);
+    expect(detail!.items[0].dosingText).toBe("Take 1 in the morning.");
+    expect(detail!.items[0].brandName).toBeTruthy();
+
+    // Remove one item + rename.
+    await removeProtocolItem(it2);
+    await updateProtocolMeta(protocolId, "Menopause Starter v2", "Updated");
+    detail = await getProtocol(protocolId);
+    expect(detail!.name).toBe("Menopause Starter v2");
+    expect(detail!.items).toHaveLength(1);
+
+    // Apply the from-scratch protocol to a plan.
+    const targetPlan = await getOrCreateDraftPlan(await createPatient({ name: "Scratch Target", dob: "1992-03-03" }));
+    const added = await applyProtocolToPlan(protocolId, targetPlan);
+    expect(added).toBe(1);
+    const plan = await getPlan(targetPlan);
+    expect(plan!.items[0].dosingText).toBe("Take 1 in the morning.");
   });
 });
