@@ -21,6 +21,16 @@ export async function listUsers(): Promise<Omit<UserRow, "password_hash">[]> {
   return query("SELECT id, email, role, name FROM users ORDER BY name");
 }
 
+export async function getUserById(id: number): Promise<UserRow | null> {
+  const rows = await query<UserRow>("SELECT * FROM users WHERE id = ?", [id]);
+  return rows[0] ?? null;
+}
+
+export async function updateUserPassword(id: number, newPassword: string): Promise<void> {
+  const hash = await hashPassword(newPassword);
+  await execute("UPDATE users SET password_hash = ? WHERE id = ?", [hash, id]);
+}
+
 export async function deleteUser(id: number): Promise<void> {
   await execute("DELETE FROM users WHERE id = ?", [id]);
 }

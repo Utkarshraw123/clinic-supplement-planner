@@ -51,7 +51,9 @@ export default async function AppShell({ children }: { children: React.ReactNode
         <SidebarNav items={items} />
 
         <div style={{ marginTop: "auto", paddingTop: 18, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", padding: "0 12px 8px" }}>Signed in as {user.name}</div>
+          <Link href="/account" style={{ display: "block", fontSize: 12, color: "rgba(255,255,255,0.55)", padding: "0 12px 8px", textDecoration: "none" }}>
+            Signed in as <span style={{ color: "rgba(255,255,255,0.82)" }}>{user.name}</span>
+          </Link>
           <div style={{ padding: "0 8px" }}><SignOutButton /></div>
         </div>
       </aside>
