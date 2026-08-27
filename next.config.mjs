@@ -11,6 +11,9 @@ const nextConfig = {
       "/plan/[patientId]": ["./node_modules/pdfkit/js/**/*"],
       "/plan/[patientId]/prepare": ["./node_modules/pdfkit/js/**/*"],
       "/patients/[id]/history": ["./node_modules/pdfkit/js/**/*"],
+      // The snapshot PDF route imports lib/delivery (→ @react-pdf/pdfkit); without the
+      // font assets traced here it logs an Unhandled Rejection on the pdfkit font load.
+      "/api/snapshots/[id]/pdf": ["./node_modules/pdfkit/js/**/*"],
     },
   },
 };
