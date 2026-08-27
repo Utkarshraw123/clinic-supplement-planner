@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth/current-user";
 import { listPatients } from "@/lib/patients";
 import PageHeader from "@/components/PageHeader";
+import PatientSearch from "@/components/PatientSearch";
 
 export default async function PatientsPage() {
   await requireUser();
@@ -19,15 +20,7 @@ export default async function PatientsPage() {
           </>
         }
       />
-      <div className="card">
-        {patients.length === 0 && <p className="muted">No patients yet. Add your first to start a plan.</p>}
-        {patients.map((p) => (
-          <div key={p.id} className="list-row">
-            <Link href={`/patients/${p.id}`} style={{ fontWeight: 500, color: "var(--brand-ink)" }}>{p.name}</Link>
-            <span className="muted-xs">DOB {p.dob}</span>
-          </div>
-        ))}
-      </div>
+      <PatientSearch patients={patients.map((p) => ({ id: p.id, name: p.name, dob: p.dob }))} />
     </div>
   );
 }

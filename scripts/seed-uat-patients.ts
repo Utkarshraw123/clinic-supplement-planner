@@ -1,5 +1,5 @@
 /**
- * Seed 10 realistic UAT patients with varied clinical attributes, so the tool
+ * Seed 25 realistic UAT patients with varied clinical attributes, so the tool
  * feels populated during user-acceptance testing. Attributes are chosen to
  * exercise the flagging engine against the Wild Nutrition catalogue:
  *   - allergy       -> allergen term  (HARD block on a matching product)
@@ -37,6 +37,21 @@ const PATIENTS: UatPatient[] = [
   { name: "Emily Clarke",      dob: "1992-03-25", attrs: [A("mushroom"), A("fish"), G("Sleep"), G("Stress & Mood")] },
   { name: "Rebecca Nolan",     dob: "1986-10-05", attrs: [G("Perimenopause"), G("Hormonal Health"), D("Vegetarian"), M("Anaemia")] },
   { name: "Thomas Reid",       dob: "1980-01-28", attrs: [A("soya"), G("Gut Health"), G("Immunity")] },
+  { name: "Hannah Foster",     dob: "1993-08-14", attrs: [A("mushroom"), G("Stress & Mood"), G("Sleep"), D("Vegetarian")] },
+  { name: "Nathan Brooks",     dob: "1972-05-09", attrs: [G("Heart Health"), G("Joint & Bone"), M("Hypertension")] },
+  { name: "Grace Sullivan",    dob: "1998-01-16", attrs: [A("gluten"), G("Skin Health"), G("Beauty"), D("Gluten Free"), M("IBS")] },
+  { name: "Liam Patterson",    dob: "1984-11-27", attrs: [A("fish"), G("Energy"), G("Cognitive"), D("Dairy Free")] },
+  { name: "Isabella Moretti",  dob: "1991-06-03", attrs: [G("Fertility"), G("Hormonal Health"), M("PCOS")] },
+  { name: "Ethan Wallace",     dob: "1979-03-21", attrs: [A("peanut"), G("Fitness & Recovery"), G("General Wellbeing")] },
+  { name: "Chloe Richardson",  dob: "1996-09-11", attrs: [A("egg"), G("Gut Health"), G("Immunity"), D("Vegan")] },
+  { name: "Ryan Mitchell",     dob: "1970-12-02", attrs: [G("Joint & Bone"), G("Energy"), M("Osteoporosis")] },
+  { name: "Amelia Hughes",     dob: "1988-04-18", attrs: [A("mushroom"), G("Perimenopause"), G("Sleep"), M("Migraine")] },
+  { name: "Jacob Green",       dob: "1983-07-24", attrs: [A("shellfish"), G("Heart Health"), D("Pescatarian")] },
+  { name: "Olivia Dawson",     dob: "1994-02-06", attrs: [G("Pregnancy" ), G("Hormonal Health"), D("Halal"), M("Pregnancy")] },
+  { name: "Samuel Byrne",      dob: "1977-10-30", attrs: [A("milk"), G("Stress & Mood"), G("Cognitive"), M("Depression")] },
+  { name: "Freya Lawson",      dob: "1990-12-13", attrs: [A("sesame"), G("Gut Health"), G("Beauty"), D("Gluten Free")] },
+  { name: "Benjamin Cole",     dob: "1986-05-15", attrs: [G("Energy"), G("Immunity"), M("Diabetes")] },
+  { name: "Matilda Rowe",      dob: "1997-08-29", attrs: [A("tree nuts"), A("gluten"), G("Menopause"), G("Hormonal Health"), D("Vegetarian")] },
 ];
 
 async function main() {
