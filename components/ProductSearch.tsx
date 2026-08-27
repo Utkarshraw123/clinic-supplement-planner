@@ -8,11 +8,16 @@ export default function ProductSearch({ initial }: { initial: Hit[] }) {
   const [term, setTerm] = useState("");
   const [hits, setHits] = useState<Hit[]>(initial);
   useEffect(() => {
+    // `active` guards against out-of-order responses: fast typing fires several
+    // fetches, and without this an earlier query resolving last would overwrite
+    // the newest results with stale ones.
+    let active = true;
     const t = setTimeout(async () => {
       const res = await fetch(`/api/products/search?q=${encodeURIComponent(term)}`);
-      setHits(await res.json());
+      const data = await res.json();
+      if (active) setHits(data);
     }, 200);
-    return () => clearTimeout(t);
+    return () => { active = false; clearTimeout(t); };
   }, [term]);
   return (
     <div>
