@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { runMigrations } from "@/scripts/migrate";
-import { createUser, findUserByEmail, getUserById, updateUserPassword } from "@/lib/users";
+import { createUser, findUserByEmail, getUserById, updateUserPassword, updateUser } from "@/lib/users";
 import { verifyPassword } from "@/lib/auth/password";
 
 describe("users", () => {
@@ -23,6 +23,17 @@ describe("users", () => {
     expect(u!.email).toBe(email);
     expect(u!.role).toBe("admin");
     expect(await getUserById(999999)).toBeNull();
+  });
+
+  it("updates a user's name, email and role", async () => {
+    const email = `up${Date.now()}@clinic.test`;
+    const id = await createUser({ email, password: "pw123456", role: "team", name: "Placeholder" });
+    const newEmail = `named${Date.now()}@clinic.test`;
+    await updateUser(id, { name: "Hannah Reeves", email: newEmail, role: "admin" });
+    const u = await getUserById(id);
+    expect(u!.name).toBe("Hannah Reeves");
+    expect(u!.email).toBe(newEmail);
+    expect(u!.role).toBe("admin");
   });
 
   it("updates a password: the old one stops working and the new one verifies", async () => {

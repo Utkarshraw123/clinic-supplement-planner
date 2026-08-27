@@ -21,6 +21,13 @@ export async function listUsers(): Promise<Omit<UserRow, "password_hash">[]> {
   return query("SELECT id, email, role, name FROM users ORDER BY name");
 }
 
+export async function updateUser(id: number, input: { name: string; email: string; role: "admin"|"team" }): Promise<void> {
+  await execute(
+    "UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?",
+    [input.name.trim(), input.email.toLowerCase().trim(), input.role, id]
+  );
+}
+
 export async function getUserById(id: number): Promise<UserRow | null> {
   const rows = await query<UserRow>("SELECT * FROM users WHERE id = ?", [id]);
   return rows[0] ?? null;

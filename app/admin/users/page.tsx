@@ -1,24 +1,50 @@
 import { requireAdmin } from "@/lib/auth/current-user";
 import { listUsers } from "@/lib/users";
-import { addUserAction, removeUserAction } from "./actions";
+import { addUserAction, removeUserAction, updateUserAction } from "./actions";
 
 export default async function UsersPage() {
-  await requireAdmin();
+  const me = await requireAdmin();
   const users = await listUsers();
   return (
-    <div className="stack" style={{ gap: 16, maxWidth: 640 }}>
-      <h1>Team members</h1>
+    <div className="stack" style={{ gap: 16, maxWidth: 720 }}>
+      <div>
+        <h1>Team members</h1>
+        <p className="muted" style={{ marginTop: 2 }}>Edit a member’s details inline, or add a new one. They set their own password from the Account page.</p>
+      </div>
+
       <div className="card">
         {users.map((u) => (
-          <div key={u.id} className="list-row">
-            <span><span style={{ fontWeight: 500 }}>{u.name}</span> <span className="muted-xs">{u.email}</span></span>
-            <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span className={`badge ${u.role === "admin" ? "" : "badge--neutral"}`}>{u.role}</span>
-              <form action={removeUserAction}><input type="hidden" name="id" value={u.id} /><button className="btn--sm">Remove</button></form>
-            </span>
+          <div key={u.id} className="user-row">
+            <form action={updateUserAction} className="user-edit">
+              <input type="hidden" name="id" value={u.id} />
+              <label className="field">
+                <span className="field__label">Full name</span>
+                <input name="name" defaultValue={u.name} required />
+              </label>
+              <label className="field">
+                <span className="field__label">Email</span>
+                <input name="email" type="email" defaultValue={u.email} required />
+              </label>
+              <label className="field" style={{ maxWidth: 120 }}>
+                <span className="field__label">Role</span>
+                <select name="role" defaultValue={u.role} disabled={u.id === me.userId}>
+                  <option value="team">Team</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+              {u.id === me.userId && <input type="hidden" name="role" value={u.role} />}
+              <button type="submit" className="btn--sm btn--primary">Save</button>
+            </form>
+            {u.id !== me.userId && (
+              <form action={removeUserAction}>
+                <input type="hidden" name="id" value={u.id} />
+                <button className="btn--sm">Remove</button>
+              </form>
+            )}
           </div>
         ))}
       </div>
+
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Add member</h2>
         <form action={addUserAction} className="stack" style={{ gap: 10 }}>
