@@ -1,4 +1,4 @@
-import { query, execute } from "@/lib/db";
+import { query, execute, getDb } from "@/lib/db";
 
 export type AttrType = "allergy"|"goal"|"diet"|"med_condition";
 export type PatientAttr = { termId: number; label: string; attrType: AttrType };
@@ -29,6 +29,34 @@ export async function getPatient(id: number): Promise<PatientDetail | null> {
      WHERE pa.patient_id = ?`, [id]
   );
   return { ...base[0], attributes };
+}
+
+// GDPR right-to-erasure: permanently remove a patient and EVERYTHING linked to
+// them — clinical attributes, plans, plan items, guides, and the sent snapshots
+// (which hold the frozen PDF + the client's email). Also purges the audit-log
+// rows for those plans/snapshots, since the "sent" entry records the email.
+// Runs as one write transaction so it's all-or-nothing.
+export async function deletePatient(id: number): Promise<void> {
+  const planIds = (await query<{ id: number }>("SELECT id FROM plans WHERE patient_id = ?", [id])).map((r) => r.id);
+  const stmts: { sql: string; args: number[] }[] = [];
+
+  if (planIds.length) {
+    const ph = planIds.map(() => "?").join(",");
+    const snapIds = (await query<{ id: number }>(`SELECT id FROM plan_snapshots WHERE plan_id IN (${ph})`, planIds)).map((r) => r.id);
+    stmts.push({ sql: `DELETE FROM audit_events WHERE entity = 'plan' AND entity_id IN (${ph})`, args: planIds });
+    if (snapIds.length) {
+      const sph = snapIds.map(() => "?").join(",");
+      stmts.push({ sql: `DELETE FROM audit_events WHERE entity = 'snapshot' AND entity_id IN (${sph})`, args: snapIds });
+    }
+    stmts.push({ sql: `DELETE FROM plan_snapshots WHERE plan_id IN (${ph})`, args: planIds });
+    stmts.push({ sql: `DELETE FROM plan_items WHERE plan_id IN (${ph})`, args: planIds });
+    stmts.push({ sql: `DELETE FROM plan_guide WHERE plan_id IN (${ph})`, args: planIds });
+    stmts.push({ sql: `DELETE FROM plans WHERE patient_id = ?`, args: [id] });
+  }
+  stmts.push({ sql: `DELETE FROM patient_attributes WHERE patient_id = ?`, args: [id] });
+  stmts.push({ sql: `DELETE FROM patients WHERE id = ?`, args: [id] });
+
+  await getDb().batch(stmts, "write");
 }
 
 export async function setPatientAttributes(patientId: number, attrs: { termId: number; attrType: AttrType }[]): Promise<void> {

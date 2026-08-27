@@ -5,6 +5,7 @@ import { getPatient, type AttrType } from "@/lib/patients";
 import { listTerms, type TermType } from "@/lib/taxonomies";
 import { savePatientBasicsAction } from "@/app/patients/actions";
 import ClinicalProfileForm, { type Section } from "@/components/ClinicalProfileForm";
+import DeletePatientButton from "@/components/DeletePatientButton";
 import Toaster from "@/components/Toaster";
 
 const ATTR_MAP: { attr: AttrType; term: TermType; label: string; hint: string }[] = [
@@ -15,7 +16,7 @@ const ATTR_MAP: { attr: AttrType; term: TermType; label: string; hint: string }[
 ];
 
 export default async function PatientProfile({ params }: { params: { id: string } }) {
-  await requireUser();
+  const u = await requireUser();
   const id = Number(params.id);
   const patient = await getPatient(id);
   if (!patient) notFound();
@@ -56,6 +57,17 @@ export default async function PatientProfile({ params }: { params: { id: string 
         <p className="muted" style={{ marginBottom: 14 }}>Click to select any number in each section. Missing an option? Add it inline — it&apos;s saved to the taxonomy for next time.</p>
         <ClinicalProfileForm patientId={patient.id} sections={sections} />
       </div>
+
+      {u.role === "admin" && (
+        <div className="card" style={{ borderColor: "var(--danger)" }}>
+          <h2 style={{ marginBottom: 2, color: "var(--danger)" }}>Danger zone</h2>
+          <p className="muted-xs" style={{ marginBottom: 12 }}>
+            Permanently erase {patient.name} and everything linked to them — clinical profile, all plans and guides, and any
+            finalised or sent records (including the stored PDF and client email). Use this to fulfil a data-erasure request. This cannot be undone.
+          </p>
+          <DeletePatientButton patientId={patient.id} patientName={patient.name} />
+        </div>
+      )}
     </div>
   );
 }
