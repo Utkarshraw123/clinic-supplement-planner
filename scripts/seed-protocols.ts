@@ -66,6 +66,46 @@ const PROTOCOLS: Proto[] = [
       { product: "Vitamin D", dose: "1 capsule daily with food" },
     ],
   },
+  {
+    name: "Endometriosis Support",
+    description: "Hormone and anti-inflammatory support for endometriosis — turmeric, omega and magnesium.",
+    items: [
+      { product: "Endo Support", dose: "2 capsules daily with food" },
+      { product: "Organic Turmaforte Turmeric", dose: "1 capsule daily with food" },
+      { product: "Pure Strength Omega 3", dose: "2 capsules daily with food" },
+      { product: "Magnesium", dose: "2 capsules with the evening meal" },
+    ],
+  },
+  {
+    name: "Gut Health Reset",
+    description: "Digestive support — live cultures, fibre, and soothing turmeric and magnesium.",
+    items: [
+      { product: "Multi Strain Biotic", dose: "1 capsule daily" },
+      { product: "High Fibre Plus", dose: "1 serving daily in water" },
+      { product: "Organic Turmaforte Turmeric", dose: "1 capsule daily with food" },
+      { product: "Magnesium", dose: "2 capsules with the evening meal" },
+    ],
+  },
+  {
+    name: "Immunity Support",
+    description: "Immune foundation — immune complex with vitamin D, vitamin C and zinc.",
+    items: [
+      { product: "Immune Support", dose: "2 capsules daily with food" },
+      { product: "Vitamin D", dose: "1 capsule daily with food" },
+      { product: "Vitamin C Plus", dose: "1 capsule daily with food" },
+      { product: "Zinc Plus", dose: "1 capsule daily with food" },
+    ],
+  },
+  {
+    name: "Energy & Fatigue Support",
+    description: "For low energy and fatigue — energy complex with iron, B12 and magnesium (confirm iron need first).",
+    items: [
+      { product: "Energy Support", dose: "2 capsules daily with food" },
+      { product: "Iron Plus", dose: "1 capsule daily with food" },
+      { product: "Vitamin B12 Plus", dose: "1 capsule daily with food" },
+      { product: "Magnesium", dose: "2 capsules with the evening meal" },
+    ],
+  },
 ];
 
 async function productId(name: string): Promise<number | null> {
