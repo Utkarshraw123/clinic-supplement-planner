@@ -1,5 +1,5 @@
 import { query, execute } from "@/lib/db";
-import { getProduct, type ProductDetail } from "@/lib/products";
+import { getProductsByIds, type ProductDetail } from "@/lib/products";
 
 export type PlanItemDetail = { id: number; product: ProductDetail; dosingText: string; note: string|null; chosenAlternativeId: number|null; position: number };
 export type PlanDetail = { id: number; patientId: number; status: "draft"|"finalised"; items: PlanItemDetail[] };
@@ -44,25 +44,28 @@ export async function dosingTextFor(presetId: number|null, customText: string|nu
 }
 
 export async function getPlan(planId: number): Promise<PlanDetail | null> {
-  const base = await query<{ id: number; patient_id: number; status: "draft"|"finalised" }>(
-    "SELECT id, patient_id, status FROM plans WHERE id = ?", [planId]
-  );
+  // Wave 1: plan header, its items, and all dosing presets — in parallel.
+  const [base, itemRows, presets] = await Promise.all([
+    query<{ id: number; patient_id: number; status: "draft"|"finalised" }>(
+      "SELECT id, patient_id, status FROM plans WHERE id = ?", [planId]),
+    query<{ id: number; product_id: number; dosing_preset_id: number|null; dosing_custom_text: string|null; note: string|null; chosen_alternative_id: number|null; position: number }>(
+      "SELECT id, product_id, dosing_preset_id, dosing_custom_text, note, chosen_alternative_id, position FROM plan_items WHERE plan_id = ? ORDER BY position", [planId]),
+    query<{ id: number; text: string }>("SELECT id, text FROM dosing_presets"),
+  ]);
   if (!base[0]) return null;
-  const itemRows = await query<{ id: number; product_id: number; dosing_preset_id: number|null; dosing_custom_text: string|null; note: string|null; chosen_alternative_id: number|null; position: number }>(
-    "SELECT id, product_id, dosing_preset_id, dosing_custom_text, note, chosen_alternative_id, position FROM plan_items WHERE plan_id = ? ORDER BY position", [planId]
-  );
+
+  // Wave 2: every item's product in one batched load (constant queries, not N×).
+  const presetText = new Map(presets.map((p) => [p.id, p.text]));
+  const products = await getProductsByIds([...new Set(itemRows.map((r) => r.product_id))]);
+
   const items: PlanItemDetail[] = [];
   for (const r of itemRows) {
-    const product = await getProduct(r.product_id);
+    const product = products.get(r.product_id);
     if (!product) continue;
-    items.push({
-      id: r.id,
-      product,
-      dosingText: await dosingTextFor(r.dosing_preset_id, r.dosing_custom_text),
-      note: r.note,
-      chosenAlternativeId: r.chosen_alternative_id,
-      position: r.position,
-    });
+    const dosingText = r.dosing_custom_text?.trim()
+      ? r.dosing_custom_text.trim()
+      : (r.dosing_preset_id ? (presetText.get(r.dosing_preset_id) ?? "") : "");
+    items.push({ id: r.id, product, dosingText, note: r.note, chosenAlternativeId: r.chosen_alternative_id, position: r.position });
   }
   return { id: base[0].id, patientId: base[0].patient_id, status: base[0].status, items };
 }

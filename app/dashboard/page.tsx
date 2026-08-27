@@ -12,10 +12,12 @@ function greeting(): string {
 
 export default async function DashboardPage() {
   const u = await requireUser();
-  const stats = await getDashboardStats();
-  const patients = await recentPatients();
-  const sent = await recentlySent();
-  const team = u.role === "admin" ? await getPractitionerBreakdown() : [];
+  const [stats, patients, sent, team] = await Promise.all([
+    getDashboardStats(),
+    recentPatients(),
+    recentlySent(),
+    u.role === "admin" ? getPractitionerBreakdown() : Promise.resolve([]),
+  ]);
 
   const cards = [
     { label: "Patients", value: stats.patientCount },

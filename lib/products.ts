@@ -98,6 +98,31 @@ export async function listActiveProductsWithTags(): Promise<ProductDetail[]> {
   return base.map((b) => ({ ...b, tags: byProduct.get(b.id) ?? [], suppliers: [], alternatives: [] }));
 }
 
+// Batch-load full ProductDetail (tags + suppliers + alternatives) for many ids in
+// 4 parallel queries — replaces N× getProduct() in hot paths like getPlan().
+export async function getProductsByIds(ids: number[]): Promise<Map<number, ProductDetail>> {
+  const map = new Map<number, ProductDetail>();
+  if (ids.length === 0) return map;
+  const ph = ids.map(() => "?").join(",");
+  const [base, tags, suppliers, alternatives] = await Promise.all([
+    query<Omit<ProductDetail,"tags"|"suppliers"|"alternatives">>(
+      `SELECT p.id, p.brand_id, b.name AS brand_name, p.name, p.description, p.package_size, p.form, p.default_note, p.status
+       FROM products p JOIN brands b ON b.id = p.brand_id WHERE p.id IN (${ph})`, ids),
+    query<{ product_id: number; termId: number; label: string; tagType: TermType }>(
+      `SELECT pt.product_id, t.id AS termId, t.label AS label, pt.tag_type AS tagType
+       FROM product_tags pt JOIN taxonomy_terms t ON t.id = pt.taxonomy_term_id WHERE pt.product_id IN (${ph})`, ids),
+    query<{ product_id: number; id: number; label: string; url: string }>(
+      `SELECT product_id, id, label, url FROM supplier_links WHERE product_id IN (${ph})`, ids),
+    query<{ product_id: number; id: number; name: string }>(
+      `SELECT a.product_id, p.id, p.name FROM product_alternatives a JOIN products p ON p.id = a.alternative_product_id WHERE a.product_id IN (${ph})`, ids),
+  ]);
+  for (const b of base) map.set(b.id, { ...b, tags: [], suppliers: [], alternatives: [] });
+  for (const t of tags) map.get(t.product_id)?.tags.push({ termId: t.termId, label: t.label, tagType: t.tagType });
+  for (const sup of suppliers) map.get(sup.product_id)?.suppliers.push({ id: sup.id, label: sup.label, url: sup.url });
+  for (const a of alternatives) map.get(a.product_id)?.alternatives.push({ id: a.id, name: a.name });
+  return map;
+}
+
 export async function searchProducts(term: string): Promise<{ id: number; name: string; brand_name: string; form: string|null; package_size: string|null }[]> {
   const like = `%${term.trim()}%`;
   return query(

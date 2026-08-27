@@ -16,20 +16,21 @@ import Toaster from "@/components/Toaster";
 export default async function PlanBuilder({ params }: { params: { patientId: string } }) {
   const u = await requireUser();
   const patientId = Number(params.patientId);
-  const patient = await getPatient(patientId);
-  if (!patient) notFound();
-  const planId = await getOrCreateDraftPlan(patientId, u.userId);
-  const plan = await getPlan(planId);
-  const presets = await query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id");
 
-  // One batched load (2 queries) instead of ~4 queries per product — this is what
-  // made adding/removing an item feel slow when the catalogue grew to ~44 products.
-  const allProducts = await listActiveProductsWithTags();
+  // All independent loads in one parallel wave (was ~5 sequential round-trips).
+  const [patient, planId, presets, allProducts, protocols] = await Promise.all([
+    getPatient(patientId),
+    getOrCreateDraftPlan(patientId, u.userId),
+    query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id"),
+    listActiveProductsWithTags(),
+    listProtocols(),
+  ]);
+  if (!patient) notFound();
+  const plan = await getPlan(planId);
+
   const inPlan = new Set(plan!.items.map((it) => it.product.id));
   const catalog = allProducts.filter((p) => !inPlan.has(p.id));
   const suggestions = suggestForPatient(catalog, patient.attributes, 5);
-
-  const protocols = await listProtocols();
 
   const itemFlags = plan!.items.map((it) => ({ item: it, flags: flagProductForPatient(it.product, patient.attributes) }));
   const planHasBlock = itemFlags.some(({ flags }) => hasBlock(flags));

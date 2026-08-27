@@ -12,17 +12,23 @@ import SnippetTextarea from "@/components/SnippetTextarea";
 export default async function PrepareGuidePage({ params }: { params: { patientId: string } }) {
   const u = await requireUser();
   const patientId = Number(params.patientId);
-  const patient = await getPatient(patientId);
+
+  // Independent loads in parallel; snippets fetched once and split by category.
+  const [patient, planId, allSnips] = await Promise.all([
+    getPatient(patientId),
+    getOrCreateDraftPlan(patientId, u.userId),
+    listSnippets(),
+  ]);
   if (!patient) notFound();
-  const planId = await getOrCreateDraftPlan(patientId, u.userId);
   const plan = await getPlan(planId);
   const planHasBlock = plan!.items.some((it) => hasBlock(flagProductForPatient(it.product, patient.attributes)));
   const guide = await getGuideForEditing(plan!, patient);
-  const supplementSnips = await listSnippets("supplement");
-  const lifestyleSnips = await listSnippets("lifestyle");
-  const dietarySnips = await listSnippets("dietary");
-  const introSnips = await listSnippets("intro");
-  const nextSnips = await listSnippets("next");
+  const byCat = (c: string) => allSnips.filter((s) => s.category === c);
+  const supplementSnips = byCat("supplement");
+  const lifestyleSnips = byCat("lifestyle");
+  const dietarySnips = byCat("dietary");
+  const introSnips = byCat("intro");
+  const nextSnips = byCat("next");
 
   const ta = { minHeight: 90 } as const;
 
