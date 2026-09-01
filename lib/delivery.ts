@@ -3,7 +3,7 @@ import { getPlan, finalisePlan } from "@/lib/plans";
 import { getPatient } from "@/lib/patients";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { buildGuidePdfData, renderPlanPdf } from "@/lib/pdf";
-import { getGuideForEditing } from "@/lib/guide";
+import { getGuideForEditing, buildSupplementRows } from "@/lib/guide";
 import { getClinicSettings } from "@/lib/settings";
 import { sendPlanEmail } from "@/lib/email";
 import { recordAudit } from "@/lib/audit";
@@ -25,12 +25,11 @@ export async function finalisePlanToSnapshot(input: { planId: number; actorId?: 
   }
 
   const guide = await getGuideForEditing(plan, patient);
-  // One purchase link per prescribed product (its first supplier link) for the
-  // "Where to buy" section of the guide — so the client can actually order them.
-  const links = plan.items
-    .map((it) => ({ name: it.product.name, url: it.product.suppliers[0]?.url ?? "" }))
-    .filter((l) => l.url);
-  const pdfData = buildGuidePdfData(patient, guide, links);
+  // The supplement plan is built straight from the plan items (single source of truth)
+  // and laid out as a table — brand, size, dosing, duration, promo code, and every
+  // vendor's buy link. This is what keeps the PDF in lock-step with the plan.
+  const supplements = buildSupplementRows(plan);
+  const pdfData = buildGuidePdfData(patient, guide, supplements);
   const pdf = await renderPlanPdf(pdfData);
 
   const rs = await execute(

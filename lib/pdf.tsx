@@ -1,12 +1,12 @@
 import { Document, Page, Text, View, Image, Link, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
 import type { PatientDetail } from "@/lib/patients";
-import type { PlanGuide } from "@/lib/guide";
+import type { PlanGuide, SupplementRow } from "@/lib/guide";
 import { HEADER_IMAGE, FOOTER_IMAGE } from "@/lib/pdf-assets";
 
-// The branded Supplement Instruction Guide. All practitioner/auto fields arrive already
-// resolved on `PlanGuide`; this module only lays them out.
-export type GuideLink = { name: string; url: string };
+// The branded Supplement Instruction Guide. Free-text sections arrive resolved on
+// `PlanGuide`; the supplement plan arrives as structured rows (built from the plan
+// items) and is laid out as a TABLE — so what prints always matches the plan.
 export type GuidePdfData = {
   clientName: string;
   consultationDate: string;
@@ -14,12 +14,12 @@ export type GuidePdfData = {
   nextConsultation: string;
   lifestyle: string;
   dietary: string;
-  supplementText: string;
+  supplements: SupplementRow[];
   medsText: string;
-  links: GuideLink[];
+  notes: string;
 };
 
-export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide, links: GuideLink[] = []): GuidePdfData {
+export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide, supplements: SupplementRow[] = []): GuidePdfData {
   const s = (v: string | null | undefined) => (v ?? "").trim();
   return {
     clientName: patient.name,
@@ -28,14 +28,16 @@ export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide, link
     nextConsultation: s(guide.nextConsultation),
     lifestyle: s(guide.lifestyle),
     dietary: s(guide.dietary),
-    supplementText: s(guide.supplementText),
+    supplements,
     medsText: s(guide.medsText),
-    links: links.filter((l) => l.url.trim()),
+    notes: s(guide.notes),
   };
 }
 
 const GOLD = "#A17C3A";
 const INK = "#2C2C2A";
+const MUTED = "#6B6B63";
+const RULE = "#E3D9C6";
 
 const s = StyleSheet.create({
   page: { paddingTop: 212, paddingBottom: 200, paddingHorizontal: 44, fontSize: 11, color: INK, lineHeight: 1.5 },
@@ -47,24 +49,24 @@ const s = StyleSheet.create({
   metaLabel: { fontSize: 11, color: GOLD, width: 118 },
   metaValue: { fontSize: 11, color: INK },
   intro: { marginBottom: 4 },
-  sectionTitle: { fontSize: 12, color: GOLD, marginTop: 12, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.4 },
+  sectionTitle: { fontSize: 12, color: GOLD, marginTop: 14, marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.4 },
   line: { fontSize: 11, color: INK },
   spacer: { height: 6 },
-  buyInline: { fontSize: 10, color: GOLD, textDecoration: "underline" },
-});
 
-// Attach each product's purchase link to the first supplement line that names it
-// (case-insensitive; longest name wins so "Magnesium Plus" beats "Magnesium").
-// Each link is used once, so a product's description line underneath won't also grab it.
-export function attachLinksToLines(text: string, links: GuideLink[]): { text: string; url?: string }[] {
-  const sorted = [...links].sort((a, b) => b.name.length - a.name.length);
-  const used = new Set<string>();
-  return text.split("\n").map((line) => {
-    const hit = sorted.find((l) => l.url && !used.has(l.url) && line.toLowerCase().includes(l.name.toLowerCase()));
-    if (hit) { used.add(hit.url); return { text: line, url: hit.url }; }
-    return { text: line };
-  });
-}
+  // Supplement table
+  tHead: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: GOLD, paddingBottom: 4, marginBottom: 2 },
+  tHeadCell: { fontSize: 8.5, color: GOLD, textTransform: "uppercase", letterSpacing: 0.4 },
+  tRow: { flexDirection: "row", borderBottomWidth: 0.75, borderBottomColor: RULE, paddingVertical: 7 },
+  cSupp: { width: "37%", paddingRight: 8 },
+  cDose: { width: "33%", paddingRight: 8 },
+  cBuy: { width: "30%" },
+  suppName: { fontSize: 11, color: INK, fontWeight: 700 },
+  sub: { fontSize: 8.5, color: MUTED, marginTop: 1 },
+  doseMain: { fontSize: 10.5, color: INK },
+  doseNote: { fontSize: 8.5, color: MUTED, marginTop: 2, fontStyle: "italic" },
+  buyLink: { fontSize: 9, color: GOLD, textDecoration: "underline", marginBottom: 2 },
+  codePill: { fontSize: 8.5, color: INK, marginTop: 2 },
+});
 
 // @react-pdf does not honour "\n" inside a single <Text>; split into lines.
 function Multiline({ text }: { text: string }) {
@@ -86,23 +88,40 @@ function Section({ title, body }: { title: string; body: string }) {
   );
 }
 
-// The supplement plan, with a clickable "Buy online" link inline on each product line.
-function SupplementSection({ text, links }: { text: string; links: GuideLink[] }) {
-  if (!text.trim()) return null;
-  const lines = attachLinksToLines(text, links);
+// The supplement plan as a structured table. The table itself wraps across pages;
+// each row is kept whole (wrap={false}) so a supplement is never split mid-row.
+function SupplementTable({ rows }: { rows: SupplementRow[] }) {
+  if (rows.length === 0) return null;
   return (
-    <View wrap={false}>
+    <View>
       <Text style={s.sectionTitle}>Supplement Plan</Text>
-      {lines.map((ln, i) =>
-        ln.text.trim() === "" ? (
-          <View key={i} style={s.spacer} />
-        ) : (
-          <Text key={i} style={s.line}>
-            {ln.text}
-            {ln.url ? <Link src={ln.url} style={s.buyInline}>{"   Buy online"}</Link> : null}
-          </Text>
-        )
-      )}
+      <View style={s.tHead}>
+        <Text style={[s.tHeadCell, s.cSupp]}>Supplement</Text>
+        <Text style={[s.tHeadCell, s.cDose]}>Dosage</Text>
+        <Text style={[s.tHeadCell, s.cBuy]}>Where to buy</Text>
+      </View>
+      {rows.map((r, i) => {
+        const meta = [r.brand, r.size].filter(Boolean).join("  ·  ");
+        return (
+          <View key={i} style={s.tRow} wrap={false}>
+            <View style={s.cSupp}>
+              <Text style={s.suppName}>{r.name}</Text>
+              {meta ? <Text style={s.sub}>{meta}</Text> : null}
+            </View>
+            <View style={s.cDose}>
+              {r.dose ? <Text style={s.doseMain}>{r.dose}</Text> : <Text style={s.doseMain}>—</Text>}
+              {r.duration ? <Text style={s.sub}>{r.duration}</Text> : null}
+              {r.note ? <Text style={s.doseNote}>{r.note}</Text> : null}
+            </View>
+            <View style={s.cBuy}>
+              {r.buyLinks.length === 0 ? <Text style={s.sub}>—</Text> : r.buyLinks.map((b, j) => (
+                <Link key={j} src={b.url} style={s.buyLink}>{b.label ? `Buy at ${b.label}` : "Buy online"}</Link>
+              ))}
+              {r.code ? <Text style={s.codePill}>Code: {r.code}</Text> : null}
+            </View>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -127,8 +146,9 @@ function GuideDoc({ data }: { data: GuidePdfData }) {
 
         <Section title="Lifestyle & Other Recommendations" body={data.lifestyle} />
         <Section title="Dietary Recommendations" body={data.dietary} />
-        <SupplementSection text={data.supplementText} links={data.links} />
+        <SupplementTable rows={data.supplements} />
         <Section title="Medications / Hormones / Contraception" body={data.medsText} />
+        <Section title="Notes" body={data.notes} />
 
         <View fixed style={s.footerBox}>
           <Image src={FOOTER_IMAGE} style={s.bannerImg} />

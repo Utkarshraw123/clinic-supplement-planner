@@ -4,8 +4,10 @@ import { createBrand } from "@/lib/brands";
 import { createProduct } from "@/lib/products";
 import { addTerm } from "@/lib/taxonomies";
 import { createPatient, setPatientAttributes, getPatient } from "@/lib/patients";
-import { getOrCreateDraftPlan, addPlanItem, setItemDosing, setItemNote, setItemDuration, setItemOrderCode, getPlan } from "@/lib/plans";
-import { defaultSupplementText, defaultMedsText, savePlanGuide, getPlanGuide, getGuideForEditing, todayIso } from "@/lib/guide";
+import { getOrCreateDraftPlan, addPlanItem, setItemDosing, setItemNote, setItemDuration, setItemOrderCode, setItemSize, getPlan } from "@/lib/plans";
+import { addSupplierLink } from "@/lib/products";
+import { execute } from "@/lib/db";
+import { defaultSupplementText, defaultMedsText, savePlanGuide, getPlanGuide, getGuideForEditing, todayIso, buildSupplementRows } from "@/lib/guide";
 
 describe("plan guide", () => {
   beforeAll(async () => { await runMigrations(); });
@@ -96,6 +98,50 @@ describe("plan guide", () => {
     expect(text).not.toContain("for ");
   });
 
+  it("builds one structured supplement row per item (regression: 5 in, 5 out)", async () => {
+    const brandId = await createBrand({ name: `Rows ${Date.now()}` });
+    const patientId = await createPatient({ name: "Rows P", dob: "1990-01-01" });
+    const planId = await getOrCreateDraftPlan(patientId);
+    for (let i = 1; i <= 5; i++) {
+      const pid = await createProduct({ brandId, name: `Rows Product ${i}`, form: "capsule" });
+      await addPlanItem(planId, pid);
+    }
+    const plan = (await getPlan(planId))!;
+    const rows = buildSupplementRows(plan);
+    expect(rows).toHaveLength(5);
+    expect(rows.map((r) => r.name)).toContain("Rows Product 5");
+  });
+
+  it("supplement row: brand promo fallback, per-item overrides, size, and all vendor links", async () => {
+    const brandId = await createBrand({ name: `RowDetail ${Date.now()}` });
+    await execute("UPDATE brands SET promo_code = ? WHERE id = ?", ["BRAND20", brandId]);
+    const pid = await createProduct({ brandId, name: "RowDetail Mag", form: "capsule", packageSize: "60 capsules" });
+    await addSupplierLink(pid, "Wild Nutrition", "https://wn.example/mag");
+    await addSupplierLink(pid, "Amazon", "https://amazon.example/mag");
+    const pid2 = await createProduct({ brandId, name: "RowDetail Iron", form: "capsule", packageSize: "30 capsules" });
+    const patientId = await createPatient({ name: "RowDetail P", dob: "1990-01-01" });
+    const planId = await getOrCreateDraftPlan(patientId);
+    const i1 = await addPlanItem(planId, pid);
+    const i2 = await addPlanItem(planId, pid2);
+    await setItemDosing(i1, null, "1 capsule at night");
+    await setItemDuration(i1, "3 months");
+    await setItemSize(i1, "120 capsules");     // overrides the product's 60
+    await setItemOrderCode(i1, "OVERRIDE5");    // overrides the brand promo
+    const rows = buildSupplementRows((await getPlan(planId))!);
+
+    const mag = rows.find((r) => r.name === "RowDetail Mag")!;
+    expect(mag.brand).toContain("RowDetail");
+    expect(mag.size).toBe("120 capsules");        // item size wins
+    expect(mag.dose).toBe("1 capsule at night");
+    expect(mag.duration).toBe("for 3 months");
+    expect(mag.code).toBe("OVERRIDE5");           // per-item code wins over brand promo
+    expect(mag.buyLinks).toHaveLength(2);         // every vendor link
+
+    const iron = rows.find((r) => r.name === "RowDetail Iron")!;
+    expect(iron.size).toBe("30 capsules");        // falls back to product package size
+    expect(iron.code).toBe("BRAND20");            // falls back to the brand promo code
+  });
+
   it("builds a bullet meds list from the patient's med_condition attributes", async () => {
     const patientId = await createPatient({ name: "Meds P", dob: "1990-01-01" });
     const t1 = await addTerm("caution", `levothyroxine-${Date.now()}`);
@@ -122,7 +168,7 @@ describe("plan guide", () => {
     // Practitioner edits + saves.
     await savePlanGuide(planId, {
       consultationDate: "2026-08-26", intro: "Here we go", nextConsultation: null,
-      lifestyle: "Sleep well", dietary: null, supplementText: "1. Custom wording", medsText: null,
+      lifestyle: "Sleep well", dietary: null, supplementText: "1. Custom wording", medsText: null, notes: "Final word",
     });
     const saved = await getPlanGuide(planId);
     expect(saved!.intro).toBe("Here we go");

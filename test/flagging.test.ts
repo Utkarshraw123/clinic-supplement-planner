@@ -5,7 +5,7 @@ import type { PatientAttr } from "@/lib/patients";
 
 function product(partial: Partial<ProductDetail>): ProductDetail {
   return {
-    id: 1, brand_id: 1, brand_name: "B", name: "P", description: null, package_size: null, form: null, default_note: null, status: "active",
+    id: 1, brand_id: 1, brand_name: "B", brand_promo_code: null, name: "P", description: null, package_size: null, form: null, default_note: null, status: "active",
     tags: [], suppliers: [], alternatives: [], ...partial,
   };
 }

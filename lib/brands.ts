@@ -1,6 +1,6 @@
 import { query, execute } from "@/lib/db";
 
-export type Brand = { id: number; name: string; website: string|null; logo_url: string|null };
+export type Brand = { id: number; name: string; website: string|null; logo_url: string|null; promo_code: string|null };
 
 export async function createBrand(input: { name: string; website?: string; logoUrl?: string }): Promise<number> {
   const rs = await execute(
@@ -11,7 +11,13 @@ export async function createBrand(input: { name: string; website?: string; logoU
 }
 
 export async function listBrands(): Promise<Brand[]> {
-  return query<Brand>("SELECT id, name, website, logo_url FROM brands ORDER BY name");
+  return query<Brand>("SELECT id, name, website, logo_url, promo_code FROM brands ORDER BY name");
+}
+
+// One promo code per brand, applied to every product of that brand on a prescription
+// (a per-item order code overrides it). Set once here.
+export async function setBrandPromoCode(id: number, code: string|null): Promise<void> {
+  await execute("UPDATE brands SET promo_code = ? WHERE id = ?", [code && code.trim() ? code.trim() : null, id]);
 }
 
 // Resolve a brand by name (case-insensitive), creating it if it doesn't exist yet.

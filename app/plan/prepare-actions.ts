@@ -18,6 +18,7 @@ function readGuide(fd: FormData): PlanGuide {
     dietary: g("dietary"),
     supplementText: g("supplementText"),
     medsText: g("medsText"),
+    notes: g("notes"),
   };
 }
 

@@ -21,7 +21,10 @@ export async function runMigrations(): Promise<void> {
   await ensureColumn("products", "description", "TEXT");
   await ensureColumn("plan_items", "note", "TEXT");          // per-product practitioner comment
   await ensureColumn("plan_items", "duration", "TEXT");      // per-item course length (e.g. "3 months")
-  await ensureColumn("plan_items", "order_code", "TEXT");    // per-item discount / coupon code
+  await ensureColumn("plan_items", "order_code", "TEXT");    // per-item discount / coupon code (overrides brand promo)
+  await ensureColumn("plan_items", "size", "TEXT");          // per-item pack size (e.g. "60 capsules")
+  await ensureColumn("brands", "promo_code", "TEXT");        // one promo code per brand, applied to all its products
+  await ensureColumn("plan_guide", "notes", "TEXT");         // closing notes block on the prescription
   await ensureColumn("note_snippets", "category", "TEXT");   // supplement | lifestyle | dietary | general
 }
 

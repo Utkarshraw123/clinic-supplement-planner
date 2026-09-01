@@ -4,7 +4,7 @@ import type { ProductDetail } from "@/lib/products";
 import type { PatientAttr } from "@/lib/patients";
 
 function product(id: number, name: string, tags: ProductDetail["tags"]): ProductDetail {
-  return { id, brand_id: 1, brand_name: "B", name, description: null, package_size: null, form: null, default_note: null, status: "active", tags, suppliers: [], alternatives: [] };
+  return { id, brand_id: 1, brand_name: "B", brand_promo_code: null, name, description: null, package_size: null, form: null, default_note: null, status: "active", tags, suppliers: [], alternatives: [] };
 }
 
 describe("recommendations", () => {

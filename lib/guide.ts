@@ -10,12 +10,48 @@ export type PlanGuide = {
   dietary: string | null;
   supplementText: string | null;
   medsText: string | null;
+  notes: string | null;
 };
 
 const EMPTY: PlanGuide = {
   consultationDate: null, intro: null, nextConsultation: null,
-  lifestyle: null, dietary: null, supplementText: null, medsText: null,
+  lifestyle: null, dietary: null, supplementText: null, medsText: null, notes: null,
 };
+
+// A prescribed product as it appears in the guide's supplement TABLE. Built directly
+// from the plan items (single source of truth) so the PDF can never drift from the
+// plan — this is what fixed the "5 added, 3 printed" bug. No marketing copy here.
+export type SupplementRow = {
+  name: string;
+  brand: string;
+  size: string;
+  dose: string;
+  duration: string;
+  note: string;
+  code: string;
+  buyLinks: { label: string; url: string }[];
+};
+
+export function buildSupplementRows(plan: PlanDetail): SupplementRow[] {
+  return plan.items.map((it) => {
+    const dur = it.duration?.trim() || "";
+    const durText = dur ? (/^finish off/i.test(dur) ? dur : `for ${dur}`) : "";
+    // Per-item order code overrides the brand's promo code.
+    const code = (it.orderCode?.trim()) || (it.product.brand_promo_code?.trim()) || "";
+    const note = (it.note?.trim()) || (it.product.default_note?.trim()) || "";
+    const size = (it.size?.trim()) || (it.product.package_size?.trim()) || "";
+    return {
+      name: it.product.name,
+      brand: it.product.brand_name,
+      size,
+      dose: it.dosingText?.trim() || "",
+      duration: durText,
+      note,
+      code,
+      buyLinks: it.product.suppliers.filter((sup) => sup.url?.trim()).map((sup) => ({ label: sup.label, url: sup.url })),
+    };
+  });
+}
 
 // Numbered supplement list from the structured plan items — the editable starting point.
 // Each product's saved default note ("only take at night", …) auto-appends to its line,
@@ -59,23 +95,23 @@ export function todayIso(): string {
 export async function getPlanGuide(planId: number): Promise<PlanGuide | null> {
   const rows = await query<{
     consultation_date: string | null; intro: string | null; next_consultation: string | null;
-    lifestyle: string | null; dietary: string | null; supplement_text: string | null; meds_text: string | null;
+    lifestyle: string | null; dietary: string | null; supplement_text: string | null; meds_text: string | null; notes: string | null;
   }>(
-    `SELECT consultation_date, intro, next_consultation, lifestyle, dietary, supplement_text, meds_text
+    `SELECT consultation_date, intro, next_consultation, lifestyle, dietary, supplement_text, meds_text, notes
      FROM plan_guide WHERE plan_id = ?`, [planId]
   );
   if (!rows[0]) return null;
   const r = rows[0];
   return {
     consultationDate: r.consultation_date, intro: r.intro, nextConsultation: r.next_consultation,
-    lifestyle: r.lifestyle, dietary: r.dietary, supplementText: r.supplement_text, medsText: r.meds_text,
+    lifestyle: r.lifestyle, dietary: r.dietary, supplementText: r.supplement_text, medsText: r.meds_text, notes: r.notes,
   };
 }
 
 export async function savePlanGuide(planId: number, g: PlanGuide): Promise<void> {
   await execute(
-    `INSERT INTO plan_guide (plan_id, consultation_date, intro, next_consultation, lifestyle, dietary, supplement_text, meds_text, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+    `INSERT INTO plan_guide (plan_id, consultation_date, intro, next_consultation, lifestyle, dietary, supplement_text, meds_text, notes, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
      ON CONFLICT(plan_id) DO UPDATE SET
        consultation_date = excluded.consultation_date,
        intro = excluded.intro,
@@ -84,8 +120,9 @@ export async function savePlanGuide(planId: number, g: PlanGuide): Promise<void>
        dietary = excluded.dietary,
        supplement_text = excluded.supplement_text,
        meds_text = excluded.meds_text,
+       notes = excluded.notes,
        updated_at = datetime('now')`,
-    [planId, g.consultationDate, g.intro, g.nextConsultation, g.lifestyle, g.dietary, g.supplementText, g.medsText]
+    [planId, g.consultationDate, g.intro, g.nextConsultation, g.lifestyle, g.dietary, g.supplementText, g.medsText, g.notes]
   );
 }
 
@@ -101,5 +138,6 @@ export async function getGuideForEditing(plan: PlanDetail, patient: PatientDetai
     dietary: saved.dietary ?? "",
     supplementText: saved.supplementText ?? defaultSupplementText(plan),
     medsText: saved.medsText ?? defaultMedsText(patient),
+    notes: saved.notes ?? "",
   };
 }

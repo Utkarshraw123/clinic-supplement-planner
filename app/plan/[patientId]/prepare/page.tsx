@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth/current-user";
 import { getPatient } from "@/lib/patients";
 import { getOrCreateDraftPlan, getPlan } from "@/lib/plans";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
-import { getGuideForEditing } from "@/lib/guide";
+import { getGuideForEditing, buildSupplementRows } from "@/lib/guide";
 import { listSnippets } from "@/lib/notes";
 import { saveGuideAction, finaliseGuideAction } from "@/app/plan/prepare-actions";
 import SnippetTextarea from "@/components/SnippetTextarea";
@@ -24,11 +24,12 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
   const planHasBlock = plan!.items.some((it) => hasBlock(flagProductForPatient(it.product, patient.attributes)));
   const guide = await getGuideForEditing(plan!, patient);
   const byCat = (c: string) => allSnips.filter((s) => s.category === c);
-  const supplementSnips = byCat("supplement");
   const lifestyleSnips = byCat("lifestyle");
   const dietarySnips = byCat("dietary");
   const introSnips = byCat("intro");
   const nextSnips = byCat("next");
+  const generalSnips = byCat("general");
+  const supplements = buildSupplementRows(plan!);
 
   const ta = { minHeight: 90 } as const;
 
@@ -90,14 +91,26 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
 
           <div className="card stack" style={{ gap: 14 }}>
             <div className="prep-head"><span className="attr-dot attr-dot--danger" /><h2>Supplement plan &amp; medications</h2></div>
-            <label className="stack" style={{ gap: 5 }}>
-              <span>Supplement plan <span className="muted-xs">· pre-filled from the plan builder (incl. product notes) — edit the wording if you like</span></span>
-              <SnippetTextarea name="supplementText" defaultValue={guide.supplementText ?? ""} snippets={supplementSnips} rows={7} />
-            </label>
-            <p className="muted-xs">Each product line in the guide gets a clickable <strong>“Buy online →”</strong> link (from its catalogue supplier link), so the client can order it straight from the PDF.</p>
+            <p className="muted-xs" style={{ margin: 0 }}>This prints as a table built straight from the plan — brand, pack size, dosage, duration, promo code and every vendor’s buy link. To change any of it, edit the item back on the <Link href={`/plan/${patientId}`}>plan builder</Link>.</p>
+            <div className="rx-preview">
+              {supplements.map((r, i) => (
+                <div key={i} className="rx-prev-row">
+                  <div className="rx-prev-name"><strong>{r.name}</strong>{[r.brand, r.size].filter(Boolean).length ? <span className="muted-xs">  {[r.brand, r.size].filter(Boolean).join("  ·  ")}</span> : null}</div>
+                  <div className="muted-xs">{[r.dose || "—", r.duration, r.note].filter(Boolean).join("  ·  ")}{r.code ? `  ·  code ${r.code}` : ""}</div>
+                  <div className="muted-xs">{r.buyLinks.length ? r.buyLinks.map((b) => b.label || "Buy online").join(", ") : "no buy link on file"}</div>
+                </div>
+              ))}
+            </div>
             <label className="stack" style={{ gap: 5 }}>
               <span>Medications / hormones / contraception <span className="muted-xs">· pre-filled from the patient record</span></span>
               <textarea name="medsText" style={ta} defaultValue={guide.medsText ?? ""} />
+            </label>
+          </div>
+
+          <div className="card stack" style={{ gap: 14 }}>
+            <div className="prep-head"><span className="attr-dot attr-dot--ok" /><h2>Closing notes</h2><span className="muted-xs">optional · prints at the end of the guide</span></div>
+            <label className="stack" style={{ gap: 5 }}><span>Notes <span className="muted-xs">· pick a template chip or write your own</span></span>
+              <SnippetTextarea name="notes" defaultValue={guide.notes ?? ""} snippets={generalSnips} rows={3} placeholder="e.g. Please reach out any time with questions." />
             </label>
           </div>
 

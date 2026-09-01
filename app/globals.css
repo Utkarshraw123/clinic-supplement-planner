@@ -352,3 +352,10 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .user-edit { display: flex; gap: 10px; align-items: flex-end; flex: 1; flex-wrap: wrap; }
 .user-edit .field { flex: 1; min-width: 140px; }
 .user-edit button, .user-row > form button { height: 40px; }
+
+/* Prescription preview on the Prepare page (read-only; edited in the plan builder) */
+.rx-preview { border: 1px solid var(--sand-border); border-radius: 10px; overflow: hidden; }
+.rx-prev-row { padding: 11px 14px; border-top: 1px solid var(--sand-border); display: flex; flex-direction: column; gap: 2px; }
+.rx-prev-row:first-child { border-top: 0; }
+.rx-prev-name { font-size: 14.5px; color: var(--brand-ink); }
+.rx-prev-name .muted-xs { font-weight: 400; }

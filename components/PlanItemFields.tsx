@@ -1,6 +1,7 @@
 "use client";
+import { useState } from "react";
 import { saveItemFieldsAction } from "@/app/plan/actions";
-import { DURATION_OPTIONS } from "@/lib/durations";
+import { DURATION_OPTIONS, SIZE_OPTIONS } from "@/lib/durations";
 
 type Preset = { id: number; label: string };
 
@@ -8,19 +9,24 @@ export default function PlanItemFields({
   itemId,
   patientId,
   presets,
+  notePresets,
   currentText,
   currentDuration,
   currentOrderCode,
+  currentSize,
   currentNote,
 }: {
   itemId: number;
   patientId: number;
   presets: Preset[];
+  notePresets: string[];
   currentText: string;
   currentDuration: string | null;
   currentOrderCode: string | null;
+  currentSize: string | null;
   currentNote: string | null;
 }) {
+  const [note, setNote] = useState(currentNote ?? "");
   return (
     <form action={saveItemFieldsAction} className="rx-fields">
       <input type="hidden" name="itemId" value={itemId} />
@@ -52,13 +58,38 @@ export default function PlanItemFields({
       </label>
 
       <label className="field">
-        <span className="field__label">Order code</span>
+        <span className="field__label">Pack size</span>
+        <select name="size" defaultValue={currentSize ?? ""}>
+          <option value="">— product default —</option>
+          {SIZE_OPTIONS.map((sz) => (
+            <option key={sz} value={sz}>{sz}</option>
+          ))}
+        </select>
+      </label>
+
+      <label className="field">
+        <span className="field__label">Order code <span className="field__hint">overrides brand promo</span></span>
         <input name="orderCode" placeholder="Discount / coupon code" defaultValue={currentOrderCode ?? ""} />
       </label>
 
+      {notePresets.length > 0 && (
+        <label className="field">
+          <span className="field__label">Insert a note</span>
+          <select
+            value=""
+            onChange={(e) => { if (e.target.value) setNote(e.target.value); }}
+          >
+            <option value="">— pick a ready-made note —</option>
+            {notePresets.map((n, i) => (
+              <option key={i} value={n}>{n}</option>
+            ))}
+          </select>
+        </label>
+      )}
+
       <label className="field field--full">
-        <span className="field__label">Note for this product <span className="field__hint">appears on the guide</span></span>
-        <input name="note" placeholder="e.g. only take at night" defaultValue={currentNote ?? ""} />
+        <span className="field__label">Note for this product <span className="field__hint">appears on the guide · pick above or type your own</span></span>
+        <input name="note" placeholder="e.g. only take at night" value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
 
       <div className="rx-actions">

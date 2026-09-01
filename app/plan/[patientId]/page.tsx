@@ -9,6 +9,7 @@ import { query } from "@/lib/db";
 import { removeItemAction, chooseAlternativeAction } from "@/app/plan/actions";
 import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
 import { listProtocols } from "@/lib/protocols";
+import { listSnippets } from "@/lib/notes";
 import PlanItemFields from "@/components/PlanItemFields";
 import AddToPlanButton from "@/components/AddToPlanButton";
 import Toaster from "@/components/Toaster";
@@ -19,13 +20,15 @@ export default async function PlanBuilder({ params, searchParams }: { params: { 
   const requestedPlanId = searchParams.plan ? Number(searchParams.plan) : undefined;
 
   // All independent loads in one parallel wave (was ~5 sequential round-trips).
-  const [patient, planId, presets, allProducts, protocols] = await Promise.all([
+  const [patient, planId, presets, allProducts, protocols, snippets] = await Promise.all([
     getPatient(patientId),
     resolveDraftPlanId(patientId, requestedPlanId, u.userId),
     query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id"),
     listActiveProductsWithTags(),
     listProtocols(),
+    listSnippets(),
   ]);
+  const notePresets = snippets.filter((sn) => sn.category === "supplement").map((sn) => sn.text);
   if (!patient) notFound();
   const plan = await getPlan(planId);
 
@@ -170,9 +173,11 @@ export default async function PlanBuilder({ params, searchParams }: { params: { 
                   itemId={item.id}
                   patientId={patientId}
                   presets={presets}
+                  notePresets={notePresets}
                   currentText={item.dosingText}
                   currentDuration={item.duration}
                   currentOrderCode={item.orderCode}
+                  currentSize={item.size}
                   currentNote={item.note}
                 />
               </div>
