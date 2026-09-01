@@ -74,10 +74,20 @@ export default function PlanItemFields({
 
       {notePresets.length > 0 && (
         <label className="field">
-          <span className="field__label">Insert a note</span>
+          <span className="field__label">Insert a note <span className="field__hint">adds to the note below</span></span>
           <select
             value=""
-            onChange={(e) => { if (e.target.value) setNote(e.target.value); }}
+            onChange={(e) => {
+              const pick = e.target.value;
+              if (!pick) return;
+              // Append (don't overwrite) so presets and custom text stack up.
+              setNote((prev) => {
+                const s = prev.trim();
+                if (!s) return pick;
+                if (s.split(/\.\s*|\n/).map((x) => x.trim()).includes(pick.trim())) return s; // avoid dupes
+                return /[.!?]$/.test(s) ? `${s} ${pick}` : `${s}. ${pick}`;
+              });
+            }}
           >
             <option value="">— pick a ready-made note —</option>
             {notePresets.map((n, i) => (
@@ -88,8 +98,8 @@ export default function PlanItemFields({
       )}
 
       <label className="field field--full">
-        <span className="field__label">Note for this product <span className="field__hint">appears on the guide · pick above or type your own</span></span>
-        <input name="note" placeholder="e.g. only take at night" value={note} onChange={(e) => setNote(e.target.value)} />
+        <span className="field__label">Note for this product <span className="field__hint">appears on the guide · pick above (adds on) or type your own</span></span>
+        <textarea name="note" rows={2} placeholder="e.g. only take at night" value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
 
       <div className="rx-actions">
