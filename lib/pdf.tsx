@@ -1,8 +1,20 @@
-import { Document, Page, Text, View, Image, Link, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, Link, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
 import type { PatientDetail } from "@/lib/patients";
 import type { PlanGuide, SupplementRow } from "@/lib/guide";
 import { HEADER_IMAGE, FOOTER_IMAGE } from "@/lib/pdf-assets";
+import { MERRIWEATHER_REGULAR, MERRIWEATHER_BOLD } from "@/lib/pdf-fonts";
+
+// The whole prescription is set in Merriweather (embedded, no runtime fetch).
+Font.register({
+  family: "Merriweather",
+  fonts: [
+    { src: MERRIWEATHER_REGULAR },
+    { src: MERRIWEATHER_BOLD, fontWeight: 700 },
+  ],
+});
+// Merriweather has no italic face bundled — avoid @react-pdf trying to fetch one.
+Font.registerHyphenationCallback((word) => [word]);
 
 // The branded Supplement Instruction Guide. Free-text sections arrive resolved on
 // `PlanGuide`; the supplement plan arrives as structured rows (built from the plan
@@ -40,7 +52,7 @@ const MUTED = "#6B6B63";
 const RULE = "#E3D9C6";
 
 const s = StyleSheet.create({
-  page: { paddingTop: 212, paddingBottom: 200, paddingHorizontal: 44, fontSize: 11, color: INK, lineHeight: 1.5 },
+  page: { fontFamily: "Merriweather", paddingTop: 212, paddingBottom: 200, paddingHorizontal: 44, fontSize: 11, color: INK, lineHeight: 1.5 },
   headerBox: { position: "absolute", top: 26, left: 44, right: 44 },
   footerBox: { position: "absolute", bottom: 24, left: 44, right: 44 },
   bannerImg: { width: "100%" },
@@ -63,7 +75,7 @@ const s = StyleSheet.create({
   suppName: { fontSize: 11, color: INK, fontWeight: 700 },
   sub: { fontSize: 8.5, color: MUTED, marginTop: 1 },
   doseMain: { fontSize: 10.5, color: INK },
-  doseNote: { fontSize: 8.5, color: MUTED, marginTop: 2, fontStyle: "italic" },
+  doseNote: { fontSize: 8.5, color: MUTED, marginTop: 2 },
   buyLink: { fontSize: 9, color: GOLD, textDecoration: "underline", marginBottom: 2 },
   codePill: { fontSize: 8.5, color: INK, marginTop: 2 },
 });
