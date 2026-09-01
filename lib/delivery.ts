@@ -77,9 +77,9 @@ export async function listSnapshots(planId: number): Promise<{ id: number; sent_
   return query("SELECT id, sent_to_email, sent_at, created_at FROM plan_snapshots WHERE plan_id = ? ORDER BY created_at DESC", [planId]);
 }
 
-export async function listSnapshotsForPatient(patientId: number): Promise<{ id: number; sent_to_email: string|null; sent_at: string|null; created_at: string }[]> {
+export async function listSnapshotsForPatient(patientId: number): Promise<{ id: number; plan_id: number; sent_to_email: string|null; sent_at: string|null; created_at: string }[]> {
   return query(
-    `SELECT s.id, s.sent_to_email, s.sent_at, s.created_at
+    `SELECT s.id, s.plan_id, s.sent_to_email, s.sent_at, s.created_at
      FROM plan_snapshots s JOIN plans p ON p.id = s.plan_id
      WHERE p.patient_id = ? ORDER BY s.created_at DESC`,
     [patientId]

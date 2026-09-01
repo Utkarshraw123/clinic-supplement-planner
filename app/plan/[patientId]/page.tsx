@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getPatient } from "@/lib/patients";
-import { getOrCreateDraftPlan, getPlan } from "@/lib/plans";
+import { resolveDraftPlanId, getPlan } from "@/lib/plans";
 import { listActiveProductsWithTags } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
@@ -13,14 +13,15 @@ import PlanItemFields from "@/components/PlanItemFields";
 import AddToPlanButton from "@/components/AddToPlanButton";
 import Toaster from "@/components/Toaster";
 
-export default async function PlanBuilder({ params }: { params: { patientId: string } }) {
+export default async function PlanBuilder({ params, searchParams }: { params: { patientId: string }; searchParams: { plan?: string } }) {
   const u = await requireUser();
   const patientId = Number(params.patientId);
+  const requestedPlanId = searchParams.plan ? Number(searchParams.plan) : undefined;
 
   // All independent loads in one parallel wave (was ~5 sequential round-trips).
   const [patient, planId, presets, allProducts, protocols] = await Promise.all([
     getPatient(patientId),
-    getOrCreateDraftPlan(patientId, u.userId),
+    resolveDraftPlanId(patientId, requestedPlanId, u.userId),
     query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id"),
     listActiveProductsWithTags(),
     listProtocols(),

@@ -1,4 +1,4 @@
-import { query, execute } from "@/lib/db";
+import { query, execute, getDb } from "@/lib/db";
 import { getProductsByIds, type ProductDetail } from "@/lib/products";
 
 export { DURATION_OPTIONS } from "@/lib/durations";
@@ -82,4 +82,63 @@ export async function getPlan(planId: number): Promise<PlanDetail | null> {
 
 export async function finalisePlan(planId: number): Promise<void> {
   await execute("UPDATE plans SET status = 'finalised', updated_at = datetime('now') WHERE id = ?", [planId]);
+}
+
+// Copy an existing plan's items into a brand-new draft for the SAME patient, so a
+// follow-up can be re-prescribed and tweaked without rebuilding. Source is untouched.
+export async function duplicatePlan(sourcePlanId: number, authorId?: number): Promise<number> {
+  const base = await query<{ patient_id: number }>("SELECT patient_id FROM plans WHERE id = ?", [sourcePlanId]);
+  if (!base[0]) throw new Error(`duplicatePlan: source plan ${sourcePlanId} not found`);
+  const items = await query<{ product_id: number; dosing_preset_id: number|null; dosing_custom_text: string|null; chosen_alternative_id: number|null; note: string|null; duration: string|null; order_code: string|null; position: number }>(
+    `SELECT product_id, dosing_preset_id, dosing_custom_text, chosen_alternative_id, note, duration, order_code, position
+     FROM plan_items WHERE plan_id = ? ORDER BY position`, [sourcePlanId]
+  );
+  const rs = await execute("INSERT INTO plans (patient_id, author_id) VALUES (?, ?)", [base[0].patient_id, authorId ?? null]);
+  const newId = Number(rs.lastInsertRowid);
+  for (const it of items) {
+    await execute(
+      `INSERT INTO plan_items (plan_id, product_id, dosing_preset_id, dosing_custom_text, chosen_alternative_id, note, duration, order_code, position)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [newId, it.product_id, it.dosing_preset_id, it.dosing_custom_text, it.chosen_alternative_id, it.note, it.duration, it.order_code, it.position]
+    );
+  }
+  return newId;
+}
+
+// Delete a draft plan and everything attached to it (items + any saved guide), in one
+// write batch. Leaves the patient, other plans and snapshots alone. UI calls this on drafts.
+export async function deletePlan(planId: number): Promise<void> {
+  await getDb().batch(
+    [
+      { sql: "DELETE FROM plan_items WHERE plan_id = ?", args: [planId] },
+      { sql: "DELETE FROM plan_guide WHERE plan_id = ?", args: [planId] },
+      { sql: "DELETE FROM plans WHERE id = ?", args: [planId] },
+    ],
+    "write"
+  );
+}
+
+// Which draft to open in the builder: the requested one if it's a draft of this patient,
+// otherwise the patient's default (newest / freshly-created) draft.
+export async function resolveDraftPlanId(patientId: number, requestedPlanId?: number, authorId?: number): Promise<number> {
+  if (requestedPlanId) {
+    const rows = await query<{ id: number }>(
+      "SELECT id FROM plans WHERE id = ? AND patient_id = ? AND status = 'draft'", [requestedPlanId, patientId]
+    );
+    if (rows[0]) return rows[0].id;
+  }
+  return getOrCreateDraftPlan(patientId, authorId);
+}
+
+export async function listDraftPlans(): Promise<{ planId: number; patientId: number; patientName: string; itemCount: number; updatedAt: string; authorName: string|null }[]> {
+  return query(
+    `SELECT p.id AS planId, p.patient_id AS patientId, pt.name AS patientName,
+            (SELECT COUNT(*) FROM plan_items pi WHERE pi.plan_id = p.id) AS itemCount,
+            p.updated_at AS updatedAt, u.name AS authorName
+     FROM plans p
+     JOIN patients pt ON pt.id = p.patient_id
+     LEFT JOIN users u ON u.id = p.author_id
+     WHERE p.status = 'draft'
+     ORDER BY p.updated_at DESC`
+  );
 }

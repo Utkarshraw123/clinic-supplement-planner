@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
-import { addPlanItem, removePlanItem, setItemDosing, setItemAlternative, setItemNote, setItemDuration, setItemOrderCode } from "@/lib/plans";
+import { addPlanItem, removePlanItem, setItemDosing, setItemAlternative, setItemNote, setItemDuration, setItemOrderCode, duplicatePlan } from "@/lib/plans";
 import { finaliseAndSend, finalisePlanToSnapshot, sendSnapshotEmail } from "@/lib/delivery";
 
 export async function addItemAction(formData: FormData) {
@@ -10,6 +10,15 @@ export async function addItemAction(formData: FormData) {
   const planId = Number(formData.get("planId"));
   await addPlanItem(planId, Number(formData.get("productId")));
   revalidatePath(`/plan/${formData.get("patientId")}`);
+}
+
+// Copy an existing plan into a fresh draft for the same patient, then open it in the builder.
+export async function duplicatePlanAction(formData: FormData) {
+  const u = await requireUser();
+  const sourcePlanId = Number(formData.get("sourcePlanId"));
+  const patientId = String(formData.get("patientId"));
+  const newId = await duplicatePlan(sourcePlanId, u.userId);
+  redirect(`/plan/${patientId}?plan=${newId}`);
 }
 
 export async function removeItemAction(formData: FormData) {

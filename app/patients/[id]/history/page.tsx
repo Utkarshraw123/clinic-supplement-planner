@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getPatient } from "@/lib/patients";
 import { listSnapshotsForPatient } from "@/lib/delivery";
-import { sendSnapshotAction } from "@/app/plan/actions";
+import { sendSnapshotAction, duplicatePlanAction } from "@/app/plan/actions";
 
 export default async function HistoryPage({ params }: { params: { id: string } }) {
   await requireUser();
@@ -37,9 +37,14 @@ export default async function HistoryPage({ params }: { params: { id: string } }
                     {s.sent_to_email ? ` · ${s.sent_to_email}` : ""}
                   </span>
                 </div>
-                <div style={{ display: "flex", gap: 6 }}>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   <a href={`/api/snapshots/${s.id}/pdf`} target="_blank" className="btn btn--sm">View</a>
                   <a href={`/api/snapshots/${s.id}/pdf?download=1`} className="btn btn--sm btn--primary">Download PDF</a>
+                  <form action={duplicatePlanAction}>
+                    <input type="hidden" name="sourcePlanId" value={s.plan_id} />
+                    <input type="hidden" name="patientId" value={patient.id} />
+                    <button type="submit" className="btn--sm" title="Copy this plan into a new editable draft">Duplicate → new draft</button>
+                  </form>
                 </div>
               </div>
               {!sent && (

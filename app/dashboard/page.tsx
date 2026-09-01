@@ -20,11 +20,11 @@ export default async function DashboardPage() {
   ]);
 
   const cards = [
-    { label: "Patients", value: stats.patientCount },
-    { label: "Draft plans", value: stats.draftPlans },
+    { label: "Patients", value: stats.patientCount, href: "/patients" },
+    { label: "Draft plans", value: stats.draftPlans, href: "/plans/drafts" },
     { label: "Sent this week", value: stats.plansSentThisWeek },
     { label: "Sent all time", value: stats.plansSentAllTime },
-  ];
+  ] as { label: string; value: number; href?: string }[];
 
   return (
     <div className="stack" style={{ gap: 24 }}>
@@ -38,12 +38,19 @@ export default async function DashboardPage() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14 }}>
-        {cards.map((c) => (
-          <div key={c.label} className="card" style={{ padding: "18px 20px" }}>
-            <div className="stat-num">{c.value}</div>
-            <div className="eyebrow" style={{ marginTop: 6 }}>{c.label}</div>
-          </div>
-        ))}
+        {cards.map((c) => {
+          const inner = (
+            <>
+              <div className="stat-num">{c.value}</div>
+              <div className="eyebrow" style={{ marginTop: 6 }}>{c.label}{c.href && <span aria-hidden="true" style={{ color: "var(--terracotta)", marginLeft: 6 }}>→</span>}</div>
+            </>
+          );
+          return c.href ? (
+            <Link key={c.label} href={c.href} className="card stat-card--link" style={{ padding: "18px 20px", textDecoration: "none", color: "inherit", display: "block" }}>{inner}</Link>
+          ) : (
+            <div key={c.label} className="card" style={{ padding: "18px 20px" }}>{inner}</div>
+          );
+        })}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>

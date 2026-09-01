@@ -4,7 +4,7 @@ import { createBrand } from "@/lib/brands";
 import { createProduct, addSupplierLink, linkAlternative } from "@/lib/products";
 import { createPatient } from "@/lib/patients";
 import * as Plans from "@/lib/plans";
-import { execute } from "@/lib/db";
+import { execute, query } from "@/lib/db";
 
 describe("plans", () => {
   let patientId = 0, productId = 0, presetId = 0;
@@ -69,6 +69,79 @@ describe("plans", () => {
     item = plan!.items.find((i) => i.id === itemId)!;
     expect(item.duration).toBeNull();
     expect(item.orderCode).toBeNull();
+  });
+
+  it("duplicates a plan into a new draft for the same patient (all fields copied, source untouched)", async () => {
+    const brandId = await createBrand({ name: `Dup ${Date.now()}` });
+    const p1 = await createProduct({ brandId, name: "Dup Magnesium", form: "capsule" });
+    const p2 = await createProduct({ brandId, name: "Dup Iron", form: "capsule" });
+    const patient = await createPatient({ name: "Dup P", dob: "1990-01-01" });
+    const src = await Plans.getOrCreateDraftPlan(patient);
+    const i1 = await Plans.addPlanItem(src, p1);
+    await Plans.addPlanItem(src, p2);
+    await Plans.setItemDosing(i1, null, "1 capsule at night");
+    await Plans.setItemDuration(i1, "3 months");
+    await Plans.setItemOrderCode(i1, "WN10");
+    await Plans.setItemNote(i1, "with food");
+    await Plans.finalisePlan(src);
+
+    const dupId = await Plans.duplicatePlan(src);
+    expect(dupId).not.toBe(src);
+    const dup = (await Plans.getPlan(dupId))!;
+    expect(dup.status).toBe("draft");
+    expect(dup.patientId).toBe(patient);
+    expect(dup.items.map((i) => i.product.name)).toEqual(["Dup Magnesium", "Dup Iron"]);
+    const mag = dup.items.find((i) => i.product.name === "Dup Magnesium")!;
+    expect(mag.dosingText).toBe("1 capsule at night");
+    expect(mag.duration).toBe("3 months");
+    expect(mag.orderCode).toBe("WN10");
+    expect(mag.note).toBe("with food");
+    // source untouched
+    const source = (await Plans.getPlan(src))!;
+    expect(source.status).toBe("finalised");
+    expect(source.items.length).toBe(2);
+  });
+
+  it("deletes a draft plan and its items but leaves the patient and other plans", async () => {
+    const brandId = await createBrand({ name: `Del ${Date.now()}` });
+    const prod = await createProduct({ brandId, name: "Del Zinc", form: "capsule" });
+    const patient = await createPatient({ name: "Del P", dob: "1990-01-01" });
+    const keep = await Plans.getOrCreateDraftPlan(patient);
+    await Plans.addPlanItem(keep, prod);
+    await Plans.finalisePlan(keep); // keep this one as a finalised plan
+    const doomed = await Plans.duplicatePlan(keep);
+    await Plans.deletePlan(doomed);
+
+    expect(await Plans.getPlan(doomed)).toBeNull();
+    expect((await Plans.getPlan(keep))!.items.length).toBe(1); // untouched
+    const stillThere = await createPatient({ name: "unrelated", dob: "1990-01-01" });
+    expect(stillThere).toBeGreaterThan(0);
+    const patientRow = await query<{ id: number }>("SELECT id FROM patients WHERE id = ?", [patient]);
+    expect(patientRow.length).toBe(1); // patient survives
+  });
+
+  it("resolveDraftPlanId honours a valid draft of the patient, else the default draft", async () => {
+    const patient = await createPatient({ name: "Resolve P", dob: "1990-01-01" });
+    const def = await Plans.getOrCreateDraftPlan(patient);
+    // A second draft via duplicate of the (empty) default:
+    const second = await Plans.duplicatePlan(def);
+    expect(await Plans.resolveDraftPlanId(patient, second)).toBe(second);
+    // Requesting a non-existent / non-owned id falls back to the patient's default draft.
+    const fallback = await Plans.resolveDraftPlanId(patient, 999999);
+    expect([def, second]).toContain(fallback);
+  });
+
+  it("listDraftPlans returns only drafts with item counts and patient names", async () => {
+    const brandId = await createBrand({ name: `LD ${Date.now()}` });
+    const prod = await createProduct({ brandId, name: "LD Vit D", form: "capsule" });
+    const patient = await createPatient({ name: `ListDraft P ${Date.now()}`, dob: "1990-01-01" });
+    const plan = await Plans.getOrCreateDraftPlan(patient);
+    await Plans.addPlanItem(plan, prod);
+    const drafts = await Plans.listDraftPlans();
+    const mine = drafts.find((d) => d.planId === plan);
+    expect(mine).toBeTruthy();
+    expect(mine!.patientName).toContain("ListDraft P");
+    expect(Number(mine!.itemCount)).toBe(1);
   });
 
   it("finalises a plan", async () => {
