@@ -9,6 +9,7 @@ import { saveProductAction, addSupplierAction, removeSupplierAction } from "@/ap
 import EnrichAssist from "@/components/EnrichAssist";
 import SnippetTextarea from "@/components/SnippetTextarea";
 import ProductTagsForm, { type TagSection } from "@/components/ProductTagsForm";
+import RemoveProductButton from "@/components/RemoveProductButton";
 import Toaster from "@/components/Toaster";
 
 const TAG_META: { type: TermType; label: string; hint: string }[] = [
@@ -100,6 +101,17 @@ export default async function ProductEditor({ params }: { params: { id: string }
           </form>
         </div>
 
+      </div>
+
+      <div className="card" style={{ borderColor: "var(--danger)" }}>
+        <h2 style={{ marginBottom: 4, color: "var(--danger)" }}>Danger zone</h2>
+        <div className="row-between" style={{ alignItems: "center", gap: 12 }}>
+          <p className="muted" style={{ margin: 0 }}>
+            Remove this product from the catalogue. It will no longer appear in the catalogue
+            or when building plans. Plans already sent are unaffected.
+          </p>
+          <RemoveProductButton productId={product.id} productName={product.name} />
+        </div>
       </div>
     </div>
   );

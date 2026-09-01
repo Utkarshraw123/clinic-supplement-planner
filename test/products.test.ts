@@ -44,4 +44,20 @@ describe("products", () => {
     const detail = await P.getProduct(id);
     expect(detail!.tags.map((t) => t.label)).toEqual(["zinc"]);
   });
+
+  it("archiveProduct removes the product from the active catalogue and search", async () => {
+    const id = await P.createProduct({ brandId, name: `Discontinue me ${Date.now()}`, form: "capsule" });
+    const name = (await P.getProduct(id))!.name;
+
+    // present before archiving
+    expect((await P.listActiveProductsWithTags()).some((p) => p.id === id)).toBe(true);
+    expect((await P.searchProducts(name)).some((h) => h.id === id)).toBe(true);
+
+    await P.archiveProduct(id);
+
+    // gone from the catalogue + plan builder + search, but the row still exists
+    expect((await P.listActiveProductsWithTags()).some((p) => p.id === id)).toBe(false);
+    expect((await P.searchProducts(name)).some((h) => h.id === id)).toBe(false);
+    expect((await P.getProduct(id))!.status).toBe("archived");
+  });
 });

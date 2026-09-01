@@ -106,3 +106,12 @@ export async function archiveProductAction(formData: FormData) {
   await P.archiveProduct(Number(formData.get("id")));
   redirect("/catalog");
 }
+
+// Remove a product from the catalogue (soft delete via archive). It disappears
+// from the catalogue and plan builder; past plans/snapshots are untouched.
+export async function removeProductAction(id: number) {
+  await requireUser();
+  await P.archiveProduct(id);
+  revalidatePath("/catalog");
+  redirect("/catalog");
+}
