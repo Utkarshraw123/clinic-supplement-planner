@@ -27,8 +27,8 @@ export default function LoginPage() {
     <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "var(--cream)" }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 22 }}>
-          <div style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: 26, fontWeight: 600, color: "var(--brand-ink)" }}>Practitioner tools</div>
-          <p className="muted" style={{ marginTop: 4 }}>The clinic supplement planner</p>
+          <div style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: 27, fontWeight: 600, color: "var(--brand-ink)", lineHeight: 1.15, textWrap: "balance", maxWidth: 340, marginInline: "auto" }}>Welcome to Lorna&apos;s world of nutrition</div>
+          <p className="muted" style={{ marginTop: 8 }}>Personalised supplement plans, thoughtfully made.</p>
         </div>
         <div className="card card--plain card--pad-lg" style={{ boxShadow: "var(--shadow-md)" }}>
           <h1 style={{ fontSize: 22, marginBottom: 4 }}>Sign in</h1>
