@@ -21,6 +21,11 @@ export function flagProductForPatient(product: ProductDetail, attributes: Patien
   const MARINE = new Set(["fish", "omega 3", "omega-3", "collagen", "marine collagen"]);
   const productIsMarine = productAllergenIngredient.some((label) => MARINE.has(label));
 
+  // A "vegan but fish/marine is fine" diet — matches any such wording
+  // ("Vegan but Fish Product", "Vegan but Fish Oil is fine", "Vegan (marine OK)", …),
+  // so a marine product (or a plain vegan one) does not warn for these patients.
+  const isVeganMarineDiet = (d: string) => d.startsWith("vegan") && /(fish|marine)/.test(d);
+
   for (const label of productAllergenIngredient) {
     if (allergyLabels.has(label)) flags.push({ level: "block", reason: `contains ${label} (patient allergy)` });
   }
@@ -30,8 +35,8 @@ export function flagProductForPatient(product: ProductDetail, attributes: Patien
   if (productDiets.length > 0) {
     for (const diet of dietPrefs) {
       if (productDiets.includes(diet)) continue;
-      // "Vegan (marine OK)" is satisfied by a vegan product OR any marine-sourced one.
-      if (diet === "vegan (marine ok)" && (productDiets.includes("vegan") || productIsMarine)) continue;
+      // A "vegan but fish/marine OK" diet is satisfied by a vegan product OR any marine-sourced one.
+      if (isVeganMarineDiet(diet) && (productDiets.includes("vegan") || productIsMarine)) continue;
       flags.push({ level: "warn", reason: `not tagged ${diet}` });
     }
   }

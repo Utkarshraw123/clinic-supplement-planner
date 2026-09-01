@@ -35,11 +35,19 @@ describe("flagging", () => {
     expect(flagProductForPatient(noDietInfo, veganPatient)).toHaveLength(0);
   });
 
-  it("'Vegan (marine OK)' accepts marine products but still warns on other non-vegan ones", () => {
-    const marineOk: PatientAttr[] = [{ termId: 3, label: "Vegan (marine OK)", attrType: "diet" }];
+  // Every "vegan but fish/marine OK" wording gets the marine exception (not just one exact label).
+  it.each([
+    "Vegan but Fish Product",
+    "Vegan but Fish Oil is fine",
+    "Vegan (marine OK)",
+  ])("'%s' accepts marine products but still warns on other non-vegan ones", (label) => {
+    const marineOk: PatientAttr[] = [{ termId: 3, label, attrType: "diet" }];
     // A marine omega-3 product (tagged fish) with a non-vegan diet tag: no diet warn.
     const omega = product({ tags: [{ termId: 4, label: "fish", tagType: "allergen" }, { termId: 5, label: "dairy free", tagType: "diet" }] });
     expect(flagProductForPatient(omega, marineOk).some((f) => f.reason.startsWith("not tagged"))).toBe(false);
+    // Marine collagen is also accepted.
+    const collagen = product({ tags: [{ termId: 8, label: "marine collagen", tagType: "ingredient" }, { termId: 9, label: "vegetarian", tagType: "diet" }] });
+    expect(flagProductForPatient(collagen, marineOk).some((f) => f.reason.startsWith("not tagged"))).toBe(false);
     // A non-marine, non-vegan product still warns.
     const gelatine = product({ tags: [{ termId: 6, label: "vegetarian", tagType: "diet" }] });
     expect(flagProductForPatient(gelatine, marineOk).some((f) => f.reason.startsWith("not tagged"))).toBe(true);

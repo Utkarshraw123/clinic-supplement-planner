@@ -1,13 +1,17 @@
 /**
- * Seed the "Vegan (marine OK)" dietary option (#1) and a set of common medications
+ * Seed the "Vegan but Fish Product" dietary option (#1) and a set of common medications
  * (#12) into the controlled taxonomies, so they're one-click selectable when setting
  * up a patient. Idempotent (taxonomy_terms is UNIQUE(type,label)). Run local + prod:
  *   npx tsx scripts/seed-clinical-terms.ts
+ *
+ * "Vegan but Fish Product" = a vegan patient who will still take fish/marine-sourced
+ * supplements (omega-3 fish oil, marine collagen). lib/flagging.ts gives any such
+ * "vegan + fish/marine" diet the marine exception, so those products don't warn.
  */
 import { runMigrations } from "@/scripts/migrate";
 import { addTerm } from "@/lib/taxonomies";
 
-const DIETS = ["Vegan (marine OK)"];
+const DIETS = ["Vegan but Fish Product"];
 
 // Common medications a nutrition patient may be on — added to the "caution" taxonomy,
 // which is the patient record's "Medications / conditions" picker.
