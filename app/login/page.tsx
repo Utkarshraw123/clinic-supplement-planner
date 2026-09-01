@@ -35,8 +35,8 @@ export default function LoginPage() {
           <p className="muted" style={{ marginBottom: 20 }}>Welcome back.</p>
           <form onSubmit={submit} className="stack" style={{ gap: 14 }}>
             <label className="stack" style={{ gap: 6 }}>
-              <span>Email</span>
-              <input type="email" placeholder="name@clinic.co.uk" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <span>Email or username</span>
+              <input type="text" autoComplete="username" placeholder="lorna123 or name@clinic.co.uk" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </label>
             <label className="stack" style={{ gap: 6 }}>
               <span>Password</span>

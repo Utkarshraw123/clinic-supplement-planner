@@ -22,8 +22,8 @@ export default async function UsersPage() {
                 <input name="name" defaultValue={u.name} required />
               </label>
               <label className="field">
-                <span className="field__label">Email</span>
-                <input name="email" type="email" defaultValue={u.email} required />
+                <span className="field__label">Email or username</span>
+                <input name="email" type="text" defaultValue={u.email} required />
               </label>
               <label className="field" style={{ maxWidth: 120 }}>
                 <span className="field__label">Role</span>
