@@ -12,6 +12,7 @@ import { listProtocols } from "@/lib/protocols";
 import { listSnippets } from "@/lib/notes";
 import PlanItemFields from "@/components/PlanItemFields";
 import AddToPlanButton from "@/components/AddToPlanButton";
+import AddProductSearch from "@/components/AddProductSearch";
 import Toaster from "@/components/Toaster";
 
 export default async function PlanBuilder({ params, searchParams }: { params: { patientId: string }; searchParams: { plan?: string } }) {
@@ -118,14 +119,11 @@ export default async function PlanBuilder({ params, searchParams }: { params: { 
           <h2>Add products to the prescription</h2>
           <span className="muted-xs">{catalog.length} available</span>
         </div>
-        <div>
-          {catalog.slice(0, 50).map((c) => (
-            <div key={c.id} className="list-row">
-              <span style={{ fontSize: 14 }}>{c.name} <span className="muted-xs">· {c.brand_name}{c.form ? ` · ${c.form}` : ""}</span></span>
-              <AddToPlanButton planId={planId} patientId={patientId} productId={c.id} />
-            </div>
-          ))}
-        </div>
+        <AddProductSearch
+          planId={planId}
+          patientId={patientId}
+          catalog={catalog.map((c) => ({ id: c.id, name: c.name, brand_name: c.brand_name, form: c.form }))}
+        />
       </div>
 
       <div>

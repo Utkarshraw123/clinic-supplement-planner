@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { requireUser } from "@/lib/auth/current-user";
 import { listProtocols } from "@/lib/protocols";
-import { deleteProtocolAction, createProtocolAction } from "./actions";
+import { createProtocolAction } from "./actions";
+import ProtocolSearch from "@/components/ProtocolSearch";
 
 export default async function ProtocolsPage() {
   await requireUser();
@@ -26,24 +26,7 @@ export default async function ProtocolsPage() {
       {protocols.length === 0 ? (
         <div className="card"><p className="muted">No protocols yet. Create one above, or build a patient&apos;s plan and use “Save as protocol”.</p></div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-          {protocols.map((p) => (
-            <div key={p.id} className="card stack" style={{ gap: 8 }}>
-              <div className="row-between">
-                <h2 style={{ fontSize: 17 }}>{p.name}</h2>
-                <span className="badge badge--neutral">{p.itemCount} {p.itemCount === 1 ? "item" : "items"}</span>
-              </div>
-              {p.description && <p className="muted" style={{ fontSize: 13 }}>{p.description}</p>}
-              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                <Link href={`/protocols/${p.id}`} className="btn btn--sm btn--primary">Edit</Link>
-                <form action={deleteProtocolAction}>
-                  <input type="hidden" name="id" value={p.id} />
-                  <button className="btn--sm">Delete</button>
-                </form>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ProtocolSearch protocols={protocols.map((p) => ({ id: p.id, name: p.name, description: p.description, itemCount: p.itemCount }))} />
       )}
     </div>
   );
