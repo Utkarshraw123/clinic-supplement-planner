@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
-import { getProduct, searchProducts } from "@/lib/products";
+import { getProduct } from "@/lib/products";
 import { listBrands } from "@/lib/brands";
 import { listTerms, type TermType } from "@/lib/taxonomies";
 import { listSnippets } from "@/lib/notes";
-import { saveProductAction, addSupplierAction, removeSupplierAction, addAlternativeAction } from "@/app/catalog/products/actions";
+import { saveProductAction, addSupplierAction, removeSupplierAction } from "@/app/catalog/products/actions";
 import EnrichAssist from "@/components/EnrichAssist";
 import SnippetTextarea from "@/components/SnippetTextarea";
 import ProductTagsForm, { type TagSection } from "@/components/ProductTagsForm";
@@ -27,7 +27,6 @@ export default async function ProductEditor({ params }: { params: { id: string }
   const brands = await listBrands();
   const allTerms = await listTerms();
   const snippets = await listSnippets("supplement");
-  const others = (await searchProducts("")).filter((p) => p.id !== id);
 
   const tagSections: TagSection[] = TAG_META.map(({ type, label, hint }) => ({
     type, label, hint,
@@ -101,18 +100,6 @@ export default async function ProductEditor({ params }: { params: { id: string }
           </form>
         </div>
 
-        <div className="card">
-          <h2 style={{ marginBottom: 10 }}>Alternative formats</h2>
-          <div>
-            {product.alternatives.length === 0 && <p className="muted" style={{ marginBottom: 8 }}>No alternatives linked.</p>}
-            {product.alternatives.map((a) => <div key={a.id} className="list-row">{a.name}</div>)}
-          </div>
-          <form action={addAlternativeAction} style={{ display: "flex", gap: 6, marginTop: 10 }}>
-            <input type="hidden" name="productId" value={product.id} />
-            <select name="altId">{others.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select>
-            <button type="submit" className="btn--sm">Link</button>
-          </form>
-        </div>
       </div>
     </div>
   );

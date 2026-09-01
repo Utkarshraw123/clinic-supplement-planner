@@ -17,6 +17,10 @@ export function flagProductForPatient(product: ProductDetail, attributes: Patien
   const productCautions = product.tags.filter((t) => t.tagType === "caution").map((t) => norm(t.label));
   const productDiets = product.tags.filter((t) => t.tagType === "diet").map((t) => norm(t.label));
 
+  // Marine-sourced products: some vegans accept omega-3 fish oil / marine collagen.
+  const MARINE = new Set(["fish", "omega 3", "omega-3", "collagen", "marine collagen"]);
+  const productIsMarine = productAllergenIngredient.some((label) => MARINE.has(label));
+
   for (const label of productAllergenIngredient) {
     if (allergyLabels.has(label)) flags.push({ level: "block", reason: `contains ${label} (patient allergy)` });
   }
@@ -25,7 +29,10 @@ export function flagProductForPatient(product: ProductDetail, attributes: Patien
   }
   if (productDiets.length > 0) {
     for (const diet of dietPrefs) {
-      if (!productDiets.includes(diet)) flags.push({ level: "warn", reason: `not tagged ${diet}` });
+      if (productDiets.includes(diet)) continue;
+      // "Vegan (marine OK)" is satisfied by a vegan product OR any marine-sourced one.
+      if (diet === "vegan (marine ok)" && (productDiets.includes("vegan") || productIsMarine)) continue;
+      flags.push({ level: "warn", reason: `not tagged ${diet}` });
     }
   }
   return flags;

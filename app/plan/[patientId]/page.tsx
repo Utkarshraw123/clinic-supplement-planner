@@ -6,7 +6,7 @@ import { listActiveProductsWithTags } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
 import { query } from "@/lib/db";
-import { removeItemAction, chooseAlternativeAction } from "@/app/plan/actions";
+import { removeItemAction } from "@/app/plan/actions";
 import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
 import { listProtocols } from "@/lib/protocols";
 import { listSnippets } from "@/lib/notes";
@@ -153,20 +153,6 @@ export default async function PlanBuilder({ params, searchParams }: { params: { 
                 </div>
               )}
               <div className="rx-details">
-                {item.product.alternatives.length > 0 && (
-                  <form action={chooseAlternativeAction} className="rx-alt">
-                    <label className="field" style={{ flex: 1, minWidth: 220 }}>
-                      <span className="field__label">Alternative format</span>
-                      <input type="hidden" name="itemId" value={item.id} />
-                      <input type="hidden" name="patientId" value={patientId} />
-                      <select name="altId" defaultValue={item.chosenAlternativeId ?? ""}>
-                        <option value="">No alternative offered</option>
-                        {item.product.alternatives.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-                      </select>
-                    </label>
-                    <button type="submit" className="btn--sm">Set</button>
-                  </form>
-                )}
                 <PlanItemFields
                   itemId={item.id}
                   patientId={patientId}

@@ -35,6 +35,19 @@ describe("flagging", () => {
     expect(flagProductForPatient(noDietInfo, veganPatient)).toHaveLength(0);
   });
 
+  it("'Vegan (marine OK)' accepts marine products but still warns on other non-vegan ones", () => {
+    const marineOk: PatientAttr[] = [{ termId: 3, label: "Vegan (marine OK)", attrType: "diet" }];
+    // A marine omega-3 product (tagged fish) with a non-vegan diet tag: no diet warn.
+    const omega = product({ tags: [{ termId: 4, label: "fish", tagType: "allergen" }, { termId: 5, label: "dairy free", tagType: "diet" }] });
+    expect(flagProductForPatient(omega, marineOk).some((f) => f.reason.startsWith("not tagged"))).toBe(false);
+    // A non-marine, non-vegan product still warns.
+    const gelatine = product({ tags: [{ termId: 6, label: "vegetarian", tagType: "diet" }] });
+    expect(flagProductForPatient(gelatine, marineOk).some((f) => f.reason.startsWith("not tagged"))).toBe(true);
+    // A plain vegan patient is NOT given the marine exception.
+    const veganOnly: PatientAttr[] = [{ termId: 7, label: "vegan", attrType: "diet" }];
+    expect(flagProductForPatient(omega, veganOnly).some((f) => f.reason.startsWith("not tagged"))).toBe(true);
+  });
+
   it("scores concern/goal overlap and never blocks on score alone", () => {
     const p = product({ tags: [{ termId: 5, label: "energy", tagType: "concern" }, { termId: 6, label: "sleep", tagType: "concern" }] });
     const attrs: PatientAttr[] = [{ termId: 7, label: "energy", attrType: "goal" }];
