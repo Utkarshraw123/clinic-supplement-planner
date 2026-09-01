@@ -25,9 +25,17 @@ state + the exact next steps.
 
 ---
 
-## 1. ▶ NEXT UP — the ONLY unfinished feedback item: **E2, import the Cytoplan range (#6)**
+## 1. ✅ DONE — E2, import the Cytoplan range (#6) — 2026-09-01, HEAD `c15dc3b`, seeded local + PROD
 
-The user chose **"attempt a full scrape"** (over a curated list). I got partway; **nothing has been written or committed** — the scrape data lives only in the (now-gone) browser tab, so re-run it. Here is everything learned so the next session doesn't re-derive it.
+**COMPLETE.** User revised the plan from a full scrape to a **CURATED** import (177 → **84 products**) scoped to Lorna Driver-Davies's practice (women's hormonal health, gut, nervous system/stress/sleep, energy/methylation, thyroid, foundational multis/minerals, detox/liver, immunity, skin/collagen, blood sugar). Files: `scripts/data/cytoplan.json` (84) + `scripts/seed-cytoplan.ts` (mirrors seed-wild-nutrition.ts, idempotent skip-by-name). Committed `c15dc3b`, pushed, and **seeded on PROD** (Cytoplan now = 84 products; total prod catalogue = 84 Cytoplan + 44 Wild Nutrition). 93 tests still pass.
+- **Scrape method (worked):** sitemap_product.xml (177 urls) → same-origin `fetch('/<slug>')` from the browser pane → picked the JSON-LD Product whose `offers.url` matched the page (multi-block bug fixed). `organic-echinacea` DROPPED — it sits behind a Cytoplan practitioner login ("Practitioners Only" page, no product data).
+- **Tags** derived against the existing controlled vocab (reused concern/allergen/diet labels; added 2 concerns: **Thyroid**, **Blood Sugar**). **6 auto-derived allergen tags, ALL still needing Lorna's sign-off** (see §3.4): Menopause Support→soya, CytoProtect GI Tract→milk (lactoferrin), Fish Oil Capsules→fish, Krill Oil→shellfish, Marine Collagen→fish, Organic Lion's Mane→mushroom.
+- **Excluded 93:** pet range, marketing bundles, books/kits, paediatric-only, male-reproductive, OA-joint, niche cardiovascular, duplicate nutrient forms (kept 2–3 forms each), single-organ/misc.
+- **Review + allergen sign-off artifact for Lorna:** https://claude.ai/code/artifact/a41a5445-7bc2-4ab3-8a0b-a024663cac03 (84 grouped by clinical area + allergen table + exclusions).
+- **Still TODO (user/Lorna actions):** set the Cytoplan brand **promo code** on `/catalog/brands`; Lorna's Cytoplan **allergen sign-off** (§3.4) before those 6 tags are trusted; note Cytoplan "Food State" nutrients are grown on a Lactobacillus/yeast base → verify labels for trace milk/soya.
+
+### Original scrape notes (kept for reference)
+The user originally chose **"attempt a full scrape"**. Here is everything learned about scraping Cytoplan.
 
 ### What Cytoplan is
 - `cytoplan.co.uk` is **headless Magento** with a client-rendered (JS) product grid. `/products.json` and direct `curl` are **403 (bot-blocked)**. Category/all-products page HTML only contains a handful of products (grid loads via API), so scraping category HTML does NOT give the full list.
