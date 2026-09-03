@@ -70,7 +70,8 @@ CREATE TABLE IF NOT EXISTS clinic_settings (
   logo_url TEXT,
   address TEXT,
   contact TEXT,
-  email_from TEXT
+  email_from TEXT,
+  letterhead_template TEXT
 );
 
 CREATE TABLE IF NOT EXISTS patients (

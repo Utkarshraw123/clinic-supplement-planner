@@ -26,6 +26,7 @@ export async function runMigrations(): Promise<void> {
   await ensureColumn("brands", "promo_code", "TEXT");        // one promo code per brand, applied to all its products
   await ensureColumn("plan_guide", "notes", "TEXT");         // closing notes block on the prescription
   await ensureColumn("note_snippets", "category", "TEXT");   // supplement | lifestyle | dietary | general
+  await ensureColumn("clinic_settings", "letterhead_template", "TEXT"); // prescription PDF colourway (see lib/pdf-themes.ts)
 }
 
 if (process.argv[1] && process.argv[1].endsWith("migrate.ts")) {

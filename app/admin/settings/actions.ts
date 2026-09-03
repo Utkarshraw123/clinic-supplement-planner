@@ -11,6 +11,7 @@ export async function saveSettingsAction(formData: FormData) {
     address: String(formData.get("address") || "") || null,
     contact: String(formData.get("contact") || "") || null,
     email_from: String(formData.get("email_from") || "") || null,
+    letterhead_template: String(formData.get("letterhead_template") || "") || null,
   });
   revalidatePath("/admin/settings");
 }

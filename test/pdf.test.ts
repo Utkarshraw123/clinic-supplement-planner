@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderPlanPdf, buildGuidePdfData, type GuidePdfData } from "@/lib/pdf";
+import { LETTERHEAD_THEMES, getLetterheadTheme, DEFAULT_LETTERHEAD } from "@/lib/pdf-themes";
 import type { PatientDetail } from "@/lib/patients";
 import type { SupplementRow } from "@/lib/guide";
 
@@ -43,6 +44,27 @@ describe("pdf", () => {
     // More rows → a materially larger PDF (content isn't dropped/clipped).
     expect(many.length).toBeGreaterThan(few.length);
     expect(many.subarray(0, 5).toString("latin1")).toBe("%PDF-");
+  });
+
+  it("renders a valid PDF for every letterhead theme, and falls back for unknown ids", async () => {
+    const data: GuidePdfData = {
+      clientName: "Emma Hartley", consultationDate: "2026-08-26", intro: "Hi Emma.",
+      nextConsultation: "", lifestyle: "Sleep well.", dietary: "",
+      supplements: [row({ name: "Food-Grown Magnesium", code: "WN10", buyLinks: [{ label: "Wild Nutrition", url: "https://x.test/y" }] })],
+      medsText: "", notes: "Thanks.",
+    };
+    for (const t of LETTERHEAD_THEMES) {
+      const buf = await renderPlanPdf(data, t.id);
+      expect(buf.subarray(0, 5).toString("latin1"), `theme ${t.id}`).toBe("%PDF-");
+      expect(buf.length).toBeGreaterThan(500);
+    }
+    // Unknown / missing template must not throw — it resolves to the default theme.
+    for (const bad of ["nope", "", null, undefined]) {
+      const buf = await renderPlanPdf(data, bad as string | null | undefined);
+      expect(buf.subarray(0, 5).toString("latin1")).toBe("%PDF-");
+    }
+    expect(getLetterheadTheme("nope").id).toBe(DEFAULT_LETTERHEAD);
+    expect(getLetterheadTheme("sage-green").accent).toBe("#5E7355");
   });
 
   it("maps a patient + guide + supplements into pdf data, trimming blanks", () => {

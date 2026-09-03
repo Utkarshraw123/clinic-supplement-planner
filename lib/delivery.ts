@@ -30,7 +30,8 @@ export async function finalisePlanToSnapshot(input: { planId: number; actorId?: 
   // vendor's buy link. This is what keeps the PDF in lock-step with the plan.
   const supplements = buildSupplementRows(plan);
   const pdfData = buildGuidePdfData(patient, guide, supplements);
-  const pdf = await renderPlanPdf(pdfData);
+  const settings = await getClinicSettings();
+  const pdf = await renderPlanPdf(pdfData, settings.letterhead_template);
 
   const rs = await execute(
     `INSERT INTO plan_snapshots (plan_id, frozen_json, pdf_base64, sent_to_email, sent_at, sent_by)

@@ -4,6 +4,7 @@ import type { PatientDetail } from "@/lib/patients";
 import type { PlanGuide, SupplementRow } from "@/lib/guide";
 import { HEADER_IMAGE, FOOTER_IMAGE } from "@/lib/pdf-assets";
 import { MERRIWEATHER_REGULAR, MERRIWEATHER_BOLD } from "@/lib/pdf-fonts";
+import { getLetterheadTheme, type LetterheadTheme } from "@/lib/pdf-themes";
 
 // The whole prescription is set in Merriweather (embedded, no runtime fetch).
 Font.register({
@@ -46,42 +47,45 @@ export function buildGuidePdfData(patient: PatientDetail, guide: PlanGuide, supp
   };
 }
 
-const GOLD = "#A17C3A";
-const INK = "#2C2C2A";
-const MUTED = "#6B6B63";
-const RULE = "#E3D9C6";
+// Styles are a function of the chosen letterhead theme. Layout, spacing and the
+// Merriweather typeface are identical for every theme — only the palette (accent,
+// ink, muted, rule) differs, so the logo/banner keeps its position and the plan
+// always reads the same, just in a different colourway.
+type PdfStyles = ReturnType<typeof makeStyles>;
+function makeStyles(theme: LetterheadTheme) {
+  const { accent: ACCENT, ink: INK, muted: MUTED, rule: RULE } = theme;
+  return StyleSheet.create({
+    page: { fontFamily: "Merriweather", paddingTop: 212, paddingBottom: 200, paddingHorizontal: 44, fontSize: 11, color: INK, lineHeight: 1.5 },
+    headerBox: { position: "absolute", top: 26, left: 44, right: 44 },
+    footerBox: { position: "absolute", bottom: 24, left: 44, right: 44 },
+    bannerImg: { width: "100%" },
+    meta: { marginBottom: 12 },
+    metaRow: { flexDirection: "row", marginBottom: 2 },
+    metaLabel: { fontSize: 11, color: ACCENT, width: 118 },
+    metaValue: { fontSize: 11, color: INK },
+    intro: { marginBottom: 4 },
+    sectionTitle: { fontSize: 12, color: ACCENT, marginTop: 14, marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.4 },
+    line: { fontSize: 11, color: INK },
+    spacer: { height: 6 },
 
-const s = StyleSheet.create({
-  page: { fontFamily: "Merriweather", paddingTop: 212, paddingBottom: 200, paddingHorizontal: 44, fontSize: 11, color: INK, lineHeight: 1.5 },
-  headerBox: { position: "absolute", top: 26, left: 44, right: 44 },
-  footerBox: { position: "absolute", bottom: 24, left: 44, right: 44 },
-  bannerImg: { width: "100%" },
-  meta: { marginBottom: 12 },
-  metaRow: { flexDirection: "row", marginBottom: 2 },
-  metaLabel: { fontSize: 11, color: GOLD, width: 118 },
-  metaValue: { fontSize: 11, color: INK },
-  intro: { marginBottom: 4 },
-  sectionTitle: { fontSize: 12, color: GOLD, marginTop: 14, marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.4 },
-  line: { fontSize: 11, color: INK },
-  spacer: { height: 6 },
-
-  // Supplement table
-  tHead: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: GOLD, paddingBottom: 4, marginBottom: 2 },
-  tHeadCell: { fontSize: 8.5, color: GOLD, textTransform: "uppercase", letterSpacing: 0.4 },
-  tRow: { flexDirection: "row", borderBottomWidth: 0.75, borderBottomColor: RULE, paddingVertical: 7 },
-  cSupp: { width: "37%", paddingRight: 8 },
-  cDose: { width: "33%", paddingRight: 8 },
-  cBuy: { width: "30%" },
-  suppName: { fontSize: 11, color: INK, fontWeight: 700 },
-  sub: { fontSize: 8.5, color: MUTED, marginTop: 1 },
-  doseMain: { fontSize: 10.5, color: INK },
-  doseNote: { fontSize: 8.5, color: MUTED, marginTop: 2 },
-  buyLink: { fontSize: 9, color: GOLD, textDecoration: "underline", marginBottom: 2 },
-  codePill: { fontSize: 8.5, color: INK, marginTop: 2 },
-});
+    // Supplement table
+    tHead: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: ACCENT, paddingBottom: 4, marginBottom: 2 },
+    tHeadCell: { fontSize: 8.5, color: ACCENT, textTransform: "uppercase", letterSpacing: 0.4 },
+    tRow: { flexDirection: "row", borderBottomWidth: 0.75, borderBottomColor: RULE, paddingVertical: 7 },
+    cSupp: { width: "37%", paddingRight: 8 },
+    cDose: { width: "33%", paddingRight: 8 },
+    cBuy: { width: "30%" },
+    suppName: { fontSize: 11, color: INK, fontWeight: 700 },
+    sub: { fontSize: 8.5, color: MUTED, marginTop: 1 },
+    doseMain: { fontSize: 10.5, color: INK },
+    doseNote: { fontSize: 8.5, color: MUTED, marginTop: 2 },
+    buyLink: { fontSize: 9, color: ACCENT, textDecoration: "underline", marginBottom: 2 },
+    codePill: { fontSize: 8.5, color: INK, marginTop: 2 },
+  });
+}
 
 // @react-pdf does not honour "\n" inside a single <Text>; split into lines.
-function Multiline({ text }: { text: string }) {
+function Multiline({ text, s }: { text: string; s: PdfStyles }) {
   const lines = text.split("\n");
   return (
     <View>
@@ -90,19 +94,19 @@ function Multiline({ text }: { text: string }) {
   );
 }
 
-function Section({ title, body }: { title: string; body: string }) {
+function Section({ title, body, s }: { title: string; body: string; s: PdfStyles }) {
   if (!body.trim()) return null;
   return (
     <View wrap={false}>
       <Text style={s.sectionTitle}>{title}</Text>
-      <Multiline text={body} />
+      <Multiline text={body} s={s} />
     </View>
   );
 }
 
 // The supplement plan as a structured table. The table itself wraps across pages;
 // each row is kept whole (wrap={false}) so a supplement is never split mid-row.
-function SupplementTable({ rows }: { rows: SupplementRow[] }) {
+function SupplementTable({ rows, s }: { rows: SupplementRow[]; s: PdfStyles }) {
   if (rows.length === 0) return null;
   return (
     <View>
@@ -138,7 +142,7 @@ function SupplementTable({ rows }: { rows: SupplementRow[] }) {
   );
 }
 
-function GuideDoc({ data }: { data: GuidePdfData }) {
+function GuideDoc({ data, s }: { data: GuidePdfData; s: PdfStyles }) {
   return (
     <Document>
       <Page size="A4" style={s.page}>
@@ -153,14 +157,14 @@ function GuideDoc({ data }: { data: GuidePdfData }) {
           ) : null}
         </View>
 
-        {data.intro ? <View style={s.intro}><Multiline text={data.intro} /></View> : null}
-        {data.nextConsultation ? <View style={s.intro}><Multiline text={data.nextConsultation} /></View> : null}
+        {data.intro ? <View style={s.intro}><Multiline text={data.intro} s={s} /></View> : null}
+        {data.nextConsultation ? <View style={s.intro}><Multiline text={data.nextConsultation} s={s} /></View> : null}
 
-        <Section title="Lifestyle & Other Recommendations" body={data.lifestyle} />
-        <Section title="Dietary Recommendations" body={data.dietary} />
-        <SupplementTable rows={data.supplements} />
-        <Section title="Medications / Hormones / Contraception" body={data.medsText} />
-        <Section title="Notes" body={data.notes} />
+        <Section title="Lifestyle & Other Recommendations" body={data.lifestyle} s={s} />
+        <Section title="Dietary Recommendations" body={data.dietary} s={s} />
+        <SupplementTable rows={data.supplements} s={s} />
+        <Section title="Medications / Hormones / Contraception" body={data.medsText} s={s} />
+        <Section title="Notes" body={data.notes} s={s} />
 
         <View fixed style={s.footerBox}>
           <Image src={FOOTER_IMAGE} style={s.bannerImg} />
@@ -170,6 +174,9 @@ function GuideDoc({ data }: { data: GuidePdfData }) {
   );
 }
 
-export async function renderPlanPdf(data: GuidePdfData): Promise<Buffer> {
-  return renderToBuffer(<GuideDoc data={data} />);
+// `templateId` selects the letterhead colourway (from clinic settings); an unknown
+// or missing id falls back to the default theme.
+export async function renderPlanPdf(data: GuidePdfData, templateId?: string | null): Promise<Buffer> {
+  const s = makeStyles(getLetterheadTheme(templateId));
+  return renderToBuffer(<GuideDoc data={data} s={s} />);
 }
