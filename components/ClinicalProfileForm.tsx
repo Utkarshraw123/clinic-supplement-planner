@@ -40,6 +40,19 @@ export default function ClinicalProfileForm({ patientId, sections }: { patientId
   async function addNew(i: number) {
     const label = (drafts[rows[i].attr] ?? "").trim();
     if (!label) return;
+    // If the section already offers this term (ignoring case/spacing), select that one
+    // instead of creating a near-duplicate — keeps the taxonomy clean and steers the
+    // clinician onto the canonical term products are actually tagged with.
+    const existing = rows[i].options.find((o) => o.label.trim().toLowerCase() === label.toLowerCase());
+    if (existing) {
+      setRows((prev) => prev.map((r, idx) => {
+        if (idx !== i) return r;
+        const sel = new Set(r.sel); sel.add(existing.id);
+        return { ...r, sel };
+      }));
+      setDrafts((d) => ({ ...d, [rows[i].attr]: "" }));
+      return;
+    }
     const res = await addTermAction(rows[i].term, label);
     setRows((prev) => prev.map((r, idx) => {
       if (idx !== i) return r;

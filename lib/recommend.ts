@@ -15,7 +15,7 @@ export function suggestForPatient(products: ProductDetail[], attributes: Patient
     const flags = flagProductForPatient(product, attributes);
     // Stage 1: exclude hard blocks and hard diet violations.
     if (hasBlock(flags)) continue;
-    if (flags.some((f) => f.level === "warn" && f.reason.startsWith("not tagged "))) continue;
+    if (flags.some((f) => f.level === "warn" && f.kind === "diet")) continue;
 
     // Stage 2: score by goal overlap; only keep positive matches.
     const score = scoreProductForPatient(product, attributes);

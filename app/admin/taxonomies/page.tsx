@@ -10,15 +10,22 @@ const TYPES: { type: TermType; label: string; hint: string }[] = [
   { type: "caution", label: "Cautions", hint: "Medications & conditions recorded on a patient. Raises a warning on the plan." },
 ];
 
-export default async function TaxonomiesPage() {
+export default async function TaxonomiesPage({ searchParams }: { searchParams: { error?: string } }) {
   await requireAdmin();
   const terms = await listTerms();
+  const error = searchParams?.error;
   return (
     <div className="stack" style={{ gap: 16 }}>
       <div>
         <h1>Taxonomies</h1>
         <p className="muted" style={{ marginTop: 2 }}>The master word-lists the whole app tags from — so “mushroom” always means the same mushroom everywhere.</p>
       </div>
+
+      {error && (
+        <div className="card" style={{ borderColor: "var(--danger)", background: "var(--danger-bg, #fdf3f2)" }}>
+          <p style={{ color: "var(--danger)", fontSize: 14, margin: 0 }}>{error}</p>
+        </div>
+      )}
 
       <div className="card card--plain">
         <p className="eyebrow" style={{ marginBottom: 6 }}>What is this?</p>
