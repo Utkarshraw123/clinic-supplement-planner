@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth/current-user";
 import { getClinicSettings } from "@/lib/settings";
 import { LETTERHEAD_THEMES, DEFAULT_LETTERHEAD } from "@/lib/pdf-themes";
+import LetterheadPreviewButton from "@/components/LetterheadPreviewButton";
 import { saveSettingsAction } from "./actions";
 
 export default async function SettingsPage() {
@@ -51,6 +52,8 @@ export default async function SettingsPage() {
                 </label>
               ))}
             </div>
+            <LetterheadPreviewButton />
+            <p className="muted-xs" style={{ margin: 0 }}>Preview opens a sample plan in the selected colour. The colour applies to plans finalised after you Save — plans already finalised keep the colour they were made with.</p>
           </div>
 
           <button type="submit" className="btn--primary" style={{ justifySelf: "start" }}>Save settings</button>
