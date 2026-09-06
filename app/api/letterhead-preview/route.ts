@@ -7,7 +7,7 @@ import { getLetterheadTheme } from "@/lib/pdf-themes";
 const SAMPLE: GuidePdfData = {
   clientName: "Sample Client",
   consultationDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
-  intro: "This is a sample of your prescription letterhead. Your logo, banner and typeface stay exactly the same — only the accent colour of the headings, table and links changes.",
+  intro: "This is a sample of your prescription letterhead. Your logo, all text and the body stay exactly the same — only the background colour behind the header and footer changes.",
   nextConsultation: "At our next consultation we will review progress and adjust the plan as needed.",
   lifestyle: "Aim for 7–8 hours of sleep, lights down by 10pm.\nDaily 20-minute walk in natural light.\nReduce caffeine to one cup before noon.",
   dietary: "Protein with every meal to steady blood sugar.\nOily fish twice a week; plenty of leafy greens.",

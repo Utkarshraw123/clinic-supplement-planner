@@ -1,28 +1,25 @@
-// Letterhead colour themes for the prescription PDF. The logo/banner (header &
-// footer images) and the Merriweather typeface are identical across every theme —
-// only the accent palette applied to headings, the supplement table and links
-// changes. Plain data with no @react-pdf import, so the settings UI can render
-// swatches without pulling in the PDF renderer.
+// Letterhead themes for the prescription PDF. The logo, all header/footer text and
+// the body are IDENTICAL across every theme (original gold artwork, unchanged) — a
+// theme only sets the BACKGROUND colour behind the header and footer banners. Plain
+// data with no @react-pdf import, so the settings UI can render swatches without
+// pulling in the PDF renderer.
 
 export type LetterheadTheme = {
   id: string;
   name: string;
   description: string;
-  accent: string; // section titles, meta labels, table header, rules, buy links
-  ink: string;    // body text
-  muted: string;  // secondary / sub text
-  rule: string;   // table row dividers
+  bg: string | null; // header/footer background; null = plain white (the original look)
 };
 
 export const LETTERHEAD_THEMES: LetterheadTheme[] = [
-  { id: "classic-gold", name: "Classic Gold", description: "The original — warm gold on cream.", accent: "#A17C3A", ink: "#2C2C2A", muted: "#6B6B63", rule: "#E3D9C6" },
-  { id: "sage-green",   name: "Sage Green",   description: "Soft botanical green.",             accent: "#5E7355", ink: "#2B2E29", muted: "#6A6F64", rule: "#D9E1CF" },
-  { id: "slate-blue",   name: "Slate Blue",   description: "Calm, clinical blue.",              accent: "#3F5A73", ink: "#262B30", muted: "#656E77", rule: "#D6DEE6" },
-  { id: "dusty-rose",   name: "Dusty Rose",   description: "Warm, understated rose.",           accent: "#A65D66", ink: "#2E2A2B", muted: "#6E6467", rule: "#ECDADC" },
-  { id: "charcoal",     name: "Charcoal",     description: "Minimal monochrome.",               accent: "#4A4A45", ink: "#232320", muted: "#6B6B64", rule: "#DAD6CE" },
+  { id: "original",   name: "Original (white)", description: "No background — the original look.", bg: null },
+  { id: "sage-green", name: "Sage",             description: "Soft green header & footer.",       bg: "#EAF0E4" },
+  { id: "slate-blue", name: "Slate",            description: "Soft blue header & footer.",         bg: "#E7EDF3" },
+  { id: "dusty-rose", name: "Rose",             description: "Soft rose header & footer.",         bg: "#F5E9EB" },
+  { id: "warm-sand",  name: "Warm Sand",        description: "Soft warm cream header & footer.",   bg: "#F4EEE2" },
 ];
 
-export const DEFAULT_LETTERHEAD = "classic-gold";
+export const DEFAULT_LETTERHEAD = "original";
 
 // Resolve a stored id to a theme, always falling back to the default so a missing
 // or unknown value never breaks PDF rendering.

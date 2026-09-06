@@ -64,7 +64,8 @@ describe("pdf", () => {
       expect(buf.subarray(0, 5).toString("latin1")).toBe("%PDF-");
     }
     expect(getLetterheadTheme("nope").id).toBe(DEFAULT_LETTERHEAD);
-    expect(getLetterheadTheme("sage-green").accent).toBe("#5E7355");
+    expect(getLetterheadTheme(DEFAULT_LETTERHEAD).bg).toBeNull(); // default = plain white
+    expect(getLetterheadTheme("sage-green").bg).toBe("#EAF0E4");
   });
 
   it("maps a patient + guide + supplements into pdf data, trimming blanks", () => {

@@ -24,15 +24,15 @@ export default async function SettingsPage() {
 
           <div className="stack" style={{ gap: 5, marginTop: 4 }}>
             <span>Prescription letterhead</span>
-            <p className="muted-xs" style={{ margin: 0 }}>The colour scheme of the exported plan PDF. Your logo, letterhead banner and typeface stay exactly the same — only the accent colour of the headings, table and links changes. Applies to plans finalised from here on.</p>
+            <p className="muted-xs" style={{ margin: 0 }}>The background colour behind the header &amp; footer of the exported plan PDF. Your logo, all text and the body stay exactly the same — only the header/footer background changes. Applies to plans finalised from here on.</p>
             <style>{`
               .lh-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
               .lh-option{cursor:pointer}
               .lh-option input{position:absolute;opacity:0;pointer-events:none}
               .lh-card{display:block;border:1.5px solid var(--border,#E3D9C6);border-radius:10px;padding:10px 12px;transition:border-color .12s,box-shadow .12s}
               .lh-option input:checked + .lh-card{border-color:var(--accent,#A17C3A);box-shadow:0 0 0 2px rgba(161,124,58,.18)}
-              .lh-swatches{display:flex;gap:5px;margin-bottom:7px}
-              .lh-dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.08)}
+              .lh-swatch{display:block;height:34px;border-radius:6px;border:1px solid rgba(0,0,0,.08);margin-bottom:7px;position:relative}
+              .lh-logo{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-style:italic;font-size:15px;color:#A17C3A}
               .lh-name{font-size:13px;font-weight:600}
               .lh-desc{font-size:11px;color:var(--ink-muted,#6B6B63);margin-top:1px}
             `}</style>
@@ -41,10 +41,8 @@ export default async function SettingsPage() {
                 <label key={t.id} className="lh-option">
                   <input type="radio" name="letterhead_template" value={t.id} defaultChecked={selectedTemplate === t.id} />
                   <span className="lh-card">
-                    <span className="lh-swatches">
-                      <span className="lh-dot" style={{ background: t.accent }} />
-                      <span className="lh-dot" style={{ background: t.rule }} />
-                      <span className="lh-dot" style={{ background: t.ink }} />
+                    <span className="lh-swatch" style={{ background: t.bg ?? "#FFFFFF" }}>
+                      <span className="lh-logo">Lorna</span>
                     </span>
                     <span className="lh-name">{t.name}</span>
                     <span className="lh-desc">{t.description}</span>
