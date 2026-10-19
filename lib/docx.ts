@@ -109,7 +109,9 @@ function supplementTable(rows: GuidePdfData["supplements"]): (Paragraph | Table)
   ];
 }
 
-export async function renderPlanDocx(data: GuidePdfData, templateId?: string | null): Promise<Buffer> {
+// `legacySupplementText` prints the supplement plan for snapshots from before it became
+// a table (their supplements were free text); it's only used when there are no rows.
+export async function renderPlanDocx(data: GuidePdfData, templateId?: string | null, opts: { legacySupplementText?: string } = {}): Promise<Buffer> {
   const bg = getLetterheadTheme(templateId).bg;
   const date = formatConsultationDate(data.consultationDate);
   const children: (Paragraph | Table)[] = [
@@ -120,7 +122,9 @@ export async function renderPlanDocx(data: GuidePdfData, templateId?: string | n
     ...(data.nextConsultation ? lines(data.nextConsultation) : []),
     ...section("Lifestyle & Other Recommendations", data.lifestyle),
     ...section("Dietary Recommendations", data.dietary),
-    ...supplementTable(data.supplements),
+    ...(data.supplements.length > 0
+      ? supplementTable(data.supplements)
+      : section("Supplement Plan", opts.legacySupplementText ?? "")),
     ...section("Medications / Hormones / Contraception", data.medsText),
     ...section("Notes", data.notes),
   ];

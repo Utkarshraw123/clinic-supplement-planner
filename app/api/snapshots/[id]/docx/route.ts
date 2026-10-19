@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const template = frozen.letterheadTemplate !== undefined
     ? frozen.letterheadTemplate
     : (await getClinicSettings()).letterhead_template;
-  const docx = await renderPlanDocx(frozen.data, template);
+  const docx = await renderPlanDocx(frozen.data, template, { legacySupplementText: frozen.legacySupplementText });
   const download = new URL(req.url).searchParams.get("download") === "1";
   return new Response(new Uint8Array(docx), {
     headers: {

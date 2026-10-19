@@ -95,14 +95,32 @@ export async function getSnapshotPdf(snapshotId: number): Promise<Buffer | null>
   return Buffer.from(rows[0].pdf_base64, "base64");
 }
 
+const str = (v: unknown) => (typeof v === "string" ? v : "");
+
 // The data a finalised plan was rendered from, plus the letterhead it used. The
 // letterhead is `undefined` on snapshots finalised before it was recorded.
-export async function getSnapshotFrozen(snapshotId: number): Promise<{ data: GuidePdfData; letterheadTemplate: string | null | undefined } | null> {
+// Snapshots from earlier versions of the guide can lack fields (e.g. no `notes`) and
+// may hold the supplements as free text (`supplementText`) instead of table rows, so
+// every field is normalised here and that free text is returned as `legacySupplementText`.
+export async function getSnapshotFrozen(snapshotId: number): Promise<{ data: GuidePdfData; letterheadTemplate: string | null | undefined; legacySupplementText: string } | null> {
   const rows = await query<{ frozen_json: string }>("SELECT frozen_json FROM plan_snapshots WHERE id = ?", [snapshotId]);
   if (!rows[0]) return null;
-  let parsed: (GuidePdfData & { letterheadTemplate?: string | null }) | null;
-  try { parsed = JSON.parse(rows[0].frozen_json); } catch { return null; }
-  if (!parsed || typeof parsed.clientName !== "string") return null;
-  const { letterheadTemplate, ...data } = parsed;
-  return { data: { ...data, supplements: data.supplements ?? [] }, letterheadTemplate };
+  let p: Record<string, unknown> | null;
+  try { p = JSON.parse(rows[0].frozen_json); } catch { return null; }
+  if (!p || typeof p.clientName !== "string") return null;
+  const rawRows = Array.isArray(p.supplements) ? (p.supplements as Record<string, unknown>[]) : [];
+  const supplements = rawRows.map((r) => ({
+    name: str(r.name), brand: str(r.brand), size: str(r.size), dose: str(r.dose),
+    duration: str(r.duration), note: str(r.note), code: str(r.code),
+    buyLinks: (Array.isArray(r.buyLinks) ? (r.buyLinks as Record<string, unknown>[]) : [])
+      .map((b) => ({ label: str(b.label), url: str(b.url) }))
+      .filter((b) => b.url),
+  }));
+  const data: GuidePdfData = {
+    clientName: str(p.clientName), consultationDate: str(p.consultationDate), intro: str(p.intro),
+    nextConsultation: str(p.nextConsultation), lifestyle: str(p.lifestyle), dietary: str(p.dietary),
+    supplements, medsText: str(p.medsText), notes: str(p.notes),
+  };
+  const letterheadTemplate = "letterheadTemplate" in p ? (typeof p.letterheadTemplate === "string" ? p.letterheadTemplate : null) : undefined;
+  return { data, letterheadTemplate, legacySupplementText: str(p.supplementText) };
 }
