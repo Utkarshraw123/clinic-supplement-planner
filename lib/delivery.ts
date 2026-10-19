@@ -2,7 +2,7 @@ import { execute, query } from "@/lib/db";
 import { getPlan, finalisePlan } from "@/lib/plans";
 import { getPatient } from "@/lib/patients";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
-import { buildGuidePdfData, renderPlanPdf } from "@/lib/pdf";
+import { buildGuidePdfData, renderPlanPdf, type GuidePdfData } from "@/lib/pdf";
 import { getGuideForEditing, buildSupplementRows } from "@/lib/guide";
 import { getClinicSettings } from "@/lib/settings";
 import { sendPlanEmail } from "@/lib/email";
@@ -36,7 +36,7 @@ export async function finalisePlanToSnapshot(input: { planId: number; actorId?: 
   const rs = await execute(
     `INSERT INTO plan_snapshots (plan_id, frozen_json, pdf_base64, sent_to_email, sent_at, sent_by)
      VALUES (?, ?, ?, NULL, NULL, ?)`,
-    [input.planId, JSON.stringify(pdfData), pdf.toString("base64"), input.actorId ?? null]
+    [input.planId, JSON.stringify({ ...pdfData, letterheadTemplate: settings.letterhead_template ?? null }), pdf.toString("base64"), input.actorId ?? null]
   );
   const snapshotId = Number(rs.lastInsertRowid);
 
@@ -90,4 +90,16 @@ export async function getSnapshotPdf(snapshotId: number): Promise<Buffer | null>
   const rows = await query<{ pdf_base64: string }>("SELECT pdf_base64 FROM plan_snapshots WHERE id = ?", [snapshotId]);
   if (!rows[0]) return null;
   return Buffer.from(rows[0].pdf_base64, "base64");
+}
+
+// The data a finalised plan was rendered from, plus the letterhead it used. The
+// letterhead is `undefined` on snapshots finalised before it was recorded.
+export async function getSnapshotFrozen(snapshotId: number): Promise<{ data: GuidePdfData; letterheadTemplate: string | null | undefined } | null> {
+  const rows = await query<{ frozen_json: string }>("SELECT frozen_json FROM plan_snapshots WHERE id = ?", [snapshotId]);
+  if (!rows[0]) return null;
+  let parsed: (GuidePdfData & { letterheadTemplate?: string | null }) | null;
+  try { parsed = JSON.parse(rows[0].frozen_json); } catch { return null; }
+  if (!parsed || typeof parsed.clientName !== "string") return null;
+  const { letterheadTemplate, ...data } = parsed;
+  return { data: { ...data, supplements: data.supplements ?? [] }, letterheadTemplate };
 }

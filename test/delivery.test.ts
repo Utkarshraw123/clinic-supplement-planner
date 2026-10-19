@@ -5,8 +5,10 @@ import { createProduct, setProductTags } from "@/lib/products";
 import { addTerm } from "@/lib/taxonomies";
 import { createPatient, setPatientAttributes } from "@/lib/patients";
 import { getOrCreateDraftPlan, addPlanItem } from "@/lib/plans";
-import { finaliseAndSend, listSnapshots, listSnapshotsForPatient, getSnapshotPdf } from "@/lib/delivery";
+import { finaliseAndSend, listSnapshots, listSnapshotsForPatient, getSnapshotPdf, finalisePlanToSnapshot, getSnapshotFrozen } from "@/lib/delivery";
 import { getPlan } from "@/lib/plans";
+import { getClinicSettings, saveClinicSettings } from "@/lib/settings";
+import { execute } from "@/lib/db";
 
 describe("delivery", () => {
   beforeAll(async () => { await runMigrations(); });
@@ -58,5 +60,32 @@ describe("delivery", () => {
     expect(byPatient).toHaveLength(1);
     expect(byPatient[0].sent_to_email).toBe("hist@example.com");
     expect((await getPlan(planId))!.status).toBe("finalised");
+  });
+
+  it("records the frozen plan data and the letterhead it was made with", async () => {
+    const before = await getClinicSettings();
+    await saveClinicSettings({ ...before, letterhead_template: "warm-sand" });
+    try {
+      const brandId = await createBrand({ name: `Frozen ${Date.now()}` });
+      const productId = await createProduct({ brandId, name: "Frozen Magnesium", form: "capsule" });
+      const planId = await getOrCreateDraftPlan(await createPatient({ name: "Frozen P", dob: "1990-01-01" }));
+      await addPlanItem(planId, productId);
+      const { snapshotId } = await finalisePlanToSnapshot({ planId });
+
+      const frozen = (await getSnapshotFrozen(snapshotId))!;
+      expect(frozen.data.clientName).toBe("Frozen P");
+      expect(frozen.data.supplements.map((r) => r.name)).toEqual(["Frozen Magnesium"]);
+      expect(frozen.letterheadTemplate).toBe("warm-sand");
+      expect("letterheadTemplate" in frozen.data).toBe(false);
+    } finally {
+      await saveClinicSettings(before);
+    }
+  });
+
+  it("returns null for a missing or unreadable snapshot", async () => {
+    expect(await getSnapshotFrozen(999999)).toBeNull();
+    const planId = await getOrCreateDraftPlan(await createPatient({ name: "Empty Frozen P", dob: "1990-01-01" }));
+    const rs = await execute("INSERT INTO plan_snapshots (plan_id, frozen_json, pdf_base64) VALUES (?, '{}', '')", [planId]);
+    expect(await getSnapshotFrozen(Number(rs.lastInsertRowid))).toBeNull();
   });
 });
