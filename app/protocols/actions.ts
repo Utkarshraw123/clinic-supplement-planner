@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import {
   savePlanAsProtocol, applyProtocolToPlan, deleteProtocol,
-  createProtocol, updateProtocolMeta, addProtocolItem, removeProtocolItem, setProtocolItemDosing,
+  createProtocol, updateProtocolMeta, addProtocolItem, removeProtocolItem, setProtocolItemDosing, updateProtocolSections,
 } from "@/lib/protocols";
 
 // --- Standalone protocol builder ---
@@ -21,6 +21,16 @@ export async function updateProtocolMetaAction(formData: FormData) {
   await requireUser();
   const id = Number(formData.get("id"));
   await updateProtocolMeta(id, String(formData.get("name") || ""), String(formData.get("description") || "") || null);
+  revalidatePath(`/protocols/${id}`);
+}
+
+export async function updateProtocolSectionsAction(formData: FormData) {
+  await requireUser();
+  const id = Number(formData.get("id"));
+  const v = (k: string) => String(formData.get(k) ?? "").replace(/\r\n/g, "\n");
+  await updateProtocolSections(id, {
+    nextConsultation: v("nextConsultation"), lifestyle: v("lifestyle"), dietary: v("dietary"), notes: v("notes"),
+  });
   revalidatePath(`/protocols/${id}`);
 }
 

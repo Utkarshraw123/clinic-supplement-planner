@@ -6,6 +6,7 @@ import { listActiveProductsWithTags } from "@/lib/products";
 import { query } from "@/lib/db";
 import {
   updateProtocolMetaAction, addProtocolItemAction, removeProtocolItemAction, setProtocolItemDosingAction,
+  updateProtocolSectionsAction,
 } from "@/app/protocols/actions";
 
 export default async function ProtocolEditor({ params }: { params: { id: string } }) {
@@ -45,6 +46,30 @@ export default async function ProtocolEditor({ params }: { params: { id: string 
         </form>
       </div>
 
+      <div className="card">
+        <h2 style={{ marginBottom: 4 }}>Guide text (page 2)</h2>
+        <p className="muted-xs" style={{ marginBottom: 12 }}>
+          When applied to a plan, each section fills an empty section or is added underneath existing text.
+          The personal intro, medications and consultation date are never part of a protocol — they belong to each patient.
+        </p>
+        <form action={updateProtocolSectionsAction} className="stack" style={{ gap: 10 }}>
+          <input type="hidden" name="id" value={protocol.id} />
+          <label className="stack" style={{ gap: 5 }}><span>Next consultation</span>
+            <textarea name="nextConsultation" rows={2} defaultValue={protocol.nextConsultation ?? ""} />
+          </label>
+          <label className="stack" style={{ gap: 5 }}><span>Lifestyle &amp; other recommendations</span>
+            <textarea name="lifestyle" rows={4} defaultValue={protocol.lifestyle ?? ""} />
+          </label>
+          <label className="stack" style={{ gap: 5 }}><span>Dietary recommendations</span>
+            <textarea name="dietary" rows={4} defaultValue={protocol.dietary ?? ""} />
+          </label>
+          <label className="stack" style={{ gap: 5 }}><span>Notes</span>
+            <textarea name="notes" rows={3} defaultValue={protocol.notes ?? ""} />
+          </label>
+          <button type="submit" className="btn--primary" style={{ justifySelf: "start" }}>Save guide text</button>
+        </form>
+      </div>
+
       <div className="card card--plain">
         <p className="muted-xs">This is a reusable <strong>template</strong> — no patient is attached, so there are no safety flags here. When you apply it to a patient in the plan builder, every product is re-checked against that patient&apos;s allergies.</p>
       </div>
@@ -78,6 +103,11 @@ export default async function ProtocolEditor({ params }: { params: { id: string 
                 <div>
                   <div style={{ fontWeight: 600 }}>{item.productName}</div>
                   <div className="muted-xs" style={{ marginTop: 1 }}>{item.brandName}</div>
+                  {[item.duration, item.size, item.note, item.orderCode ? `code ${item.orderCode}` : null].some(Boolean) && (
+                    <div className="muted-xs" style={{ marginTop: 4 }}>
+                      {[item.duration, item.size, item.note, item.orderCode ? `code ${item.orderCode}` : null].filter(Boolean).join("  ·  ")}
+                    </div>
+                  )}
                 </div>
                 <form action={removeProtocolItemAction}>
                   <input type="hidden" name="itemId" value={item.itemId} />
