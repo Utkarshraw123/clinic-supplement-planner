@@ -27,6 +27,14 @@ export async function runMigrations(): Promise<void> {
   await ensureColumn("plan_guide", "notes", "TEXT");         // closing notes block on the prescription
   await ensureColumn("note_snippets", "category", "TEXT");   // supplement | lifestyle | dietary | general
   await ensureColumn("clinic_settings", "letterhead_template", "TEXT"); // prescription PDF colourway (see lib/pdf-themes.ts)
+  await ensureColumn("protocol_items", "note", "TEXT");          // full item fields, so a protocol is the whole plan
+  await ensureColumn("protocol_items", "duration", "TEXT");
+  await ensureColumn("protocol_items", "order_code", "TEXT");
+  await ensureColumn("protocol_items", "size", "TEXT");
+  await ensureColumn("protocols", "next_consultation", "TEXT");  // page-2 sections a protocol carries
+  await ensureColumn("protocols", "lifestyle", "TEXT");
+  await ensureColumn("protocols", "dietary", "TEXT");
+  await ensureColumn("protocols", "notes", "TEXT");
 }
 
 if (process.argv[1] && process.argv[1].endsWith("migrate.ts")) {

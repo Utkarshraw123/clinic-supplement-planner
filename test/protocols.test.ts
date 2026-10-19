@@ -3,9 +3,10 @@ import { runMigrations } from "@/scripts/migrate";
 import { createBrand } from "@/lib/brands";
 import { createProduct } from "@/lib/products";
 import { createPatient } from "@/lib/patients";
-import { getOrCreateDraftPlan, addPlanItem, setItemDosing, getPlan } from "@/lib/plans";
+import { getOrCreateDraftPlan, addPlanItem, setItemDosing, getPlan, setItemNote, setItemDuration, setItemSize, setItemOrderCodeStored } from "@/lib/plans";
 import { execute } from "@/lib/db";
-import { savePlanAsProtocol, listProtocols, getProtocol, applyProtocolToPlan, createProtocol, addProtocolItem, removeProtocolItem, setProtocolItemDosing, updateProtocolMeta } from "@/lib/protocols";
+import { savePlanAsProtocol, listProtocols, getProtocol, applyProtocolToPlan, createProtocol, addProtocolItem, removeProtocolItem, setProtocolItemDosing, updateProtocolMeta, updateProtocolSections } from "@/lib/protocols";
+import { savePlanGuide, getPlanGuide } from "@/lib/guide";
 
 describe("protocols", () => {
   let productA = 0, productB = 0, presetId = 0, patientId = 0;
@@ -73,5 +74,56 @@ describe("protocols", () => {
     expect(added).toBe(1);
     const plan = await getPlan(targetPlan);
     expect(plan!.items[0].dosingText).toBe("Take 1 in the morning.");
+  });
+
+  it("saves both pages: every item field and the four page-2 sections", async () => {
+    const srcPlan = await getOrCreateDraftPlan(await createPatient({ name: "Full Src", dob: "1990-01-01" }));
+    const i1 = await addPlanItem(srcPlan, productA);
+    await setItemDosing(i1, null, "1 at night");
+    await setItemNote(i1, "with food");
+    await setItemDuration(i1, "3 months");
+    await setItemSize(i1, "90 capsules");
+    await setItemOrderCodeStored(i1, "WN10");
+    await savePlanGuide(srcPlan, {
+      consultationDate: "2026-08-26", intro: "Hi Jane", nextConsultation: "Gut cleanse next",
+      lifestyle: "Sleep 8h", dietary: "More greens", supplementText: null, medsText: "- Levothyroxine", notes: "Call me",
+    });
+
+    const protocolId = await savePlanAsProtocol(srcPlan, "Full Protocol", null);
+    const d = (await getProtocol(protocolId))!;
+    expect(d.items[0]).toMatchObject({ note: "with food", duration: "3 months", size: "90 capsules", orderCode: "WN10", dosingText: "1 at night" });
+    expect(d).toMatchObject({ nextConsultation: "Gut cleanse next", lifestyle: "Sleep 8h", dietary: "More greens", notes: "Call me" });
+  });
+
+  it("applying a full protocol copies item fields and merges page 2 (fill empty, append filled, never touch intro/meds/date)", async () => {
+    const protocolId = await createProtocol("Merge Test", null);
+    const it1 = await addProtocolItem(protocolId, productB);
+    await execute("UPDATE protocol_items SET note = ?, duration = ?, size = ?, order_code = ? WHERE id = ?", ["at dinner", "1 month", "60 capsules", "", it1]);
+    await updateProtocolSections(protocolId, { nextConsultation: null, lifestyle: "Walk daily", dietary: "Low sugar", notes: null });
+
+    const target = await getOrCreateDraftPlan(await createPatient({ name: "Merge Target", dob: "1990-01-01" }));
+    await savePlanGuide(target, {
+      consultationDate: "2026-09-01", intro: "Hello Sam", nextConsultation: null,
+      lifestyle: "Sleep 8h", dietary: null, supplementText: null, medsText: "- Metformin", notes: null,
+    });
+    await applyProtocolToPlan(protocolId, target);
+
+    const plan = (await getPlan(target))!;
+    const item = plan.items.find((i) => i.product.id === productB)!;
+    expect(item).toMatchObject({ note: "at dinner", duration: "1 month", size: "60 capsules", orderCode: "" });
+    const g = (await getPlanGuide(target))!;
+    expect(g.lifestyle).toBe("Sleep 8h\n\nWalk daily"); // appended
+    expect(g.dietary).toBe("Low sugar");                // filled
+    expect(g.intro).toBe("Hello Sam");                  // untouched
+    expect(g.medsText).toBe("- Metformin");             // untouched
+    expect(g.consultationDate).toBe("2026-09-01");      // untouched
+  });
+
+  it("applying an old-style protocol (no page-2 text) creates no guide row", async () => {
+    const protocolId = await createProtocol("Old Style", null);
+    await addProtocolItem(protocolId, productA);
+    const target = await getOrCreateDraftPlan(await createPatient({ name: "Old Target", dob: "1990-01-01" }));
+    await applyProtocolToPlan(protocolId, target);
+    expect(await getPlanGuide(target)).toBeNull();
   });
 });

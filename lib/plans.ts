@@ -44,6 +44,12 @@ export async function setItemOrderCode(itemId: number, code: string|null): Promi
   await execute("UPDATE plan_items SET order_code = ? WHERE id = ?", [code && code.trim() ? code.trim() : null, itemId]);
 }
 
+// Store an item's order code exactly as given: null = follow the brand's default code,
+// "" = explicitly no code, otherwise the code itself (see lib/order-codes.ts).
+export async function setItemOrderCodeStored(itemId: number, stored: string|null): Promise<void> {
+  await execute("UPDATE plan_items SET order_code = ? WHERE id = ?", [stored === null ? null : stored.trim(), itemId]);
+}
+
 export async function setItemSize(itemId: number, size: string|null): Promise<void> {
   await execute("UPDATE plan_items SET size = ? WHERE id = ?", [size && size.trim() ? size.trim() : null, itemId]);
 }
