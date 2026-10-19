@@ -64,7 +64,7 @@ separately on `plans`. The document prints the raw ISO date ("2026-08-26").
 duplicated plan's Prepare page falls back to defaults. Change it to also copy the
 `plan_guide` row (intro, next_consultation, lifestyle, dietary, supplement_text,
 meds_text, notes) with `consultation_date = NULL`. If the source has no guide row, the
-duplicate has none either (unchanged behaviour). Do it in the same write batch as the
+duplicate has none either (unchanged behaviour). One `INSERT … SELECT` right after the
 item copy.
 
 ### B2. Protocols store both pages (item 8)
