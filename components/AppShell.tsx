@@ -21,6 +21,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
     items.push(
       { href: "/admin/analytics", label: "Analytics", icon: "chart" },
       { href: "/admin/notes", label: "Notes", icon: "note" },
+      { href: "/admin/dosing", label: "Dosing presets", icon: "note" },
       { href: "/admin/taxonomies", label: "Taxonomies", icon: "tag" },
       { href: "/admin/users", label: "Team", icon: "team" },
       { href: "/admin/settings", label: "Settings", icon: "cog" },

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getProtocol } from "@/lib/protocols";
 import { listActiveProductsWithTags } from "@/lib/products";
-import { query } from "@/lib/db";
+import { listDosingPresets } from "@/lib/dosing";
 import {
   updateProtocolMetaAction, addProtocolItemAction, removeProtocolItemAction, setProtocolItemDosingAction,
   updateProtocolSectionsAction,
@@ -14,7 +14,7 @@ export default async function ProtocolEditor({ params }: { params: { id: string 
   const id = Number(params.id);
   const [protocol, presets, allProducts] = await Promise.all([
     getProtocol(id),
-    query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id"),
+    listDosingPresets(),
     listActiveProductsWithTags(),
   ]);
   if (!protocol) notFound();

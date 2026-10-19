@@ -35,6 +35,7 @@ export async function runMigrations(): Promise<void> {
   await ensureColumn("protocols", "lifestyle", "TEXT");
   await ensureColumn("protocols", "dietary", "TEXT");
   await ensureColumn("protocols", "notes", "TEXT");
+  await ensureColumn("dosing_presets", "archived", "INTEGER NOT NULL DEFAULT 0"); // "deleted" presets stay resolvable
 }
 
 if (process.argv[1] && process.argv[1].endsWith("migrate.ts")) {

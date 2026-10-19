@@ -5,7 +5,7 @@ import { resolveDraftPlanId, getPlan } from "@/lib/plans";
 import { listActiveProductsWithTags } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
-import { query } from "@/lib/db";
+import { listDosingPresets } from "@/lib/dosing";
 import { removeItemAction } from "@/app/plan/actions";
 import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
 import { listProtocols } from "@/lib/protocols";
@@ -24,7 +24,7 @@ export default async function PlanBuilder({ params, searchParams }: { params: { 
   const [patient, planId, presets, allProducts, protocols, snippets] = await Promise.all([
     getPatient(patientId),
     resolveDraftPlanId(patientId, requestedPlanId, u.userId),
-    query<{ id: number; label: string }>("SELECT id, label FROM dosing_presets ORDER BY id"),
+    listDosingPresets(),
     listActiveProductsWithTags(),
     listProtocols(),
     listSnippets(),
