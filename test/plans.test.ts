@@ -5,6 +5,7 @@ import { createProduct, addSupplierLink, linkAlternative } from "@/lib/products"
 import { createPatient } from "@/lib/patients";
 import * as Plans from "@/lib/plans";
 import { execute, query } from "@/lib/db";
+import { savePlanGuide, getPlanGuide } from "@/lib/guide";
 
 describe("plans", () => {
   let patientId = 0, productId = 0, presetId = 0;
@@ -100,6 +101,33 @@ describe("plans", () => {
     const source = (await Plans.getPlan(src))!;
     expect(source.status).toBe("finalised");
     expect(source.items.length).toBe(2);
+  });
+
+  it("duplicate copies the guide (page 2) but leaves the consultation date blank", async () => {
+    const patient = await createPatient({ name: "DupGuide P", dob: "1990-01-01" });
+    const src = await Plans.getOrCreateDraftPlan(patient);
+    await Plans.addPlanItem(src, productId);
+    await savePlanGuide(src, {
+      consultationDate: "2026-08-26", intro: "Hi Jane", nextConsultation: "Gut cleanse next",
+      lifestyle: "Sleep 8h", dietary: "More greens", supplementText: null, medsText: "- Levothyroxine", notes: "Call me",
+    });
+
+    const dupId = await Plans.duplicatePlan(src);
+    const g = await getPlanGuide(dupId);
+    expect(g).not.toBeNull();
+    expect(g!.consultationDate).toBeNull();
+    expect(g).toMatchObject({
+      intro: "Hi Jane", nextConsultation: "Gut cleanse next", lifestyle: "Sleep 8h",
+      dietary: "More greens", medsText: "- Levothyroxine", notes: "Call me",
+    });
+    expect((await getPlanGuide(src))!.consultationDate).toBe("2026-08-26"); // source untouched
+  });
+
+  it("duplicate of a plan with no saved guide has no guide row", async () => {
+    const src = await Plans.getOrCreateDraftPlan(await createPatient({ name: "NoGuide P", dob: "1990-01-01" }));
+    await Plans.addPlanItem(src, productId);
+    const dupId = await Plans.duplicatePlan(src);
+    expect(await getPlanGuide(dupId)).toBeNull();
   });
 
   it("deletes a draft plan and its items but leaves the patient and other plans", async () => {

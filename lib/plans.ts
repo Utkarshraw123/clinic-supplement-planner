@@ -88,8 +88,9 @@ export async function finalisePlan(planId: number): Promise<void> {
   await execute("UPDATE plans SET status = 'finalised', updated_at = datetime('now') WHERE id = ?", [planId]);
 }
 
-// Copy an existing plan's items into a brand-new draft for the SAME patient, so a
-// follow-up can be re-prescribed and tweaked without rebuilding. Source is untouched.
+// Copy an existing plan into a brand-new draft for the SAME patient — every item field
+// and the guide's page-2 text — so a follow-up starts from last time and only needs
+// tweaking. The consultation date is left blank for the new consultation. Source untouched.
 export async function duplicatePlan(sourcePlanId: number, authorId?: number): Promise<number> {
   const base = await query<{ patient_id: number }>("SELECT patient_id FROM plans WHERE id = ?", [sourcePlanId]);
   if (!base[0]) throw new Error(`duplicatePlan: source plan ${sourcePlanId} not found`);
@@ -106,6 +107,12 @@ export async function duplicatePlan(sourcePlanId: number, authorId?: number): Pr
       [newId, it.product_id, it.dosing_preset_id, it.dosing_custom_text, it.chosen_alternative_id, it.note, it.duration, it.order_code, it.size, it.position]
     );
   }
+  await execute(
+    `INSERT INTO plan_guide (plan_id, consultation_date, intro, next_consultation, lifestyle, dietary, supplement_text, meds_text, notes, updated_at)
+     SELECT ?, NULL, intro, next_consultation, lifestyle, dietary, supplement_text, meds_text, notes, datetime('now')
+     FROM plan_guide WHERE plan_id = ?`,
+    [newId, sourcePlanId]
+  );
   return newId;
 }
 
