@@ -50,8 +50,8 @@ export default async function BrandsPage() {
               <form action={addBrandCodeAction} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                 <input type="hidden" name="brandId" value={b.id} />
                 <input name="code" placeholder="New code, e.g. LORNA10" required style={{ maxWidth: 200 }} />
-                <label className="muted-xs" style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                  <input type="checkbox" name="makeDefault" /> make default
+                <label className="muted-xs" style={{ display: "flex", gap: 5, alignItems: "center", whiteSpace: "nowrap" }}>
+                  <input type="checkbox" name="makeDefault" style={{ width: 14, height: 14, minHeight: 0, margin: 0, padding: 0, flex: "0 0 auto" }} /> make default
                 </label>
                 <button type="submit" className="btn--sm">Add code</button>
               </form>
