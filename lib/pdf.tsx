@@ -4,7 +4,8 @@ import type { PatientDetail } from "@/lib/patients";
 import type { PlanGuide, SupplementRow } from "@/lib/guide";
 import { HEADER_IMAGE, FOOTER_IMAGE } from "@/lib/pdf-assets";
 import { MERRIWEATHER_REGULAR, MERRIWEATHER_BOLD } from "@/lib/pdf-fonts";
-import { getLetterheadTheme, type LetterheadTheme } from "@/lib/pdf-themes";
+import { getLetterheadTheme } from "@/lib/pdf-themes";
+import { formatConsultationDate } from "@/lib/format";
 
 // The whole prescription is set in Merriweather (embedded, no runtime fetch).
 Font.register({
@@ -162,7 +163,7 @@ function GuideDoc({ data, bg }: { data: GuidePdfData; bg: string | null }) {
         <View style={s.meta}>
           <View style={s.metaRow}><Text style={s.metaLabel}>Name of client:</Text><Text style={s.metaValue}>{data.clientName}</Text></View>
           {data.consultationDate ? (
-            <View style={s.metaRow}><Text style={s.metaLabel}>Date of consultation:</Text><Text style={s.metaValue}>{data.consultationDate}</Text></View>
+            <View style={s.metaRow}><Text style={s.metaLabel}>Date of consultation:</Text><Text style={s.metaValue}>{formatConsultationDate(data.consultationDate)}</Text></View>
           ) : null}
         </View>
 

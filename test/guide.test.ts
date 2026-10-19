@@ -179,4 +179,14 @@ describe("plan guide", () => {
     expect(reloaded.supplementText).toBe("1. Custom wording");
     expect(reloaded.lifestyle).toBe("Sleep well");
   });
+
+  it("supplement row prints 'See notes below' verbatim (not 'for See notes below')", async () => {
+    const brandId = await createBrand({ name: `SeeNotes ${Date.now()}` });
+    const pid = await createProduct({ brandId, name: "SeeNotes Mag", form: "capsule" });
+    const planId = await getOrCreateDraftPlan(await createPatient({ name: "SeeNotes P", dob: "1990-01-01" }));
+    const itemId = await addPlanItem(planId, pid);
+    await setItemDuration(itemId, "See notes below");
+    const [row] = buildSupplementRows((await getPlan(planId))!);
+    expect(row.duration).toBe("See notes below");
+  });
 });

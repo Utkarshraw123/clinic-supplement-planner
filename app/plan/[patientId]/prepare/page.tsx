@@ -67,7 +67,7 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
               <label className="stack" style={{ gap: 5 }}><span>Client name <span className="muted-xs">(auto)</span></span>
                 <input value={patient.name} disabled />
               </label>
-              <label className="stack" style={{ gap: 5 }}><span>Date of consultation</span>
+              <label className="stack" style={{ gap: 5 }}><span>Date of consultation <span className="muted-xs">(shown on the plan)</span></span>
                 <input name="consultationDate" type="date" defaultValue={guide.consultationDate ?? ""} />
               </label>
             </div>
