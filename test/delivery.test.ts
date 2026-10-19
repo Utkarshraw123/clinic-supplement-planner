@@ -82,6 +82,16 @@ describe("delivery", () => {
     }
   });
 
+  it("flags which snapshots can produce a Word file (old-format snapshots can't)", async () => {
+    const patientId = await createPatient({ name: "Word Flag P", dob: "1990-01-01" });
+    const planId = await getOrCreateDraftPlan(patientId);
+    const modern = await execute("INSERT INTO plan_snapshots (plan_id, frozen_json, pdf_base64) VALUES (?, ?, '')", [planId, JSON.stringify({ clientName: "Word Flag P", supplements: [] })]);
+    const legacy = await execute("INSERT INTO plan_snapshots (plan_id, frozen_json, pdf_base64) VALUES (?, ?, '')", [planId, JSON.stringify({ patientName: "Word Flag P", items: [] })]);
+    const byId = new Map((await listSnapshotsForPatient(patientId)).map((s) => [s.id, s]));
+    expect(byId.get(Number(modern.lastInsertRowid))!.has_word).toBe(1);
+    expect(byId.get(Number(legacy.lastInsertRowid))!.has_word).toBe(0);
+  });
+
   it("returns null for a missing or unreadable snapshot", async () => {
     expect(await getSnapshotFrozen(999999)).toBeNull();
     const planId = await getOrCreateDraftPlan(await createPatient({ name: "Empty Frozen P", dob: "1990-01-01" }));

@@ -40,6 +40,7 @@ export default async function HistoryPage({ params }: { params: { id: string } }
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   <a href={`/api/snapshots/${s.id}/pdf`} target="_blank" className="btn btn--sm">View</a>
                   <a href={`/api/snapshots/${s.id}/pdf?download=1`} className="btn btn--sm btn--primary">Download PDF</a>
+                  {s.has_word ? <a href={`/api/snapshots/${s.id}/docx?download=1`} className="btn btn--sm">Download Word</a> : null}
                   <form action={duplicatePlanAction}>
                     <input type="hidden" name="sourcePlanId" value={s.plan_id} />
                     <input type="hidden" name="patientId" value={patient.id} />

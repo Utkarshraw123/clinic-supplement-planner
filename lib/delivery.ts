@@ -77,9 +77,12 @@ export async function listSnapshots(planId: number): Promise<{ id: number; sent_
   return query("SELECT id, sent_to_email, sent_at, created_at FROM plan_snapshots WHERE plan_id = ? ORDER BY created_at DESC", [planId]);
 }
 
-export async function listSnapshotsForPatient(patientId: number): Promise<{ id: number; plan_id: number; sent_to_email: string|null; sent_at: string|null; created_at: string }[]> {
+// has_word = 1 when the snapshot's frozen data is in the current guide format, so a Word
+// version can be built. Snapshots finalised before the guide redesign only have a PDF.
+export async function listSnapshotsForPatient(patientId: number): Promise<{ id: number; plan_id: number; sent_to_email: string|null; sent_at: string|null; created_at: string; has_word: number }[]> {
   return query(
-    `SELECT s.id, s.plan_id, s.sent_to_email, s.sent_at, s.created_at
+    `SELECT s.id, s.plan_id, s.sent_to_email, s.sent_at, s.created_at,
+            CASE WHEN json_valid(s.frozen_json) AND json_type(s.frozen_json, '$.clientName') = 'text' THEN 1 ELSE 0 END AS has_word
      FROM plan_snapshots s JOIN plans p ON p.id = s.plan_id
      WHERE p.patient_id = ? ORDER BY s.created_at DESC`,
     [patientId]
