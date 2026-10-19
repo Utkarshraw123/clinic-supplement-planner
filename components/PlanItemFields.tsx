@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { saveItemFieldsAction } from "@/app/plan/actions";
 import { DURATION_OPTIONS, SIZE_OPTIONS } from "@/lib/durations";
+import { ORDER_DEFAULT, ORDER_NONE, formValueFromStored } from "@/lib/order-codes";
 
 type Preset = { id: number; label: string };
 
@@ -15,10 +16,12 @@ export default function PlanItemFields({
   currentOrderCode,
   currentSize,
   currentNote,
+  brandCodes,
 }: {
   itemId: number;
   patientId: number;
   presets: Preset[];
+  brandCodes: { code: string; isDefault: boolean }[];
   notePresets: string[];
   currentText: string;
   currentDuration: string | null;
@@ -27,6 +30,11 @@ export default function PlanItemFields({
   currentNote: string | null;
 }) {
   const [note, setNote] = useState(currentNote ?? "");
+  const defaultCode = brandCodes.find((c) => c.isDefault)?.code ?? null;
+  const storedCode = currentOrderCode?.trim() ?? null;
+  // A code saved on this item that has since been removed from the brand's list stays
+  // selectable, so saving the form never silently drops it.
+  const unlistedCode = storedCode && !brandCodes.some((c) => c.code === storedCode) ? storedCode : null;
   return (
     <form action={saveItemFieldsAction} className="rx-fields">
       <input type="hidden" name="itemId" value={itemId} />
@@ -68,8 +76,15 @@ export default function PlanItemFields({
       </label>
 
       <label className="field">
-        <span className="field__label">Order code <span className="field__hint">overrides brand promo</span></span>
-        <input name="orderCode" placeholder="Discount / coupon code" defaultValue={currentOrderCode ?? ""} />
+        <span className="field__label">Order code <span className="field__hint">from this brand&apos;s codes</span></span>
+        <select name="orderCode" defaultValue={formValueFromStored(currentOrderCode)}>
+          <option value={ORDER_DEFAULT}>{defaultCode ? `Brand default (${defaultCode})` : "Brand default (none set)"}</option>
+          {brandCodes.map((c) => (
+            <option key={c.code} value={c.code}>{c.code}</option>
+          ))}
+          {unlistedCode && <option value={unlistedCode}>{unlistedCode} (no longer listed)</option>}
+          <option value={ORDER_NONE}>No code</option>
+        </select>
       </label>
 
       {notePresets.length > 0 && (

@@ -2,6 +2,7 @@ import { query, execute } from "@/lib/db";
 import type { PlanDetail } from "@/lib/plans";
 import type { PatientDetail } from "@/lib/patients";
 import { formatDuration } from "@/lib/format";
+import { resolveOrderCode } from "@/lib/order-codes";
 
 export type PlanGuide = {
   consultationDate: string | null;
@@ -36,8 +37,8 @@ export type SupplementRow = {
 export function buildSupplementRows(plan: PlanDetail): SupplementRow[] {
   return plan.items.map((it) => {
     const durText = formatDuration(it.duration);
-    // Per-item order code overrides the brand's promo code.
-    const code = (it.orderCode?.trim()) || (it.product.brand_promo_code?.trim()) || "";
+    // Item's chosen code, the brand default, or explicitly none (see lib/order-codes.ts).
+    const code = resolveOrderCode(it.orderCode, it.product.brand_promo_code);
     const note = (it.note?.trim()) || (it.product.default_note?.trim()) || "";
     const size = (it.size?.trim()) || (it.product.package_size?.trim()) || "";
     return {

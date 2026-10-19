@@ -5,7 +5,7 @@ import { addBrandCode } from "@/lib/brand-codes";
 import { createProduct } from "@/lib/products";
 import { addTerm } from "@/lib/taxonomies";
 import { createPatient, setPatientAttributes, getPatient } from "@/lib/patients";
-import { getOrCreateDraftPlan, addPlanItem, setItemDosing, setItemNote, setItemDuration, setItemOrderCode, setItemSize, getPlan } from "@/lib/plans";
+import { getOrCreateDraftPlan, addPlanItem, setItemDosing, setItemNote, setItemDuration, setItemOrderCode, setItemOrderCodeStored, setItemSize, getPlan } from "@/lib/plans";
 import { addSupplierLink } from "@/lib/products";
 import { execute } from "@/lib/db";
 import { defaultSupplementText, defaultMedsText, savePlanGuide, getPlanGuide, getGuideForEditing, todayIso, buildSupplementRows } from "@/lib/guide";
@@ -189,5 +189,16 @@ describe("plan guide", () => {
     await setItemDuration(itemId, "See notes below");
     const [row] = buildSupplementRows((await getPlan(planId))!);
     expect(row.duration).toBe("See notes below");
+  });
+
+  it("supplement row: 'No code' on an item suppresses the brand default", async () => {
+    const brandId = await createBrand({ name: `NoCode ${Date.now()}` });
+    await addBrandCode(brandId, "BRAND20", true);
+    const pid = await createProduct({ brandId, name: "NoCode Mag", form: "capsule" });
+    const planId = await getOrCreateDraftPlan(await createPatient({ name: "NoCode P", dob: "1990-01-01" }));
+    const itemId = await addPlanItem(planId, pid);
+    await setItemOrderCodeStored(itemId, "");
+    const [row] = buildSupplementRows((await getPlan(planId))!);
+    expect(row.code).toBe("");
   });
 });

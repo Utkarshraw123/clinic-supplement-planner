@@ -6,6 +6,7 @@ import { listActiveProductsWithTags } from "@/lib/products";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { suggestForPatient } from "@/lib/recommend";
 import { listDosingPresets } from "@/lib/dosing";
+import { listAllBrandCodes } from "@/lib/brand-codes";
 import { removeItemAction } from "@/app/plan/actions";
 import { applyProtocolAction, saveAsProtocolAction } from "@/app/protocols/actions";
 import { listProtocols } from "@/lib/protocols";
@@ -21,13 +22,14 @@ export default async function PlanBuilder({ params, searchParams }: { params: { 
   const requestedPlanId = searchParams.plan ? Number(searchParams.plan) : undefined;
 
   // All independent loads in one parallel wave (was ~5 sequential round-trips).
-  const [patient, planId, presets, allProducts, protocols, snippets] = await Promise.all([
+  const [patient, planId, presets, allProducts, protocols, snippets, codesByBrand] = await Promise.all([
     getPatient(patientId),
     resolveDraftPlanId(patientId, requestedPlanId, u.userId),
     listDosingPresets(),
     listActiveProductsWithTags(),
     listProtocols(),
     listSnippets(),
+    listAllBrandCodes(),
   ]);
   const notePresets = snippets.filter((sn) => sn.category === "supplement").map((sn) => sn.text);
   if (!patient) notFound();
@@ -163,6 +165,7 @@ export default async function PlanBuilder({ params, searchParams }: { params: { 
                   currentOrderCode={item.orderCode}
                   currentSize={item.size}
                   currentNote={item.note}
+                  brandCodes={(codesByBrand.get(item.product.brand_id) ?? []).map((c) => ({ code: c.code, isDefault: c.isDefault }))}
                 />
               </div>
             </div>
