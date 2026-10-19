@@ -174,3 +174,11 @@ CREATE TABLE IF NOT EXISTS brand_codes (
   is_default INTEGER NOT NULL DEFAULT 0,
   UNIQUE (brand_id, code)
 );
+
+CREATE TABLE IF NOT EXISTS dietary_protocols (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  body TEXT NOT NULL,
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

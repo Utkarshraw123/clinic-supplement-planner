@@ -6,6 +6,7 @@ import { getOrCreateDraftPlan, getPlan } from "@/lib/plans";
 import { flagProductForPatient, hasBlock } from "@/lib/flagging";
 import { getGuideForEditing, buildSupplementRows } from "@/lib/guide";
 import { listSnippets } from "@/lib/notes";
+import { listDietaryProtocols } from "@/lib/dietary-protocols";
 import { saveGuideAction, finaliseGuideAction } from "@/app/plan/prepare-actions";
 import SnippetTextarea from "@/components/SnippetTextarea";
 
@@ -14,10 +15,11 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
   const patientId = Number(params.patientId);
 
   // Independent loads in parallel; snippets fetched once and split by category.
-  const [patient, planId, allSnips] = await Promise.all([
+  const [patient, planId, allSnips, dietaryProtocols] = await Promise.all([
     getPatient(patientId),
     getOrCreateDraftPlan(patientId, u.userId),
     listSnippets(),
+    listDietaryProtocols(),
   ]);
   if (!patient) notFound();
   const plan = await getPlan(planId);
@@ -85,7 +87,7 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
               <SnippetTextarea name="lifestyle" defaultValue={guide.lifestyle ?? ""} snippets={lifestyleSnips} rows={4} />
             </label>
             <label className="stack" style={{ gap: 5 }}><span>Dietary recommendations</span>
-              <SnippetTextarea name="dietary" defaultValue={guide.dietary ?? ""} snippets={dietarySnips} rows={4} />
+              <SnippetTextarea name="dietary" defaultValue={guide.dietary ?? ""} snippets={dietarySnips} rows={4} blocks={dietaryProtocols} blocksLabel="Insert a dietary protocol…" />
             </label>
           </div>
 
