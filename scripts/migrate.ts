@@ -36,6 +36,19 @@ export async function runMigrations(): Promise<void> {
   await ensureColumn("protocols", "dietary", "TEXT");
   await ensureColumn("protocols", "notes", "TEXT");
   await ensureColumn("dosing_presets", "archived", "INTEGER NOT NULL DEFAULT 0"); // "deleted" presets stay resolvable
+
+  // One-time move of the old single per-brand promo code into the brand's code list as
+  // its default, then clear it so deleting codes later never brings it back.
+  await execute(
+    `INSERT INTO brand_codes (brand_id, code, is_default)
+     SELECT b.id, trim(b.promo_code), 1 FROM brands b
+     WHERE b.promo_code IS NOT NULL AND trim(b.promo_code) <> ''
+       AND NOT EXISTS (SELECT 1 FROM brand_codes bc WHERE bc.brand_id = b.id)`
+  );
+  await execute(
+    `UPDATE brands SET promo_code = NULL
+     WHERE promo_code IS NOT NULL AND EXISTS (SELECT 1 FROM brand_codes bc WHERE bc.brand_id = brands.id)`
+  );
 }
 
 if (process.argv[1] && process.argv[1].endsWith("migrate.ts")) {

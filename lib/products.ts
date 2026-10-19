@@ -58,7 +58,7 @@ export async function linkAlternative(productId: number, altId: number): Promise
 
 export async function getProduct(id: number): Promise<ProductDetail | null> {
   const base = await query<Omit<ProductDetail,"tags"|"suppliers"|"alternatives">>(
-    `SELECT p.id, p.brand_id, b.name AS brand_name, b.promo_code AS brand_promo_code, p.name, p.description, p.package_size, p.form, p.default_note, p.status
+    `SELECT p.id, p.brand_id, b.name AS brand_name, (SELECT bc.code FROM brand_codes bc WHERE bc.brand_id = b.id AND bc.is_default = 1 LIMIT 1) AS brand_promo_code, p.name, p.description, p.package_size, p.form, p.default_note, p.status
      FROM products p JOIN brands b ON b.id = p.brand_id WHERE p.id = ?`, [id]
   );
   if (!base[0]) return null;
@@ -80,7 +80,7 @@ export async function getProduct(id: number): Promise<ProductDetail | null> {
 // recommendations, the plan-builder catalog list) use this to avoid ~4 queries per product.
 export async function listActiveProductsWithTags(): Promise<ProductDetail[]> {
   const base = await query<Omit<ProductDetail, "tags"|"suppliers"|"alternatives">>(
-    `SELECT p.id, p.brand_id, b.name AS brand_name, b.promo_code AS brand_promo_code, p.name, p.description, p.package_size, p.form, p.default_note, p.status
+    `SELECT p.id, p.brand_id, b.name AS brand_name, (SELECT bc.code FROM brand_codes bc WHERE bc.brand_id = b.id AND bc.is_default = 1 LIMIT 1) AS brand_promo_code, p.name, p.description, p.package_size, p.form, p.default_note, p.status
      FROM products p JOIN brands b ON b.id = p.brand_id
      WHERE p.status = 'active' ORDER BY b.name, p.name`
   );
@@ -106,7 +106,7 @@ export async function getProductsByIds(ids: number[]): Promise<Map<number, Produ
   const ph = ids.map(() => "?").join(",");
   const [base, tags, suppliers, alternatives] = await Promise.all([
     query<Omit<ProductDetail,"tags"|"suppliers"|"alternatives">>(
-      `SELECT p.id, p.brand_id, b.name AS brand_name, b.promo_code AS brand_promo_code, p.name, p.description, p.package_size, p.form, p.default_note, p.status
+      `SELECT p.id, p.brand_id, b.name AS brand_name, (SELECT bc.code FROM brand_codes bc WHERE bc.brand_id = b.id AND bc.is_default = 1 LIMIT 1) AS brand_promo_code, p.name, p.description, p.package_size, p.form, p.default_note, p.status
        FROM products p JOIN brands b ON b.id = p.brand_id WHERE p.id IN (${ph})`, ids),
     query<{ product_id: number; termId: number; label: string; tagType: TermType }>(
       `SELECT pt.product_id, t.id AS termId, t.label AS label, pt.tag_type AS tagType

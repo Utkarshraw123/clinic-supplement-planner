@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { runMigrations } from "@/scripts/migrate";
 import { createBrand } from "@/lib/brands";
+import { addBrandCode } from "@/lib/brand-codes";
 import { createProduct } from "@/lib/products";
 import { addTerm } from "@/lib/taxonomies";
 import { createPatient, setPatientAttributes, getPatient } from "@/lib/patients";
@@ -114,7 +115,7 @@ describe("plan guide", () => {
 
   it("supplement row: brand promo fallback, per-item overrides, size, and all vendor links", async () => {
     const brandId = await createBrand({ name: `RowDetail ${Date.now()}` });
-    await execute("UPDATE brands SET promo_code = ? WHERE id = ?", ["BRAND20", brandId]);
+    await addBrandCode(brandId, "BRAND20", true);
     const pid = await createProduct({ brandId, name: "RowDetail Mag", form: "capsule", packageSize: "60 capsules" });
     await addSupplierLink(pid, "Wild Nutrition", "https://wn.example/mag");
     await addSupplierLink(pid, "Amazon", "https://amazon.example/mag");

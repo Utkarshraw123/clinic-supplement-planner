@@ -1,7 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/current-user";
-import { createBrand, setBrandPromoCode } from "@/lib/brands";
+import { createBrand } from "@/lib/brands";
+import { addBrandCode, deleteBrandCode, setDefaultBrandCode } from "@/lib/brand-codes";
 
 export async function addBrandAction(formData: FormData) {
   await requireUser();
@@ -9,8 +10,20 @@ export async function addBrandAction(formData: FormData) {
   revalidatePath("/catalog/brands");
 }
 
-export async function setBrandPromoAction(formData: FormData) {
+export async function addBrandCodeAction(formData: FormData) {
   await requireUser();
-  await setBrandPromoCode(Number(formData.get("id")), String(formData.get("promo_code") || ""));
+  await addBrandCode(Number(formData.get("brandId")), String(formData.get("code") || ""), formData.get("makeDefault") === "on");
+  revalidatePath("/catalog/brands");
+}
+
+export async function deleteBrandCodeAction(formData: FormData) {
+  await requireUser();
+  await deleteBrandCode(Number(formData.get("id")));
+  revalidatePath("/catalog/brands");
+}
+
+export async function setDefaultBrandCodeAction(formData: FormData) {
+  await requireUser();
+  await setDefaultBrandCode(Number(formData.get("id")));
   revalidatePath("/catalog/brands");
 }

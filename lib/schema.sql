@@ -166,3 +166,11 @@ CREATE TABLE IF NOT EXISTS plan_guide (
   meds_text TEXT,
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS brand_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  brand_id INTEGER NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
+  code TEXT NOT NULL,
+  is_default INTEGER NOT NULL DEFAULT 0,
+  UNIQUE (brand_id, code)
+);
