@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { runMigrations } from "@/scripts/migrate";
+import { execute } from "@/lib/db";
 import { addAvailabilityWindow, listAvailability, removeAvailabilityWindow } from "@/lib/availability";
 
 describe("availability windows", () => {
-  beforeAll(async () => { await runMigrations(); });
+  beforeAll(async () => { await runMigrations(); await execute("DELETE FROM availability WHERE weekday = 1"); });
 
   it("adds, lists (ordered) and removes windows", async () => {
     const a = await addAvailabilityWindow({ weekday: 1, startTime: "09:00", endTime: "12:00" });

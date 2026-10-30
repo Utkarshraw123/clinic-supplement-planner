@@ -37,6 +37,13 @@ export async function listPatients(): Promise<{ id: number; name: string; dob: s
   return query("SELECT id, name, dob FROM patients ORDER BY name");
 }
 
+export async function findPatientByEmail(email: string): Promise<{ id: number; name: string } | null> {
+  const e = email.trim().toLowerCase();
+  if (!e) return null;
+  const rows = await query<{ id: number; name: string }>("SELECT id, name FROM patients WHERE lower(email) = ? ORDER BY id LIMIT 1", [e]);
+  return rows[0] ?? null;
+}
+
 export async function getPatient(id: number): Promise<PatientDetail | null> {
   const base = await query<{ id: number; name: string; dob: string } & PatientContact>(
     "SELECT id, name, dob, email, phone, address1, address2, city, postcode FROM patients WHERE id = ?",
