@@ -17,6 +17,12 @@ export async function runMigrations(): Promise<void> {
   for (const stmt of statements) await execute(stmt);
 
   // Idempotent column additions for tables that predate a column.
+  await ensureColumn("patients", "email", "TEXT");
+  await ensureColumn("patients", "phone", "TEXT");
+  await ensureColumn("patients", "address1", "TEXT");
+  await ensureColumn("patients", "address2", "TEXT");
+  await ensureColumn("patients", "city", "TEXT");
+  await ensureColumn("patients", "postcode", "TEXT");
   await ensureColumn("products", "default_note", "TEXT");
   await ensureColumn("products", "description", "TEXT");
   await ensureColumn("plan_items", "note", "TEXT");          // per-product practitioner comment

@@ -78,6 +78,12 @@ CREATE TABLE IF NOT EXISTS patients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   dob TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  address1 TEXT,
+  address2 TEXT,
+  city TEXT,
+  postcode TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   created_by INTEGER REFERENCES users(id)
 );

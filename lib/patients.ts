@@ -3,18 +3,34 @@ import { recordAudit } from "@/lib/audit";
 
 export type AttrType = "allergy"|"goal"|"diet"|"med_condition";
 export type PatientAttr = { termId: number; label: string; attrType: AttrType };
-export type PatientDetail = { id: number; name: string; dob: string; attributes: PatientAttr[] };
+export type PatientContact = {
+  email: string | null; phone: string | null;
+  address1: string | null; address2: string | null;
+  city: string | null; postcode: string | null;
+};
+export type PatientDetail = { id: number; name: string; dob: string; attributes: PatientAttr[] } & PatientContact;
 
-export async function createPatient(input: { name: string; dob: string; createdBy?: number }): Promise<number> {
+function contactArgs(input: Partial<PatientContact>) {
+  const norm = (v: string | null | undefined) => {
+    const t = (v ?? "").trim();
+    return t === "" ? null : t;
+  };
+  return [norm(input.email), norm(input.phone), norm(input.address1), norm(input.address2), norm(input.city), norm(input.postcode)];
+}
+
+export async function createPatient(input: { name: string; dob: string; createdBy?: number } & Partial<PatientContact>): Promise<number> {
   const rs = await execute(
-    "INSERT INTO patients (name, dob, created_by) VALUES (?, ?, ?)",
-    [input.name.trim(), input.dob.trim(), input.createdBy ?? null]
+    "INSERT INTO patients (name, dob, email, phone, address1, address2, city, postcode, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [input.name.trim(), input.dob.trim(), ...contactArgs(input), input.createdBy ?? null]
   );
   return Number(rs.lastInsertRowid);
 }
 
-export async function updatePatientBasics(id: number, input: { name: string; dob: string }): Promise<void> {
-  await execute("UPDATE patients SET name = ?, dob = ? WHERE id = ?", [input.name.trim(), input.dob.trim(), id]);
+export async function updatePatientBasics(id: number, input: { name: string; dob: string } & Partial<PatientContact>): Promise<void> {
+  await execute(
+    "UPDATE patients SET name = ?, dob = ?, email = ?, phone = ?, address1 = ?, address2 = ?, city = ?, postcode = ? WHERE id = ?",
+    [input.name.trim(), input.dob.trim(), ...contactArgs(input), id]
+  );
 }
 
 export async function listPatients(): Promise<{ id: number; name: string; dob: string }[]> {
@@ -22,7 +38,10 @@ export async function listPatients(): Promise<{ id: number; name: string; dob: s
 }
 
 export async function getPatient(id: number): Promise<PatientDetail | null> {
-  const base = await query<{ id: number; name: string; dob: string }>("SELECT id, name, dob FROM patients WHERE id = ?", [id]);
+  const base = await query<{ id: number; name: string; dob: string } & PatientContact>(
+    "SELECT id, name, dob, email, phone, address1, address2, city, postcode FROM patients WHERE id = ?",
+    [id]
+  );
   if (!base[0]) return null;
   const attributes = await query<PatientAttr>(
     `SELECT t.id AS termId, t.label AS label, pa.attr_type AS attrType
