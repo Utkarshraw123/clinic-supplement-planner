@@ -108,6 +108,22 @@ CREATE TABLE IF NOT EXISTS patient_consents (
   recorded_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Dated clinical consultation notes. Free body plus optional SOAP fields.
+CREATE TABLE IF NOT EXISTS consultation_notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+  note_date TEXT NOT NULL,
+  title TEXT,
+  body TEXT,
+  subjective TEXT,
+  objective TEXT,
+  assessment TEXT,
+  plan TEXT,
+  author_id INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS dosing_presets (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   label TEXT NOT NULL,
