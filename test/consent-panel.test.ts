@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { runMigrations } from "@/scripts/migrate";
 import { createPatient } from "@/lib/patients";
 import { recordConsent, withdrawConsent, latestConsentByPurpose } from "@/lib/consent";
-import { CONSENT_PURPOSES } from "@/app/patients/[id]/consent-actions";
+import { CONSENT_PURPOSES } from "@/app/patients/[id]/consent-config";
 
 describe("consent purposes + state", () => {
   beforeAll(async () => { await runMigrations(); });

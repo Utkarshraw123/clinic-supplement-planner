@@ -2,11 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/current-user";
 import { recordConsent, withdrawConsent } from "@/lib/consent";
-
-export const CONSENT_PURPOSES = [
-  { key: "health_data_processing", label: "Health-data processing", version: "v1" },
-  { key: "marketing", label: "Marketing emails", version: "v1" },
-] as const;
+import { CONSENT_PURPOSES } from "./consent-config";
 
 const VERSIONS: Record<string, string> = Object.fromEntries(CONSENT_PURPOSES.map((p) => [p.key, p.version]));
 
