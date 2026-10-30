@@ -10,6 +10,7 @@
     "test:watch": "vitest",
     "migrate": "tsx scripts/migrate.ts",
     "migrate:control": "tsx scripts/migrate-control.ts",
+    "migrate:all": "tsx scripts/migrate-tenants.ts",
     "bootstrap:dev": "tsx scripts/bootstrap-dev-tenant.ts",
     "seed": "tsx scripts/seed-admin.ts"
   },

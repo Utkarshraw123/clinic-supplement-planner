@@ -56,6 +56,15 @@ export async function addMembership(input: {
   });
 }
 
+export async function listTenants(): Promise<{ id: string; db_url: string; db_auth_token: string | null }[]> {
+  const rs = await getControlDb().execute("SELECT id, db_url, db_auth_token FROM tenants ORDER BY id");
+  return rs.rows.map((r) => ({
+    id: String(r.id),
+    db_url: String(r.db_url),
+    db_auth_token: r.db_auth_token ? String(r.db_auth_token) : null,
+  }));
+}
+
 export async function findPrimaryMembership(userId: number) {
   const rs = await getControlDb().execute({
     sql: "SELECT tenant_id, role FROM memberships WHERE user_id = ? ORDER BY created_at, tenant_id LIMIT 1",
