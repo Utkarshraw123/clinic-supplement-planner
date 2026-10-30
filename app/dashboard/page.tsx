@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/current-user";
+import { requireActiveSubscription } from "@/lib/billing/gate";
 import { getDashboardStats, recentPatients, recentlySent } from "@/lib/dashboard";
 import { getPractitionerBreakdown } from "@/lib/analytics";
 
@@ -12,6 +13,7 @@ function greeting(): string {
 
 export default async function DashboardPage() {
   const u = await requireUser();
+  await requireActiveSubscription(u.tenantId);
   const [stats, patients, sent, team] = await Promise.all([
     getDashboardStats(),
     recentPatients(),

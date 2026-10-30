@@ -7,6 +7,7 @@ import { resolveLogin } from "@/lib/auth/login";
 
 beforeEach(async () => {
   const db = getControlDb();
+  await db.execute("DROP TABLE IF EXISTS subscriptions");
   await db.execute("DROP TABLE IF EXISTS memberships");
   await db.execute("DROP TABLE IF EXISTS users");
   await db.execute("DROP TABLE IF EXISTS tenants");
