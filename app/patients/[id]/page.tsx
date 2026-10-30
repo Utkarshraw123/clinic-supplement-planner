@@ -44,11 +44,23 @@ export default async function PatientProfile({ params }: { params: { id: string 
 
       <div className="card">
         <h2 style={{ marginBottom: 12 }}>Details</h2>
-        <form action={savePatientBasicsAction} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10, alignItems: "end" }}>
+        <form action={savePatientBasicsAction} className="stack" style={{ gap: 10 }}>
           <input type="hidden" name="id" value={patient.id} />
-          <label className="stack" style={{ gap: 5 }}><span>Full name</span><input name="name" defaultValue={patient.name} /></label>
-          <label className="stack" style={{ gap: 5 }}><span>Date of birth</span><input name="dob" type="date" defaultValue={patient.dob} /></label>
-          <button type="submit">Save</button>
+          <div className="row" style={{ gap: 10 }}>
+            <label className="stack" style={{ gap: 5, flex: 1 }}><span>Full name</span><input name="name" defaultValue={patient.name} /></label>
+            <label className="stack" style={{ gap: 5, flex: 1 }}><span>Date of birth</span><input name="dob" type="date" defaultValue={patient.dob} /></label>
+          </div>
+          <div className="row" style={{ gap: 10 }}>
+            <label className="stack" style={{ gap: 5, flex: 1 }}><span>Email <span className="muted-xs">(used to send plans)</span></span><input name="email" type="email" defaultValue={patient.email ?? ""} placeholder="client@email.com" /></label>
+            <label className="stack" style={{ gap: 5, flex: 1 }}><span>Phone</span><input name="phone" defaultValue={patient.phone ?? ""} /></label>
+          </div>
+          <label className="stack" style={{ gap: 5 }}><span>Address line 1</span><input name="address1" defaultValue={patient.address1 ?? ""} /></label>
+          <label className="stack" style={{ gap: 5 }}><span>Address line 2</span><input name="address2" defaultValue={patient.address2 ?? ""} /></label>
+          <div className="row" style={{ gap: 10 }}>
+            <label className="stack" style={{ gap: 5, flex: 1 }}><span>City</span><input name="city" defaultValue={patient.city ?? ""} /></label>
+            <label className="stack" style={{ gap: 5, flex: 1 }}><span>Postcode</span><input name="postcode" defaultValue={patient.postcode ?? ""} /></label>
+          </div>
+          <button type="submit" style={{ justifySelf: "start" }}>Save</button>
         </form>
       </div>
 
