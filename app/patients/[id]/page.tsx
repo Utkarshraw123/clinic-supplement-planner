@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { getPatient, type AttrType } from "@/lib/patients";
 import { listTerms, type TermType } from "@/lib/taxonomies";
+import { latestConsentByPurpose } from "@/lib/consent";
 import { savePatientBasicsAction } from "@/app/patients/actions";
+import { CONSENT_PURPOSES, grantConsentAction, withdrawConsentAction } from "./consent-actions";
 import ClinicalProfileForm, { type Section } from "@/components/ClinicalProfileForm";
 import DeletePatientButton from "@/components/DeletePatientButton";
 import Toaster from "@/components/Toaster";
@@ -21,6 +23,7 @@ export default async function PatientProfile({ params }: { params: { id: string 
   const patient = await getPatient(id);
   if (!patient) notFound();
   const allTerms = await listTerms();
+  const consent = await latestConsentByPurpose(id);
 
   const sections: Section[] = ATTR_MAP.map(({ attr, term, label, hint }) => ({
     attr, term, label, hint,
@@ -62,6 +65,25 @@ export default async function PatientProfile({ params }: { params: { id: string 
           </div>
           <button type="submit" style={{ justifySelf: "start" }}>Save</button>
         </form>
+      </div>
+
+      <div className="card stack" style={{ gap: 10 }}>
+        <h2 style={{ fontSize: 16, margin: 0 }}>Consent</h2>
+        {CONSENT_PURPOSES.map((p) => {
+          const granted = consent[p.key]?.granted === 1;
+          return (
+            <div key={p.key} className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+              <span>{p.label}: <strong>{granted ? "Granted" : "Not granted"}</strong>
+                {consent[p.key]?.recorded_at ? <span className="muted-xs"> · {new Date(consent[p.key].recorded_at).toLocaleDateString()}</span> : null}
+              </span>
+              {granted ? (
+                <form action={withdrawConsentAction.bind(null, id, p.key)}><button type="submit" className="btn">Withdraw</button></form>
+              ) : (
+                <form action={grantConsentAction.bind(null, id, p.key)}><button type="submit" className="btn--primary">Record consent</button></form>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="card">
