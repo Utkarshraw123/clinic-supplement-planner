@@ -6,7 +6,9 @@ import { listTerms, type TermType } from "@/lib/taxonomies";
 import { latestConsentByPurpose } from "@/lib/consent";
 import { listNotesForPatient } from "@/lib/consultation-notes";
 import { getIntake } from "@/lib/intake";
+import { listAppointmentsForPatient } from "@/lib/appointments";
 import { deleteNoteAction } from "./notes/actions";
+import { setStatusAction } from "@/app/appointments/actions";
 import { savePatientBasicsAction } from "@/app/patients/actions";
 import { CONSENT_PURPOSES } from "./consent-config";
 import { grantConsentAction, withdrawConsentAction } from "./consent-actions";
@@ -30,6 +32,7 @@ export default async function PatientProfile({ params }: { params: { id: string 
   const consent = await latestConsentByPurpose(id);
   const notes = await listNotesForPatient(id);
   const intake = await getIntake(id);
+  const appts = await listAppointmentsForPatient(id);
 
   const sections: Section[] = ATTR_MAP.map(({ attr, term, label, hint }) => ({
     attr, term, label, hint,
@@ -140,6 +143,21 @@ export default async function PatientProfile({ params }: { params: { id: string 
             {intake.goals ? <><dt>Goals</dt><dd style={{ whiteSpace: "pre-wrap" }}>{intake.goals}</dd></> : null}
           </dl>
         )}
+      </div>
+
+      <div className="card stack" style={{ gap: 8 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 16, margin: 0 }}>Appointments</h2>
+          <Link href="/appointments" className="btn--primary">Book</Link>
+        </div>
+        {appts.length === 0 ? <p className="muted">No appointments.</p> : appts.map((a) => (
+          <div key={a.id} className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+            <span>{new Date(a.starts_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })} · {a.type_name ?? "—"} · <strong>{a.status}</strong></span>
+            {a.status === "booked" ? (
+              <form action={setStatusAction.bind(null, a.id, "cancelled", `/patients/${id}`)}><button className="btn--sm">Cancel</button></form>
+            ) : null}
+          </div>
+        ))}
       </div>
 
       <div className="card">
