@@ -1,4 +1,4 @@
-import { query, execute, getDb } from "@/lib/db";
+import { query, execute, getActiveDb } from "@/lib/db";
 
 export type AttrType = "allergy"|"goal"|"diet"|"med_condition";
 export type PatientAttr = { termId: number; label: string; attrType: AttrType };
@@ -56,7 +56,7 @@ export async function deletePatient(id: number): Promise<void> {
   stmts.push({ sql: `DELETE FROM patient_attributes WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM patients WHERE id = ?`, args: [id] });
 
-  await getDb().batch(stmts, "write");
+  await (await getActiveDb()).batch(stmts, "write");
 }
 
 export async function setPatientAttributes(patientId: number, attrs: { termId: number; attrType: AttrType }[]): Promise<void> {

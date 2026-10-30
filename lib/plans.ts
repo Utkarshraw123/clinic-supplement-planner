@@ -1,4 +1,4 @@
-import { query, execute, getDb } from "@/lib/db";
+import { query, execute, getActiveDb } from "@/lib/db";
 import { getProductsByIds, type ProductDetail } from "@/lib/products";
 
 export { DURATION_OPTIONS } from "@/lib/durations";
@@ -125,7 +125,7 @@ export async function duplicatePlan(sourcePlanId: number, authorId?: number): Pr
 // Delete a draft plan and everything attached to it (items + any saved guide), in one
 // write batch. Leaves the patient, other plans and snapshots alone. UI calls this on drafts.
 export async function deletePlan(planId: number): Promise<void> {
-  await getDb().batch(
+  await (await getActiveDb()).batch(
     [
       { sql: "DELETE FROM plan_items WHERE plan_id = ?", args: [planId] },
       { sql: "DELETE FROM plan_guide WHERE plan_id = ?", args: [planId] },

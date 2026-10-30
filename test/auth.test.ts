@@ -12,9 +12,9 @@ describe("password", () => {
 
 describe("session", () => {
   it("round-trips a payload", async () => {
-    const token = await signSession({ userId: 7, role: "admin", name: "Lorna" });
+    const token = await signSession({ userId: 7, tenantId: "lorna", role: "admin", name: "Lorna" });
     const decoded = await verifySession(token);
-    expect(decoded).toEqual({ userId: 7, role: "admin", name: "Lorna" });
+    expect(decoded).toEqual({ userId: 7, tenantId: "lorna", role: "admin", name: "Lorna" });
   });
   it("rejects a tampered token", async () => {
     expect(await verifySession("not.a.jwt")).toBeNull();
