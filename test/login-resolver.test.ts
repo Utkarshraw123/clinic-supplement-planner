@@ -14,7 +14,7 @@ beforeEach(async () => {
   for (const stmt of sql.split(";").map((s) => s.trim()).filter(Boolean)) await db.execute(stmt);
   await upsertTenant({ id: "lorna", name: "Lorna", dbUrl: "file:local.db" });
   const uid = await createControlUser({ email: "l@x.com", password: "pw", name: "Lorna" });
-  await addMembership({ userId: uid, tenantId: "lorna", role: "owner" });
+  await addMembership({ userId: uid, tenantId: "lorna", role: "owner", tenantUserId: uid });
 });
 
 describe("resolveLogin", () => {
@@ -25,7 +25,7 @@ describe("resolveLogin", () => {
 
   it("maps practitioner role to team", async () => {
     const uid = await createControlUser({ email: "p@x.com", password: "pw", name: "Pat" });
-    await addMembership({ userId: uid, tenantId: "lorna", role: "practitioner" });
+    await addMembership({ userId: uid, tenantId: "lorna", role: "practitioner", tenantUserId: uid });
     const s = await resolveLogin("p@x.com", "pw");
     expect(s?.role).toBe("team");
   });

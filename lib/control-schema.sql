@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS memberships (
   user_id INTEGER NOT NULL REFERENCES users(id),
   tenant_id TEXT NOT NULL REFERENCES tenants(id),
   role TEXT NOT NULL CHECK (role IN ('owner','admin','practitioner')),
+  tenant_user_id INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (user_id, tenant_id)
 );

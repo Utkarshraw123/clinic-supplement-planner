@@ -12,5 +12,5 @@ export async function resolveLogin(email: string, password: string): Promise<Ses
   const membership = await findPrimaryMembership(user.id);
   if (!membership) return null;
   const role: "admin" | "team" = membership.role === "practitioner" ? "team" : "admin";
-  return { userId: user.id, tenantId: membership.tenant_id, role, name: user.name };
+  return { userId: membership.tenant_user_id, tenantId: membership.tenant_id, role, name: user.name };
 }

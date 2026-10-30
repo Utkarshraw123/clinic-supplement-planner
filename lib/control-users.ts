@@ -48,11 +48,12 @@ export async function addMembership(input: {
   userId: number;
   tenantId: string;
   role: MembershipRole;
+  tenantUserId: number;
 }): Promise<void> {
   await getControlDb().execute({
-    sql: `INSERT INTO memberships (user_id, tenant_id, role) VALUES (?, ?, ?)
-          ON CONFLICT(user_id, tenant_id) DO UPDATE SET role=excluded.role`,
-    args: [input.userId, input.tenantId, input.role],
+    sql: `INSERT INTO memberships (user_id, tenant_id, role, tenant_user_id) VALUES (?, ?, ?, ?)
+          ON CONFLICT(user_id, tenant_id) DO UPDATE SET role=excluded.role, tenant_user_id=excluded.tenant_user_id`,
+    args: [input.userId, input.tenantId, input.role, input.tenantUserId],
   });
 }
 
@@ -67,10 +68,10 @@ export async function listTenants(): Promise<{ id: string; db_url: string; db_au
 
 export async function findPrimaryMembership(userId: number) {
   const rs = await getControlDb().execute({
-    sql: "SELECT tenant_id, role FROM memberships WHERE user_id = ? ORDER BY created_at, tenant_id LIMIT 1",
+    sql: "SELECT tenant_id, role, tenant_user_id FROM memberships WHERE user_id = ? ORDER BY created_at, tenant_id LIMIT 1",
     args: [userId],
   });
   const r = rs.rows[0];
   if (!r) return null;
-  return { tenant_id: String(r.tenant_id), role: r.role as MembershipRole };
+  return { tenant_id: String(r.tenant_id), role: r.role as MembershipRole, tenant_user_id: Number(r.tenant_user_id) };
 }

@@ -25,21 +25,21 @@ describe("control-plane identity", () => {
   it("creates a user, tenant, membership and resolves them", async () => {
     await upsertTenant({ id: "lorna", name: "Lorna Clinic", dbUrl: "file:local.db" });
     const uid = await createControlUser({ email: "L@x.com", password: "pw", name: "Lorna" });
-    await addMembership({ userId: uid, tenantId: "lorna", role: "owner" });
+    await addMembership({ userId: uid, tenantId: "lorna", role: "owner", tenantUserId: 7 });
 
     const found = await findControlUserByEmail("l@x.com"); // case-insensitive
     expect(found?.id).toBe(uid);
 
     const m = await findPrimaryMembership(uid);
-    expect(m).toEqual({ tenant_id: "lorna", role: "owner" });
+    expect(m).toEqual({ tenant_id: "lorna", role: "owner", tenant_user_id: 7 });
   });
 
   it("upsertTenant updates an existing row, addMembership updates the role", async () => {
     await upsertTenant({ id: "lorna", name: "Old", dbUrl: "file:old.db" });
     await upsertTenant({ id: "lorna", name: "New", dbUrl: "file:new.db" });
     const uid = await createControlUser({ email: "a@x.com", password: "pw", name: "A" });
-    await addMembership({ userId: uid, tenantId: "lorna", role: "practitioner" });
-    await addMembership({ userId: uid, tenantId: "lorna", role: "admin" });
+    await addMembership({ userId: uid, tenantId: "lorna", role: "practitioner", tenantUserId: 1 });
+    await addMembership({ userId: uid, tenantId: "lorna", role: "admin", tenantUserId: 1 });
     expect((await findPrimaryMembership(uid))?.role).toBe("admin");
   });
 
