@@ -5,6 +5,7 @@ import { getPatient, type AttrType } from "@/lib/patients";
 import { listTerms, type TermType } from "@/lib/taxonomies";
 import { latestConsentByPurpose } from "@/lib/consent";
 import { listNotesForPatient } from "@/lib/consultation-notes";
+import { getIntake } from "@/lib/intake";
 import { deleteNoteAction } from "./notes/actions";
 import { savePatientBasicsAction } from "@/app/patients/actions";
 import { CONSENT_PURPOSES } from "./consent-config";
@@ -28,6 +29,7 @@ export default async function PatientProfile({ params }: { params: { id: string 
   const allTerms = await listTerms();
   const consent = await latestConsentByPurpose(id);
   const notes = await listNotesForPatient(id);
+  const intake = await getIntake(id);
 
   const sections: Section[] = ATTR_MAP.map(({ attr, term, label, hint }) => ({
     attr, term, label, hint,
@@ -118,6 +120,25 @@ export default async function PatientProfile({ params }: { params: { id: string 
               ) : null}
             </div>
           ))
+        )}
+      </div>
+
+      <div className="card stack" style={{ gap: 8 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 16, margin: 0 }}>Intake</h2>
+          <Link href={`/patients/${id}/intake`} className="btn--primary">{intake ? "Edit intake" : "Add intake"}</Link>
+        </div>
+        {!intake ? (
+          <p className="muted">No intake recorded yet.</p>
+        ) : (
+          <dl className="muted-xs" style={{ margin: 0 }}>
+            {intake.chief_concern ? <><dt>Chief concern</dt><dd style={{ whiteSpace: "pre-wrap" }}>{intake.chief_concern}</dd></> : null}
+            {intake.health_history ? <><dt>Health history</dt><dd style={{ whiteSpace: "pre-wrap" }}>{intake.health_history}</dd></> : null}
+            {intake.current_medications ? <><dt>Current medications</dt><dd style={{ whiteSpace: "pre-wrap" }}>{intake.current_medications}</dd></> : null}
+            {intake.current_supplements ? <><dt>Current supplements</dt><dd style={{ whiteSpace: "pre-wrap" }}>{intake.current_supplements}</dd></> : null}
+            {intake.lifestyle ? <><dt>Lifestyle</dt><dd style={{ whiteSpace: "pre-wrap" }}>{intake.lifestyle}</dd></> : null}
+            {intake.goals ? <><dt>Goals</dt><dd style={{ whiteSpace: "pre-wrap" }}>{intake.goals}</dd></> : null}
+          </dl>
         )}
       </div>
 
