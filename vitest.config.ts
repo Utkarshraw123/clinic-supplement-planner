@@ -9,6 +9,7 @@ export default defineConfig({
     include: ["test/**/*.test.ts"],
     setupFiles: ["test/setup.ts"],
     fileParallelism: false,
+    env: { CONTROL_DATABASE_URL: "file:test-control.db" },
   },
   resolve: { alias: { "@": fileURLToPath(new URL(".", import.meta.url)) } },
 });
