@@ -22,6 +22,9 @@ describe("patient data export", () => {
     await createNote(pid, { noteDate: "2026-01-01", title: "Visit" });
     const { saveIntake } = await import("@/lib/intake");
     await saveIntake(pid, { chiefConcern: "Fatigue" });
+    const { createAppointmentType, createAppointment } = await import("@/lib/appointments");
+    const atId = await createAppointmentType({ name: "60m", durationMinutes: 60 });
+    await createAppointment({ patientId: pid, appointmentTypeId: atId, startsAt: new Date(Date.now() + 86400000).toISOString(), createdBy: actor });
     const planId = await getOrCreateDraftPlan(pid, actor);
     await addPlanItem(planId, productId);
 
@@ -34,6 +37,7 @@ describe("patient data export", () => {
     expect(out.plans[0].items[0].product_name).toBe("Ex Magnesium");
     expect(out.notes.some((n: { title: string | null }) => n.title === "Visit")).toBe(true);
     expect(out.intake?.chief_concern).toBe("Fatigue");
+    expect(out.appointments.length).toBeGreaterThan(0);
     expect(JSON.stringify(out)).not.toContain("pdf_base64");
   });
 

@@ -14,6 +14,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
   const items: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: "home" },
     { href: "/patients", label: "Patients", icon: "users" },
+    { href: "/appointments", label: "Appointments", icon: "calendar" },
     { href: "/catalog", label: "Catalog", icon: "grid" },
     { href: "/protocols", label: "Protocols", icon: "layers" },
   ];
@@ -22,6 +23,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
       { href: "/admin/analytics", label: "Analytics", icon: "chart" },
       { href: "/admin/notes", label: "Notes", icon: "note" },
       { href: "/admin/dosing", label: "Dosing presets", icon: "note" },
+      { href: "/admin/appointment-types", label: "Appointment types", icon: "calendar" },
       { href: "/admin/dietary-protocols", label: "Dietary protocols", icon: "layers" },
       { href: "/admin/taxonomies", label: "Taxonomies", icon: "tag" },
       { href: "/admin/users", label: "Team", icon: "team" },

@@ -2,6 +2,7 @@ import { query } from "@/lib/db";
 import { listConsents, type ConsentRow } from "@/lib/consent";
 import { listNotesForPatient, type NoteRow } from "@/lib/consultation-notes";
 import { getIntake, type IntakeRow } from "@/lib/intake";
+import { listAppointmentsForPatient, type AppointmentRow } from "@/lib/appointments";
 import { listAuditForEntity } from "@/lib/audit";
 
 type PatientRow = { id: number; name: string; dob: string; created_at: string; email: string | null; phone: string | null; address1: string | null; address2: string | null; city: string | null; postcode: string | null };
@@ -13,6 +14,7 @@ export type PatientExport = {
   consents: ConsentRow[];
   notes: NoteRow[];
   intake: IntakeRow | null;
+  appointments: AppointmentRow[];
   plans: {
     id: number; status: string; created_at: string;
     items: { product_id: number; product_name: string; note: string | null; dosing: string | null; position: number }[];
@@ -26,7 +28,7 @@ export async function exportPatientData(patientId: number): Promise<PatientExpor
   const patient = (await query<PatientRow>("SELECT id, name, dob, created_at, email, phone, address1, address2, city, postcode FROM patients WHERE id = ?", [patientId]))[0] ?? null;
   const exported_at = new Date().toISOString();
   if (!patient) {
-    return { exported_at, patient: null, attributes: [], consents: [], notes: [], intake: null, plans: [], audit: [] };
+    return { exported_at, patient: null, attributes: [], consents: [], notes: [], intake: null, appointments: [], plans: [], audit: [] };
   }
 
   const attributes = await query<{ taxonomy_term_id: number; attr_type: string; label: string }>(
@@ -39,6 +41,7 @@ export async function exportPatientData(patientId: number): Promise<PatientExpor
   const consents = await listConsents(patientId);
   const notes = await listNotesForPatient(patientId);
   const intake = await getIntake(patientId);
+  const appointments = await listAppointmentsForPatient(patientId);
   const audit = await listAuditForEntity("patient", patientId);
 
   const planRows = await query<{ id: number; status: string; created_at: string }>(
@@ -71,7 +74,7 @@ export async function exportPatientData(patientId: number): Promise<PatientExpor
     plans.push({ id: p.id, status: p.status, created_at: p.created_at, items, guide, snapshots });
   }
 
-  return { exported_at, patient, attributes, consents, notes, intake, plans, audit };
+  return { exported_at, patient, attributes, consents, notes, intake, appointments, plans, audit };
 }
 
 function safeParse(s: string): unknown {

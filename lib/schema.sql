@@ -230,3 +230,27 @@ CREATE TABLE IF NOT EXISTS dietary_protocols (
   created_by INTEGER REFERENCES users(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Appointment types a clinic offers (name + duration, optional price).
+CREATE TABLE IF NOT EXISTS appointment_types (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  duration_minutes INTEGER NOT NULL,
+  price TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Booked appointments.
+CREATE TABLE IF NOT EXISTS appointments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
+  practitioner_id INTEGER REFERENCES users(id),
+  appointment_type_id INTEGER REFERENCES appointment_types(id),
+  starts_at TEXT NOT NULL,
+  ends_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'booked' CHECK (status IN ('booked','completed','cancelled')),
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_by INTEGER REFERENCES users(id)
+);
