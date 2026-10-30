@@ -23,6 +23,16 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Retryable record of a clinic being provisioned, so a partial failure is
+-- visible and resumable rather than leaving a half-made clinic.
+CREATE TABLE IF NOT EXISTS provisioning_jobs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  state TEXT NOT NULL CHECK (state IN ('pending','db_created','schema_done','seeded','done','failed')),
+  error TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Which user belongs to which tenant, and their role there.
 CREATE TABLE IF NOT EXISTS memberships (
   user_id INTEGER NOT NULL REFERENCES users(id),
