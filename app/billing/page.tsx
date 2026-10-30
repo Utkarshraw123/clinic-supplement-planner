@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth/current-user";
 import { getSubscription, subscriptionAccess } from "@/lib/billing/subscriptions";
+import { startCheckoutAction } from "./actions";
 
 export default async function BillingPage() {
   const u = await requireUser();
@@ -15,8 +16,13 @@ export default async function BillingPage() {
       {access.allowed ? (
         <p style={{ marginTop: 16 }}>Your subscription is active. <a href="/dashboard">Go to dashboard →</a></p>
       ) : (
-        <p style={{ marginTop: 16 }}>Your access is paused ({access.reason}). Please contact support to continue — online checkout coming with onboarding.</p>
+        <p style={{ marginTop: 16 }}>Your access is paused ({access.reason}).</p>
       )}
+      {!access.allowed && process.env.STRIPE_PRICE_SOLO ? (
+        <form action={startCheckoutAction} style={{ marginTop: 16 }}>
+          <button type="submit" style={{ padding: "10px 16px" }}>Subscribe to continue</button>
+        </form>
+      ) : null}
     </main>
   );
 }
