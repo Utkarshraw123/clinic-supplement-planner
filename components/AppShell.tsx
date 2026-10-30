@@ -24,6 +24,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
       { href: "/admin/notes", label: "Notes", icon: "note" },
       { href: "/admin/dosing", label: "Dosing presets", icon: "note" },
       { href: "/admin/appointment-types", label: "Appointment types", icon: "calendar" },
+      { href: "/admin/availability", label: "Availability", icon: "calendar" },
       { href: "/admin/dietary-protocols", label: "Dietary protocols", icon: "layers" },
       { href: "/admin/taxonomies", label: "Taxonomies", icon: "tag" },
       { href: "/admin/users", label: "Team", icon: "team" },

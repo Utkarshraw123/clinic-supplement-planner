@@ -254,3 +254,11 @@ CREATE TABLE IF NOT EXISTS appointments (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   created_by INTEGER REFERENCES users(id)
 );
+
+-- Weekly clinic availability windows (clinic-wide). weekday 0=Sunday..6=Saturday.
+CREATE TABLE IF NOT EXISTS availability (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  weekday INTEGER NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL
+);
