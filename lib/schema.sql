@@ -124,6 +124,19 @@ CREATE TABLE IF NOT EXISTS consultation_notes (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- One practitioner-entered intake record per patient (upserted).
+CREATE TABLE IF NOT EXISTS patient_intake (
+  patient_id INTEGER PRIMARY KEY REFERENCES patients(id) ON DELETE CASCADE,
+  chief_concern TEXT,
+  health_history TEXT,
+  current_medications TEXT,
+  current_supplements TEXT,
+  lifestyle TEXT,
+  goals TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_by INTEGER REFERENCES users(id)
+);
+
 CREATE TABLE IF NOT EXISTS dosing_presets (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   label TEXT NOT NULL,
