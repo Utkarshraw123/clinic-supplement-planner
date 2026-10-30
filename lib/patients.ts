@@ -53,6 +53,7 @@ export async function deletePatient(id: number): Promise<void> {
     stmts.push({ sql: `DELETE FROM plan_guide WHERE plan_id IN (${ph})`, args: planIds });
     stmts.push({ sql: `DELETE FROM plans WHERE patient_id = ?`, args: [id] });
   }
+  stmts.push({ sql: `DELETE FROM patient_consents WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM patient_attributes WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM patients WHERE id = ?`, args: [id] });
 

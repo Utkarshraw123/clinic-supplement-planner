@@ -89,6 +89,19 @@ CREATE TABLE IF NOT EXISTS patient_attributes (
   PRIMARY KEY (patient_id, taxonomy_term_id, attr_type)
 );
 
+-- GDPR consent, append-only and versioned. A withdrawal is a NEW row with
+-- granted=0 (the grant row is never mutated). Latest-per-purpose is the current
+-- state. Removed only when the patient is erased.
+CREATE TABLE IF NOT EXISTS patient_consents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+  purpose TEXT NOT NULL,
+  granted INTEGER NOT NULL CHECK (granted IN (0,1)),
+  version TEXT NOT NULL,
+  recorded_by INTEGER REFERENCES users(id),
+  recorded_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS dosing_presets (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   label TEXT NOT NULL,
