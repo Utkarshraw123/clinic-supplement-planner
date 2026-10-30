@@ -14,8 +14,8 @@ export async function createPatientAction(formData: FormData) {
 // Permanently erase a patient and all linked data (GDPR right-to-erasure).
 // Admin-only and irreversible — the UI requires a typed/confirmed action.
 export async function deletePatientAction(patientId: number) {
-  await requireAdmin();
-  await deletePatient(patientId);
+  const u = await requireAdmin();
+  await deletePatient(patientId, u.userId);
   redirect("/patients");
 }
 

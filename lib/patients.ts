@@ -1,4 +1,5 @@
 import { query, execute, getActiveDb } from "@/lib/db";
+import { recordAudit } from "@/lib/audit";
 
 export type AttrType = "allergy"|"goal"|"diet"|"med_condition";
 export type PatientAttr = { termId: number; label: string; attrType: AttrType };
@@ -36,7 +37,7 @@ export async function getPatient(id: number): Promise<PatientDetail | null> {
 // (which hold the frozen PDF + the client's email). Also purges the audit-log
 // rows for those plans/snapshots, since the "sent" entry records the email.
 // Runs as one write transaction so it's all-or-nothing.
-export async function deletePatient(id: number): Promise<void> {
+export async function deletePatient(id: number, actorId?: number): Promise<void> {
   const planIds = (await query<{ id: number }>("SELECT id FROM plans WHERE patient_id = ?", [id])).map((r) => r.id);
   const stmts: { sql: string; args: number[] }[] = [];
 
@@ -58,6 +59,9 @@ export async function deletePatient(id: number): Promise<void> {
   stmts.push({ sql: `DELETE FROM patients WHERE id = ?`, args: [id] });
 
   await (await getActiveDb()).batch(stmts, "write");
+  // Proof-of-erasure: survives because we never delete entity='patient' audit rows,
+  // and carries no PII.
+  await recordAudit({ actorId, action: "erased", entity: "patient", entityId: id, detail: "patient record erased (GDPR)" });
 }
 
 export async function setPatientAttributes(patientId: number, attrs: { termId: number; attrType: AttrType }[]): Promise<void> {
