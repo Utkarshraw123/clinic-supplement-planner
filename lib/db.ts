@@ -1,13 +1,29 @@
 import { createClient, type Client, type InArgs, type ResultSet } from "@libsql/client";
 
-let _db: Client | null = null;
+// One libSQL client per (url, token). Cached so we reuse connections across the
+// control-plane and every tenant database.
+const _clients = new Map<string, Client>();
+function client(url: string, authToken?: string): Client {
+  const key = `${url}::${authToken ?? ""}`;
+  let c = _clients.get(key);
+  if (!c) {
+    c = createClient({ url, authToken });
+    _clients.set(key, c);
+  }
+  return c;
+}
 
+// The env-configured single database (legacy default: scripts, seeds, tests, and
+// the dev fallback before a tenant session exists).
 export function getDb(): Client {
-  if (_db) return _db;
   const url = process.env.TURSO_DATABASE_URL || "file:local.db";
-  const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
-  _db = createClient({ url, authToken });
-  return _db;
+  return client(url, process.env.TURSO_AUTH_TOKEN || undefined);
+}
+
+// The shared control-plane database (tenant registry + global identity).
+export function getControlDb(): Client {
+  const url = process.env.CONTROL_DATABASE_URL || "file:control.db";
+  return client(url, process.env.CONTROL_AUTH_TOKEN || undefined);
 }
 
 export async function query<T = Record<string, unknown>>(sql: string, args: InArgs = []): Promise<T[]> {
