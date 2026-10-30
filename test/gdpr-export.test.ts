@@ -18,6 +18,8 @@ describe("patient data export", () => {
     const productId = await createProduct({ brandId, name: "Ex Magnesium", form: "capsule" });
     const pid = await createPatient({ name: "Export P", dob: "1991-03-03", email: "export@x.test", createdBy: actor });
     await recordConsent({ patientId: pid, purpose: "health_data_processing", version: "v1", actorId: actor });
+    const { createNote } = await import("@/lib/consultation-notes");
+    await createNote(pid, { noteDate: "2026-01-01", title: "Visit" });
     const planId = await getOrCreateDraftPlan(pid, actor);
     await addPlanItem(planId, productId);
 
@@ -28,6 +30,7 @@ describe("patient data export", () => {
     expect(out.consents.some((c) => c.purpose === "health_data_processing")).toBe(true);
     expect(out.plans).toHaveLength(1);
     expect(out.plans[0].items[0].product_name).toBe("Ex Magnesium");
+    expect(out.notes.some((n: { title: string | null }) => n.title === "Visit")).toBe(true);
     expect(JSON.stringify(out)).not.toContain("pdf_base64");
   });
 
