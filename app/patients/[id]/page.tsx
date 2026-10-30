@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/auth/current-user";
 import { getPatient, type AttrType } from "@/lib/patients";
 import { listTerms, type TermType } from "@/lib/taxonomies";
 import { latestConsentByPurpose } from "@/lib/consent";
+import { listNotesForPatient } from "@/lib/consultation-notes";
+import { deleteNoteAction } from "./notes/actions";
 import { savePatientBasicsAction } from "@/app/patients/actions";
 import { CONSENT_PURPOSES } from "./consent-config";
 import { grantConsentAction, withdrawConsentAction } from "./consent-actions";
@@ -25,6 +27,7 @@ export default async function PatientProfile({ params }: { params: { id: string 
   if (!patient) notFound();
   const allTerms = await listTerms();
   const consent = await latestConsentByPurpose(id);
+  const notes = await listNotesForPatient(id);
 
   const sections: Section[] = ATTR_MAP.map(({ attr, term, label, hint }) => ({
     attr, term, label, hint,
@@ -85,6 +88,37 @@ export default async function PatientProfile({ params }: { params: { id: string 
             </div>
           );
         })}
+      </div>
+
+      <div className="card stack" style={{ gap: 10 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 16, margin: 0 }}>Consultation notes</h2>
+          <Link href={`/patients/${id}/notes/new`} className="btn--primary">+ Add note</Link>
+        </div>
+        {notes.length === 0 ? (
+          <p className="muted">No notes yet.</p>
+        ) : (
+          notes.map((n) => (
+            <div key={n.id} style={{ borderTop: "1px solid var(--border, #eee)", paddingTop: 10 }}>
+              <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                <strong>{n.note_date}{n.title ? ` · ${n.title}` : ""}</strong>
+                <span className="row" style={{ gap: 8 }}>
+                  <Link href={`/patients/${id}/notes/${n.id}`}>Edit</Link>
+                  <form action={deleteNoteAction.bind(null, id, n.id)}><button type="submit" className="btn">Delete</button></form>
+                </span>
+              </div>
+              {n.body ? <p style={{ whiteSpace: "pre-wrap", margin: "6px 0 0" }}>{n.body}</p> : null}
+              {(n.subjective || n.objective || n.assessment || n.plan) ? (
+                <dl className="muted-xs" style={{ margin: "6px 0 0" }}>
+                  {n.subjective ? <><dt>S</dt><dd style={{ whiteSpace: "pre-wrap" }}>{n.subjective}</dd></> : null}
+                  {n.objective ? <><dt>O</dt><dd style={{ whiteSpace: "pre-wrap" }}>{n.objective}</dd></> : null}
+                  {n.assessment ? <><dt>A</dt><dd style={{ whiteSpace: "pre-wrap" }}>{n.assessment}</dd></> : null}
+                  {n.plan ? <><dt>P</dt><dd style={{ whiteSpace: "pre-wrap" }}>{n.plan}</dd></> : null}
+                </dl>
+              ) : null}
+            </div>
+          ))
+        )}
       </div>
 
       <div className="card">
