@@ -2,7 +2,7 @@ import { query } from "@/lib/db";
 import { listConsents, type ConsentRow } from "@/lib/consent";
 import { listAuditForEntity } from "@/lib/audit";
 
-type PatientRow = { id: number; name: string; dob: string; created_at: string };
+type PatientRow = { id: number; name: string; dob: string; created_at: string; email: string | null; phone: string | null; address1: string | null; address2: string | null; city: string | null; postcode: string | null };
 
 export type PatientExport = {
   exported_at: string;
@@ -19,7 +19,7 @@ export type PatientExport = {
 };
 
 export async function exportPatientData(patientId: number): Promise<PatientExport> {
-  const patient = (await query<PatientRow>("SELECT id, name, dob, created_at FROM patients WHERE id = ?", [patientId]))[0] ?? null;
+  const patient = (await query<PatientRow>("SELECT id, name, dob, created_at, email, phone, address1, address2, city, postcode FROM patients WHERE id = ?", [patientId]))[0] ?? null;
   const exported_at = new Date().toISOString();
   if (!patient) {
     return { exported_at, patient: null, attributes: [], consents: [], plans: [], audit: [] };

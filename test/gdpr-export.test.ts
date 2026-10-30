@@ -16,7 +16,7 @@ describe("patient data export", () => {
     const actor = await createUser({ email: `x${stamp}@c.test`, password: "x", role: "admin", name: "X" });
     const brandId = await createBrand({ name: `Ex ${stamp}` });
     const productId = await createProduct({ brandId, name: "Ex Magnesium", form: "capsule" });
-    const pid = await createPatient({ name: "Export P", dob: "1991-03-03", createdBy: actor });
+    const pid = await createPatient({ name: "Export P", dob: "1991-03-03", email: "export@x.test", createdBy: actor });
     await recordConsent({ patientId: pid, purpose: "health_data_processing", version: "v1", actorId: actor });
     const planId = await getOrCreateDraftPlan(pid, actor);
     await addPlanItem(planId, productId);
@@ -24,6 +24,7 @@ describe("patient data export", () => {
     const out = await exportPatientData(pid);
 
     expect(out.patient?.name).toBe("Export P");
+    expect((out.patient as { email?: string } | null)?.email).toBe("export@x.test");
     expect(out.consents.some((c) => c.purpose === "health_data_processing")).toBe(true);
     expect(out.plans).toHaveLength(1);
     expect(out.plans[0].items[0].product_name).toBe("Ex Magnesium");

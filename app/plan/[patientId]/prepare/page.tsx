@@ -120,7 +120,7 @@ export default async function PrepareGuidePage({ params }: { params: { patientId
             <div className="prep-head"><span className="attr-dot attr-dot--warn" /><h2>Send the guide</h2></div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <label className="muted" style={{ whiteSpace: "nowrap" }}>Client email <span className="muted-xs">(optional)</span></label>
-              <input name="email" type="email" placeholder="client@email.com" style={{ flex: 1, minWidth: 200 }} />
+              <input name="email" type="email" placeholder="client@email.com" defaultValue={patient?.email ?? ""} style={{ flex: 1, minWidth: 200 }} />
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button type="submit" formAction={saveGuideAction}>Save draft</button>
