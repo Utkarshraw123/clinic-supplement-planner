@@ -4,6 +4,7 @@ import { runMigrations } from "@/scripts/migrate";
 import { seedStarterData } from "@/scripts/seed-starter";
 import { createUser, findUserByEmail } from "@/lib/users";
 import { createTursoDatabase } from "@/lib/tenancy/turso";
+import { startTrial } from "@/lib/billing/subscriptions";
 
 async function setJob(tenantId: string, state: string, error?: string) {
   await getControlDb().execute({
@@ -42,6 +43,7 @@ export async function provisionTenant(
     const uid = control ? control.id : await createControlUser({ email: input.ownerEmail, password: input.ownerPassword, name: input.ownerName });
     await addMembership({ userId: uid, tenantId: input.tenantId, role: "owner", tenantUserId });
 
+    await startTrial(input.tenantId);
     await setJob(input.tenantId, "done");
     return { tenantId: input.tenantId, tenantUserId };
   } catch (e) {

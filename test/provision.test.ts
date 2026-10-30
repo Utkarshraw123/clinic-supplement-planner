@@ -7,7 +7,7 @@ import { resolveLogin } from "@/lib/auth/login";
 
 async function resetControl() {
   const db = getControlDb();
-  for (const t of ["memberships", "users", "tenants", "provisioning_jobs"]) await db.execute(`DROP TABLE IF EXISTS ${t}`);
+  for (const t of ["subscriptions", "memberships", "users", "tenants", "provisioning_jobs"]) await db.execute(`DROP TABLE IF EXISTS ${t}`);
   const sql = readFileSync(join(process.cwd(), "lib/control-schema.sql"), "utf8");
   for (const stmt of sql.split(";").map((s) => s.trim()).filter(Boolean)) await db.execute(stmt);
 }
@@ -38,6 +38,10 @@ describe("provisionTenant", () => {
     // Job completed.
     const job = await getControlDb().execute("SELECT state FROM provisioning_jobs WHERE tenant_id = 'acme' ORDER BY id DESC LIMIT 1");
     expect(String(job.rows[0].state)).toBe("done");
+
+    const { getSubscription } = await import("@/lib/billing/subscriptions");
+    const sub = await getSubscription("acme");
+    expect(sub?.status).toBe("trialing");
   });
 
   it("marks the job failed if DB creation throws", async () => {

@@ -42,3 +42,15 @@ CREATE TABLE IF NOT EXISTS memberships (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (user_id, tenant_id)
 );
+
+-- One subscription per tenant (control-plane). Drives access gating.
+CREATE TABLE IF NOT EXISTS subscriptions (
+  tenant_id TEXT PRIMARY KEY REFERENCES tenants(id),
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT,
+  tier TEXT,
+  seats INTEGER,
+  status TEXT NOT NULL,
+  trial_ends_at TEXT,
+  current_period_end TEXT
+);
