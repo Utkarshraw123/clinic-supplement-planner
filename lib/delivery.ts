@@ -124,3 +124,11 @@ export async function getSnapshotFrozen(snapshotId: number): Promise<{ data: Gui
   const letterheadTemplate = "letterheadTemplate" in p ? (typeof p.letterheadTemplate === "string" ? p.letterheadTemplate : null) : undefined;
   return { data, letterheadTemplate, legacySupplementText: str(p.supplementText) };
 }
+
+export async function getSnapshotOwnerPatientId(snapshotId: number): Promise<number | null> {
+  const rows = await query<{ patient_id: number }>(
+    `SELECT p.patient_id FROM plan_snapshots s JOIN plans p ON p.id = s.plan_id WHERE s.id = ?`,
+    [snapshotId]
+  );
+  return rows[0]?.patient_id ?? null;
+}
