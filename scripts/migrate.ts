@@ -34,6 +34,13 @@ export async function runMigrations(): Promise<void> {
   await ensureColumn("plan_guide", "notes", "TEXT");         // closing notes block on the prescription
   await ensureColumn("note_snippets", "category", "TEXT");   // supplement | lifestyle | dietary | general
   await ensureColumn("clinic_settings", "letterhead_template", "TEXT"); // prescription PDF colourway (see lib/pdf-themes.ts)
+  // Phase 3b invoicing config (per-tenant).
+  await ensureColumn("clinic_settings", "currency", "TEXT NOT NULL DEFAULT 'EUR'");
+  await ensureColumn("clinic_settings", "vat_rate", "REAL");
+  await ensureColumn("clinic_settings", "vat_number", "TEXT");
+  await ensureColumn("clinic_settings", "invoice_prefix", "TEXT NOT NULL DEFAULT 'INV-'");
+  await ensureColumn("clinic_settings", "invoice_next_seq", "INTEGER NOT NULL DEFAULT 1");
+  await ensureColumn("clinic_settings", "stripe_secret_key", "TEXT");
   await ensureColumn("protocol_items", "note", "TEXT");          // full item fields, so a protocol is the whole plan
   await ensureColumn("protocol_items", "duration", "TEXT");
   await ensureColumn("protocol_items", "order_code", "TEXT");

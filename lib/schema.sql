@@ -273,3 +273,38 @@ CREATE TABLE IF NOT EXISTS portal_login_tokens (
   used_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Client-facing invoices (Phase 3b). Practitioner bills the patient. Money in integer cents.
+CREATE TABLE IF NOT EXISTS invoices (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
+  number TEXT,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','sent','paid','void')),
+  issue_date TEXT,
+  due_date TEXT,
+  currency TEXT NOT NULL DEFAULT 'EUR',
+  subtotal_cents INTEGER NOT NULL DEFAULT 0,
+  tax_rate REAL,
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  total_cents INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  payment_link_url TEXT,
+  paid_at TEXT,
+  paid_method TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS invoice_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  invoice_id INTEGER REFERENCES invoices(id) ON DELETE CASCADE,
+  description TEXT NOT NULL,
+  quantity REAL NOT NULL DEFAULT 1,
+  unit_price_cents INTEGER NOT NULL DEFAULT 0,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  source TEXT,
+  appointment_id INTEGER,
+  plan_id INTEGER,
+  sort INTEGER NOT NULL DEFAULT 0
+);
