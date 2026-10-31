@@ -6,6 +6,7 @@ import { listTerms, type TermType } from "@/lib/taxonomies";
 import { latestConsentByPurpose } from "@/lib/consent";
 import { listNotesForPatient } from "@/lib/consultation-notes";
 import { listInvoicesForPatient } from "@/lib/invoices";
+import { listMealPlansForPatient } from "@/lib/meal-plans";
 import { getIntake } from "@/lib/intake";
 import { listAppointmentsForPatient } from "@/lib/appointments";
 import { deleteNoteAction } from "./notes/actions";
@@ -36,6 +37,7 @@ export default async function PatientProfile({ params }: { params: { id: string 
   const intake = await getIntake(id);
   const appts = await listAppointmentsForPatient(id);
   const invoices = await listInvoicesForPatient(id);
+  const mealPlans = await listMealPlansForPatient(id);
 
   const sections: Section[] = ATTR_MAP.map(({ attr, term, label, hint }) => ({
     attr, term, label, hint,
@@ -163,6 +165,18 @@ export default async function PatientProfile({ params }: { params: { id: string 
               <form action={setStatusAction.bind(null, a.id, "cancelled", `/patients/${id}`)}><button className="btn--sm">Cancel</button></form>
             ) : null}
           </div>
+        ))}
+      </div>
+
+      <div className="card stack" style={{ gap: 8 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 16, margin: 0 }}>Meal plans</h2>
+          <Link href={`/meal-plans/new?patientId=${id}`} className="btn--primary">+ New meal plan</Link>
+        </div>
+        {mealPlans.length === 0 ? <p className="muted">No meal plans.</p> : mealPlans.map((mp) => (
+          <Link key={mp.id} href={`/meal-plans/${mp.id}`} className="row" style={{ justifyContent: "space-between", textDecoration: "none", borderTop: "1px solid var(--border,#eee)", paddingTop: 8 }}>
+            <span>{mp.title ?? "Meal plan"}</span><span className="muted"><strong>{mp.status}</strong></span>
+          </Link>
         ))}
       </div>
 
