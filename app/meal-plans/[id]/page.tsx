@@ -5,7 +5,7 @@ import { getMealPlan, planWarnings, PANEL_KEYS } from "@/lib/meal-plans";
 import { getPatient } from "@/lib/patients";
 import { listFoods } from "@/lib/foods";
 import { listRecipes } from "@/lib/recipes";
-import { saveMetaAction, addDayAction, removeDayAction, addMealAction, removeMealAction, addItemAction, removeItemAction, finaliseMealPlanAction, saveAsTemplateAction } from "../actions";
+import { saveMetaAction, addDayAction, removeDayAction, addMealAction, removeMealAction, addItemAction, removeItemAction, finaliseMealPlanAction, saveAsTemplateAction, emailMealPlanAction } from "../actions";
 
 const LABELS: Record<string, string> = { energy_kcal: "kcal", protein_g: "P", carbs_g: "C", sugars_g: "sug", fat_g: "F", saturates_g: "sat", fibre_g: "fib", salt_g: "salt" };
 const fmt = (k: string, v: number) => (k === "energy_kcal" ? Math.round(v).toString() : v.toFixed(1));
@@ -28,6 +28,7 @@ export default async function MealPlanBuilder({ params }: { params: { id: string
         <div><h1>{plan.title ?? "Meal plan"}</h1><p className="muted">{patient?.name ?? "—"} · <strong>{plan.status}</strong></p></div>
         <div className="row" style={{ gap: 8 }}>
           <Link href={`/api/meal-plans/${id}/pdf`} target="_blank" className="btn--sm">Download PDF</Link>
+          {patient?.email ? <form action={emailMealPlanAction.bind(null, id)}><button className="btn--sm">Email</button></form> : null}
           {plan.status === "draft" ? <form action={finaliseMealPlanAction.bind(null, id)}><button className="btn--primary btn--sm">Finalise</button></form> : null}
         </div>
       </div>

@@ -4,8 +4,12 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import {
   createMealPlan, updatePlanMeta, addDay, removeDay, addMeal, renameMeal, removeMeal,
-  addItem, removeItem, finaliseMealPlan, saveAsTemplate, applyTemplate,
+  addItem, removeItem, finaliseMealPlan, saveAsTemplate, applyTemplate, getMealPlan,
 } from "@/lib/meal-plans";
+import { getClinicSettings } from "@/lib/settings";
+import { getPatient } from "@/lib/patients";
+import { renderMealPlanPdf } from "@/lib/meal-plan-pdf";
+import { sendMealPlanEmail } from "@/lib/email";
 
 const num = (v: FormDataEntryValue | null) => { const n = Number(v); return Number.isFinite(n) && n > 0 ? n : null; };
 
@@ -54,3 +58,15 @@ export async function removeItemAction(planId: number, itemId: number, _fd?: For
 export async function finaliseMealPlanAction(planId: number, _fd?: FormData) { const u = await requireUser(); await finaliseMealPlan(planId, u.userId); revalidatePath(`/meal-plans/${planId}`); }
 export async function saveAsTemplateAction(planId: number, fd: FormData) { const u = await requireUser(); await saveAsTemplate(planId, String(fd.get("title") || "Template"), u.userId); revalidatePath(`/meal-plans/${planId}`); }
 export async function applyTemplateAction(templateId: number, fd: FormData) { const u = await requireUser(); const pid = Number(fd.get("patientId")); const id = await applyTemplate(templateId, pid, u.userId); redirect(`/meal-plans/${id}`); }
+
+export async function emailMealPlanAction(planId: number, _fd?: FormData) {
+  await requireUser();
+  const tree = await getMealPlan(planId);
+  if (!tree || !tree.plan.patient_id) return;
+  const patient = await getPatient(tree.plan.patient_id);
+  if (!patient?.email) return;
+  const settings = await getClinicSettings();
+  const pdf = await renderMealPlanPdf(tree, settings, patient.name);
+  await sendMealPlanEmail({ to: patient.email, from: settings.email_from || "", pdf, patientName: patient.name, title: tree.plan.title ?? "Meal plan" });
+  revalidatePath(`/meal-plans/${planId}`);
+}

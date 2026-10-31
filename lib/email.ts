@@ -52,6 +52,24 @@ export async function sendInvoiceEmail(input: { to: string; from: string; pdf: B
   return { mocked: false };
 }
 
+export async function sendMealPlanEmail(input: { to: string; from: string; pdf: Buffer; patientName: string; title: string }): Promise<{ mocked: boolean }> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.log(`[email mock] would send meal plan "${input.title}" to ${input.to} (${input.pdf.length} bytes)`);
+    return { mocked: true };
+  }
+  const { Resend } = await import("resend");
+  const resend = new Resend(key);
+  await resend.emails.send({
+    from: input.from || "plans@example.com",
+    to: input.to,
+    subject: `Your meal plan — ${input.title}`,
+    text: `Dear ${input.patientName},\n\nPlease find your meal plan "${input.title}" attached.\n\nBest wishes.`,
+    attachments: [{ filename: "meal-plan.pdf", content: input.pdf.toString("base64") }],
+  });
+  return { mocked: false };
+}
+
 export async function sendMagicLinkEmail(input: { to: string; clinicName: string; link: string }): Promise<{ mocked: boolean }> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
