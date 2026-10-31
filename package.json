@@ -19,6 +19,7 @@
   "license": "ISC",
   "description": "Internal clinical supplement plan builder",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.69.0",
     "@libsql/client": "^0.17.4",
     "@react-pdf/renderer": "^4.8.1",
     "bcryptjs": "^3.0.3",
