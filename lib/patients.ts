@@ -80,6 +80,12 @@ export async function deletePatient(id: number, actorId?: number): Promise<void>
     stmts.push({ sql: `DELETE FROM plan_guide WHERE plan_id IN (${ph})`, args: planIds });
     stmts.push({ sql: `DELETE FROM plans WHERE patient_id = ?`, args: [id] });
   }
+  const invIds = (await query<{ id: number }>("SELECT id FROM invoices WHERE patient_id = ?", [id])).map((r) => r.id);
+  if (invIds.length) {
+    const iph = invIds.map(() => "?").join(",");
+    stmts.push({ sql: `DELETE FROM invoice_items WHERE invoice_id IN (${iph})`, args: invIds });
+  }
+  stmts.push({ sql: `DELETE FROM invoices WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM portal_login_tokens WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM appointments WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM patient_intake WHERE patient_id = ?`, args: [id] });
