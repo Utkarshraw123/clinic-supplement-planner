@@ -251,6 +251,7 @@ CREATE TABLE IF NOT EXISTS appointments (
   ends_at TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'booked' CHECK (status IN ('booked','completed','cancelled')),
   notes TEXT,
+  reminder_sent_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   created_by INTEGER REFERENCES users(id)
 );

@@ -80,3 +80,24 @@ export async function setAppointmentStatus(id: number, status: "booked"|"complet
   await execute("UPDATE appointments SET status = ? WHERE id = ?", [status, id]);
   if (appt?.patient_id) await recordAudit({ actorId, action: `appointment_${status}`, entity: "patient", entityId: appt.patient_id, detail: `appointment ${id}` });
 }
+
+export type DueReminder = { id: number; patient_id: number | null; patient_name: string | null; patient_email: string | null; starts_at: string; type_name: string | null };
+
+export async function listDueReminders(withinHours = 24, now: Date = new Date()): Promise<DueReminder[]> {
+  const from = now.toISOString();
+  const to = new Date(now.getTime() + withinHours * 60 * 60 * 1000).toISOString();
+  return query<DueReminder>(
+    `SELECT a.id, a.patient_id, p.name AS patient_name, p.email AS patient_email, a.starts_at, t.name AS type_name
+       FROM appointments a
+       LEFT JOIN patients p ON p.id = a.patient_id
+       LEFT JOIN appointment_types t ON t.id = a.appointment_type_id
+      WHERE a.status = 'booked' AND a.reminder_sent_at IS NULL
+        AND a.starts_at > ? AND a.starts_at <= ?
+      ORDER BY a.starts_at ASC`,
+    [from, to]
+  );
+}
+
+export async function markReminderSent(appointmentId: number): Promise<void> {
+  await execute("UPDATE appointments SET reminder_sent_at = datetime('now') WHERE id = ?", [appointmentId]);
+}
