@@ -5,6 +5,7 @@ import { getIntake, type IntakeRow } from "@/lib/intake";
 import { listAppointmentsForPatient, type AppointmentRow } from "@/lib/appointments";
 import { listAuditForEntity } from "@/lib/audit";
 import { listInvoicesForPatient, getInvoice, type InvoiceRow, type InvoiceItemRow } from "@/lib/invoices";
+import { listMealPlansForPatient, getMealPlan, type PlanTree } from "@/lib/meal-plans";
 
 type PatientRow = { id: number; name: string; dob: string; created_at: string; email: string | null; phone: string | null; address1: string | null; address2: string | null; city: string | null; postcode: string | null };
 
@@ -23,6 +24,7 @@ export type PatientExport = {
     snapshots: { id: number; sent_to_email: string | null; sent_at: string | null; frozen_json: unknown }[];
   }[];
   invoices: { invoice: InvoiceRow; items: InvoiceItemRow[] }[];
+  mealPlans: PlanTree[];
   audit: { action: string; detail: string | null; created_at: string; actor_id: number | null }[];
 };
 
@@ -30,7 +32,7 @@ export async function exportPatientData(patientId: number): Promise<PatientExpor
   const patient = (await query<PatientRow>("SELECT id, name, dob, created_at, email, phone, address1, address2, city, postcode FROM patients WHERE id = ?", [patientId]))[0] ?? null;
   const exported_at = new Date().toISOString();
   if (!patient) {
-    return { exported_at, patient: null, attributes: [], consents: [], notes: [], intake: null, appointments: [], plans: [], invoices: [], audit: [] };
+    return { exported_at, patient: null, attributes: [], consents: [], notes: [], intake: null, appointments: [], plans: [], invoices: [], mealPlans: [], audit: [] };
   }
 
   const attributes = await query<{ taxonomy_term_id: number; attr_type: string; label: string }>(
@@ -83,7 +85,11 @@ export async function exportPatientData(patientId: number): Promise<PatientExpor
     if (g) invoices.push(g);
   }
 
-  return { exported_at, patient, attributes, consents, notes, intake, appointments, plans, invoices, audit };
+  const mpRows = await listMealPlansForPatient(patientId);
+  const mealPlans: PlanTree[] = [];
+  for (const mp of mpRows) { const t = await getMealPlan(mp.id); if (t) mealPlans.push(t); }
+
+  return { exported_at, patient, attributes, consents, notes, intake, appointments, plans, invoices, mealPlans, audit };
 }
 
 function safeParse(s: string): unknown {

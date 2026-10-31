@@ -86,6 +86,22 @@ export async function deletePatient(id: number, actorId?: number): Promise<void>
     stmts.push({ sql: `DELETE FROM invoice_items WHERE invoice_id IN (${iph})`, args: invIds });
   }
   stmts.push({ sql: `DELETE FROM invoices WHERE patient_id = ?`, args: [id] });
+  const mpIds = (await query<{ id: number }>("SELECT id FROM meal_plans WHERE patient_id = ?", [id])).map((r) => r.id);
+  if (mpIds.length) {
+    const mp = mpIds.map(() => "?").join(",");
+    const dayIds = (await query<{ id: number }>(`SELECT id FROM meal_plan_days WHERE meal_plan_id IN (${mp})`, mpIds)).map((r) => r.id);
+    if (dayIds.length) {
+      const dp = dayIds.map(() => "?").join(",");
+      const mealIds = (await query<{ id: number }>(`SELECT id FROM meal_plan_meals WHERE day_id IN (${dp})`, dayIds)).map((r) => r.id);
+      if (mealIds.length) {
+        const mlp = mealIds.map(() => "?").join(",");
+        stmts.push({ sql: `DELETE FROM meal_plan_items WHERE meal_id IN (${mlp})`, args: mealIds });
+      }
+      stmts.push({ sql: `DELETE FROM meal_plan_meals WHERE day_id IN (${dp})`, args: dayIds });
+    }
+    stmts.push({ sql: `DELETE FROM meal_plan_days WHERE meal_plan_id IN (${mp})`, args: mpIds });
+  }
+  stmts.push({ sql: `DELETE FROM meal_plans WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM portal_login_tokens WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM appointments WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM patient_intake WHERE patient_id = ?`, args: [id] });
