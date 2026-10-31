@@ -3,4 +3,5 @@
 export const CONSENT_PURPOSES = [
   { key: "health_data_processing", label: "Health-data processing", version: "v1" },
   { key: "marketing", label: "Marketing emails", version: "v1" },
+  { key: "consultation_recording", label: "Recording consultations for AI note-drafting", version: "v1" },
 ] as const;
