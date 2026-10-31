@@ -33,3 +33,20 @@ export async function sendReminderEmail(input: { to: string; from: string; clini
   });
   return { mocked: false };
 }
+
+export async function sendMagicLinkEmail(input: { to: string; clinicName: string; link: string }): Promise<{ mocked: boolean }> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.log(`[email mock] magic link for ${input.to}: ${input.link}`);
+    return { mocked: true };
+  }
+  const { Resend } = await import("resend");
+  const resend = new Resend(key);
+  await resend.emails.send({
+    from: "portal@example.com",
+    to: input.to,
+    subject: `Sign in to ${input.clinicName}`,
+    text: `Tap to sign in to your ${input.clinicName} portal:\n\n${input.link}\n\nThis link expires in 30 minutes. If you didn't request it, ignore this email.`,
+  });
+  return { mocked: false };
+}

@@ -263,3 +263,13 @@ CREATE TABLE IF NOT EXISTS availability (
   start_time TEXT NOT NULL,
   end_time TEXT NOT NULL
 );
+
+-- One-time, hashed, short-lived magic-link tokens for the client portal.
+CREATE TABLE IF NOT EXISTS portal_login_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
