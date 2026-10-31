@@ -5,6 +5,7 @@ import { getPatient, type AttrType } from "@/lib/patients";
 import { listTerms, type TermType } from "@/lib/taxonomies";
 import { latestConsentByPurpose } from "@/lib/consent";
 import { listNotesForPatient } from "@/lib/consultation-notes";
+import { listInvoicesForPatient } from "@/lib/invoices";
 import { getIntake } from "@/lib/intake";
 import { listAppointmentsForPatient } from "@/lib/appointments";
 import { deleteNoteAction } from "./notes/actions";
@@ -34,6 +35,7 @@ export default async function PatientProfile({ params }: { params: { id: string 
   const notes = await listNotesForPatient(id);
   const intake = await getIntake(id);
   const appts = await listAppointmentsForPatient(id);
+  const invoices = await listInvoicesForPatient(id);
 
   const sections: Section[] = ATTR_MAP.map(({ attr, term, label, hint }) => ({
     attr, term, label, hint,
@@ -162,6 +164,22 @@ export default async function PatientProfile({ params }: { params: { id: string 
             ) : null}
           </div>
         ))}
+      </div>
+
+      <div className="card stack" style={{ gap: 8 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 16, margin: 0 }}>Invoices</h2>
+          <Link href={`/invoices/new?patientId=${id}`} className="btn--primary">+ New invoice</Link>
+        </div>
+        {invoices.length === 0 ? <p className="muted">No invoices.</p> : invoices.map((i) => {
+          const sym = i.currency === "GBP" ? "£" : i.currency === "USD" ? "$" : "€";
+          return (
+            <Link key={i.id} href={`/invoices/${i.id}`} className="row" style={{ justifyContent: "space-between", textDecoration: "none", borderTop: "1px solid var(--border,#eee)", paddingTop: 8 }}>
+              <span>{i.number ?? "(draft)"}</span>
+              <span>{sym}{(i.total_cents / 100).toFixed(2)} · <strong>{i.status}</strong></span>
+            </Link>
+          );
+        })}
       </div>
 
       <div className="card">
