@@ -8,10 +8,11 @@ describe("portal auth", () => {
   beforeAll(async () => { await runMigrations(); });
 
   it("issues a single-use token tied to a patient by email", async () => {
-    const pid = await createPatient({ name: "Portal P", dob: "1990-01-01", email: "portal@x.test" });
-    expect(await createPortalLoginToken("nobody@x.test")).toBeNull();
+    const email = `portal${Date.now()}@x.test`;
+    const pid = await createPatient({ name: "Portal P", dob: "1990-01-01", email });
+    expect(await createPortalLoginToken("nobody-does-not-exist@x.test")).toBeNull();
 
-    const issued = await createPortalLoginToken("portal@x.test");
+    const issued = await createPortalLoginToken(email);
     expect(issued?.patientId).toBe(pid);
 
     expect(await consumePortalLoginToken(issued!.token)).toBe(pid);
@@ -19,8 +20,9 @@ describe("portal auth", () => {
   });
 
   it("rejects an expired token", async () => {
-    const pid = await createPatient({ name: "Exp P", dob: "1990-01-01", email: "exp@x.test" });
-    const issued = await createPortalLoginToken("exp@x.test");
+    const email = `exp${Date.now()}@x.test`;
+    const pid = await createPatient({ name: "Exp P", dob: "1990-01-01", email });
+    const issued = await createPortalLoginToken(email);
     const future = new Date(Date.now() + 60 * 60 * 1000);
     expect(await consumePortalLoginToken(issued!.token, future)).toBeNull();
     expect(pid).toBeGreaterThan(0);
