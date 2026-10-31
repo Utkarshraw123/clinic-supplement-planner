@@ -308,3 +308,90 @@ CREATE TABLE IF NOT EXISTS invoice_items (
   plan_id INTEGER,
   sort INTEGER NOT NULL DEFAULT 0
 );
+
+-- Phase 3c meal planner. Practitioner-maintained food database. Panel is per one portion.
+CREATE TABLE IF NOT EXISTS foods (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  portion_label TEXT NOT NULL DEFAULT '1 portion',
+  energy_kcal REAL NOT NULL DEFAULT 0,
+  protein_g REAL NOT NULL DEFAULT 0,
+  carbs_g REAL NOT NULL DEFAULT 0,
+  sugars_g REAL NOT NULL DEFAULT 0,
+  fat_g REAL NOT NULL DEFAULT 0,
+  saturates_g REAL NOT NULL DEFAULT 0,
+  fibre_g REAL NOT NULL DEFAULT 0,
+  salt_g REAL NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS food_tags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  food_id INTEGER REFERENCES foods(id) ON DELETE CASCADE,
+  taxonomy_term_id INTEGER REFERENCES taxonomy_terms(id)
+);
+
+CREATE TABLE IF NOT EXISTS recipes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  servings INTEGER NOT NULL DEFAULT 1,
+  method TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS recipe_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  recipe_id INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
+  food_id INTEGER REFERENCES foods(id),
+  portions REAL NOT NULL DEFAULT 1,
+  sort INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS meal_plans (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
+  is_template INTEGER NOT NULL DEFAULT 0,
+  title TEXT,
+  start_date TEXT,
+  notes TEXT,
+  target_kcal REAL,
+  target_protein_g REAL,
+  target_carbs_g REAL,
+  target_fat_g REAL,
+  target_fibre_g REAL,
+  target_salt_g REAL,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','final')),
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS meal_plan_days (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  meal_plan_id INTEGER REFERENCES meal_plans(id) ON DELETE CASCADE,
+  day_index INTEGER NOT NULL DEFAULT 1,
+  label TEXT,
+  sort INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS meal_plan_meals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  day_id INTEGER REFERENCES meal_plan_days(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  sort INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS meal_plan_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  meal_id INTEGER REFERENCES meal_plan_meals(id) ON DELETE CASCADE,
+  item_type TEXT NOT NULL DEFAULT 'food' CHECK (item_type IN ('food','recipe')),
+  food_id INTEGER,
+  recipe_id INTEGER,
+  quantity REAL NOT NULL DEFAULT 1,
+  note TEXT,
+  sort INTEGER NOT NULL DEFAULT 0
+);
