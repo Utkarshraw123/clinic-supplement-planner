@@ -54,6 +54,25 @@ export default async function SettingsPage() {
             <p className="muted-xs" style={{ margin: 0 }}>Preview opens a sample plan in the selected colour. The colour applies to plans finalised after you Save — plans already finalised keep the colour they were made with.</p>
           </div>
 
+          <div className="stack" style={{ gap: 10, marginTop: 8, borderTop: "1px solid var(--border,#eee)", paddingTop: 12 }}>
+            <span style={{ fontWeight: 600 }}>Invoicing</span>
+            <div className="row" style={{ gap: 10 }}>
+              <label className="stack" style={{ gap: 5, flex: 1 }}><span>Currency</span>
+                <select name="currency" defaultValue={s.currency ?? "EUR"}>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="USD">USD ($)</option>
+                </select>
+              </label>
+              <label className="stack" style={{ gap: 5, flex: 1 }}><span>Invoice prefix</span><input name="invoice_prefix" defaultValue={s.invoice_prefix ?? "INV-"} /></label>
+            </div>
+            <div className="row" style={{ gap: 10 }}>
+              <label className="stack" style={{ gap: 5, flex: 1 }}><span>VAT rate % <span className="muted-xs">(blank = not registered)</span></span><input name="vat_rate" type="number" step="0.1" min="0" defaultValue={s.vat_rate ?? ""} /></label>
+              <label className="stack" style={{ gap: 5, flex: 1 }}><span>VAT number</span><input name="vat_number" defaultValue={s.vat_number ?? ""} /></label>
+            </div>
+            <label className="stack" style={{ gap: 5 }}><span>Stripe secret key <span className="muted-xs">{s.stripe_secret_key ? "(set — leave blank to keep)" : "(optional, test key)"}</span></span><input name="stripe_secret_key" type="password" placeholder={s.stripe_secret_key ? "••••••••" : "sk_test_…"} /></label>
+          </div>
+
           <button type="submit" className="btn--primary" style={{ justifySelf: "start" }}>Save settings</button>
         </form>
       </div>
