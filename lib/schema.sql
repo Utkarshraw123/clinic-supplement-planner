@@ -78,6 +78,12 @@ CREATE TABLE IF NOT EXISTS patients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   dob TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  address1 TEXT,
+  address2 TEXT,
+  city TEXT,
+  postcode TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   created_by INTEGER REFERENCES users(id)
 );
@@ -87,6 +93,48 @@ CREATE TABLE IF NOT EXISTS patient_attributes (
   taxonomy_term_id INTEGER NOT NULL REFERENCES taxonomy_terms(id),
   attr_type TEXT NOT NULL CHECK (attr_type IN ('allergy','goal','diet','med_condition')),
   PRIMARY KEY (patient_id, taxonomy_term_id, attr_type)
+);
+
+-- GDPR consent, append-only and versioned. A withdrawal is a NEW row with
+-- granted=0 (the grant row is never mutated). Latest-per-purpose is the current
+-- state. Removed only when the patient is erased.
+CREATE TABLE IF NOT EXISTS patient_consents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+  purpose TEXT NOT NULL,
+  granted INTEGER NOT NULL CHECK (granted IN (0,1)),
+  version TEXT NOT NULL,
+  recorded_by INTEGER REFERENCES users(id),
+  recorded_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Dated clinical consultation notes. Free body plus optional SOAP fields.
+CREATE TABLE IF NOT EXISTS consultation_notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+  note_date TEXT NOT NULL,
+  title TEXT,
+  body TEXT,
+  subjective TEXT,
+  objective TEXT,
+  assessment TEXT,
+  plan TEXT,
+  author_id INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- One practitioner-entered intake record per patient (upserted).
+CREATE TABLE IF NOT EXISTS patient_intake (
+  patient_id INTEGER PRIMARY KEY REFERENCES patients(id) ON DELETE CASCADE,
+  chief_concern TEXT,
+  health_history TEXT,
+  current_medications TEXT,
+  current_supplements TEXT,
+  lifestyle TEXT,
+  goals TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_by INTEGER REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS dosing_presets (
@@ -180,5 +228,48 @@ CREATE TABLE IF NOT EXISTS dietary_protocols (
   name TEXT NOT NULL,
   body TEXT NOT NULL,
   created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Appointment types a clinic offers (name + duration, optional price).
+CREATE TABLE IF NOT EXISTS appointment_types (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  duration_minutes INTEGER NOT NULL,
+  price TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Booked appointments.
+CREATE TABLE IF NOT EXISTS appointments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
+  practitioner_id INTEGER REFERENCES users(id),
+  appointment_type_id INTEGER REFERENCES appointment_types(id),
+  starts_at TEXT NOT NULL,
+  ends_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'booked' CHECK (status IN ('booked','completed','cancelled')),
+  notes TEXT,
+  reminder_sent_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_by INTEGER REFERENCES users(id)
+);
+
+-- Weekly clinic availability windows (clinic-wide). weekday 0=Sunday..6=Saturday.
+CREATE TABLE IF NOT EXISTS availability (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  weekday INTEGER NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL
+);
+
+-- One-time, hashed, short-lived magic-link tokens for the client portal.
+CREATE TABLE IF NOT EXISTS portal_login_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

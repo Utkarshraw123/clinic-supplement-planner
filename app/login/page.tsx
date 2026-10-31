@@ -45,6 +45,7 @@ export default function LoginPage() {
             {error && <p style={{ color: "var(--danger)", fontSize: 13 }}>{error}</p>}
             <button type="submit" className="btn--primary" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
           </form>
+          <p className="muted" style={{ marginTop: 16, fontSize: 13 }}><a href="/signup">Create a clinic account →</a></p>
         </div>
       </div>
     </main>

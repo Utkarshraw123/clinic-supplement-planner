@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 
-export type SessionPayload = { userId: number; role: "admin" | "team"; name: string };
+export type SessionPayload = { userId: number; tenantId: string; role: "admin" | "team"; name: string };
 
 function secret(): Uint8Array {
   return new TextEncoder().encode(process.env.SESSION_SECRET || "dev-secret-change-me-32-characters!");
@@ -17,7 +17,13 @@ export async function signSession(payload: SessionPayload): Promise<string> {
 export async function verifySession(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret());
-    return { userId: Number(payload.userId), role: payload.role as "admin" | "team", name: String(payload.name) };
+    if (!payload.tenantId) return null; // reject legacy tokens signed before multi-tenancy
+    return {
+      userId: Number(payload.userId),
+      tenantId: String(payload.tenantId),
+      role: payload.role as "admin" | "team",
+      name: String(payload.name),
+    };
   } catch {
     return null;
   }

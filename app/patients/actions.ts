@@ -5,24 +5,35 @@ import { requireUser, requireAdmin } from "@/lib/auth/current-user";
 import { createPatient, updatePatientBasics, setPatientAttributes, deletePatient, type AttrType } from "@/lib/patients";
 import { addTerm, type TermType } from "@/lib/taxonomies";
 
+function contactFromForm(formData: FormData) {
+  return {
+    email: String(formData.get("email") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+    address1: String(formData.get("address1") ?? ""),
+    address2: String(formData.get("address2") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    postcode: String(formData.get("postcode") ?? ""),
+  };
+}
+
 export async function createPatientAction(formData: FormData) {
   const u = await requireUser();
-  const id = await createPatient({ name: String(formData.get("name")), dob: String(formData.get("dob")), createdBy: u.userId });
+  const id = await createPatient({ name: String(formData.get("name")), dob: String(formData.get("dob")), ...contactFromForm(formData), createdBy: u.userId });
   redirect(`/patients/${id}`);
 }
 
 // Permanently erase a patient and all linked data (GDPR right-to-erasure).
 // Admin-only and irreversible — the UI requires a typed/confirmed action.
 export async function deletePatientAction(patientId: number) {
-  await requireAdmin();
-  await deletePatient(patientId);
+  const u = await requireAdmin();
+  await deletePatient(patientId, u.userId);
   redirect("/patients");
 }
 
 export async function savePatientBasicsAction(formData: FormData) {
   await requireUser();
   const id = Number(formData.get("id"));
-  await updatePatientBasics(id, { name: String(formData.get("name")), dob: String(formData.get("dob")) });
+  await updatePatientBasics(id, { name: String(formData.get("name")), dob: String(formData.get("dob")), ...contactFromForm(formData) });
   revalidatePath(`/patients/${id}`);
 }
 

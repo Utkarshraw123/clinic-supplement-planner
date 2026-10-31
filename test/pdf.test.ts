@@ -32,12 +32,12 @@ describe("pdf", () => {
 
   it("renders every supplement row — a longer plan does not clip (regression: 5 added, 3 printed)", async () => {
     const few = await renderPlanPdf(buildGuidePdfData(
-      { id: 1, name: "P", dob: "1990-01-01", attributes: [] } as PatientDetail,
+      { id: 1, name: "P", dob: "1990-01-01", attributes: [], email: null, phone: null, address1: null, address2: null, city: null, postcode: null } as PatientDetail,
       { consultationDate: "2026-09-01", intro: null, nextConsultation: null, lifestyle: null, dietary: null, supplementText: null, medsText: null, notes: null },
       [row({ name: "One" })]
     ));
     const many = await renderPlanPdf(buildGuidePdfData(
-      { id: 1, name: "P", dob: "1990-01-01", attributes: [] } as PatientDetail,
+      { id: 1, name: "P", dob: "1990-01-01", attributes: [], email: null, phone: null, address1: null, address2: null, city: null, postcode: null } as PatientDetail,
       { consultationDate: "2026-09-01", intro: null, nextConsultation: null, lifestyle: null, dietary: null, supplementText: null, medsText: null, notes: null },
       Array.from({ length: 8 }, (_, i) => row({ name: `Supplement number ${i + 1}` }))
     ));
@@ -69,7 +69,7 @@ describe("pdf", () => {
   });
 
   it("maps a patient + guide + supplements into pdf data, trimming blanks", () => {
-    const patient = { id: 1, name: "Emma Hartley", dob: "1988-03-14", attributes: [] } as PatientDetail;
+    const patient = { id: 1, name: "Emma Hartley", dob: "1988-03-14", attributes: [], email: null, phone: null, address1: null, address2: null, city: null, postcode: null } as PatientDetail;
     const data = buildGuidePdfData(patient, {
       consultationDate: "2026-08-26", intro: "  hi  ", nextConsultation: null,
       lifestyle: null, dietary: null, supplementText: null, medsText: null, notes: "  final word  ",

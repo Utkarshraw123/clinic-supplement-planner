@@ -1,27 +1,54 @@
-import { query, execute, getDb } from "@/lib/db";
+import { query, execute, getActiveDb } from "@/lib/db";
+import { recordAudit } from "@/lib/audit";
 
 export type AttrType = "allergy"|"goal"|"diet"|"med_condition";
 export type PatientAttr = { termId: number; label: string; attrType: AttrType };
-export type PatientDetail = { id: number; name: string; dob: string; attributes: PatientAttr[] };
+export type PatientContact = {
+  email: string | null; phone: string | null;
+  address1: string | null; address2: string | null;
+  city: string | null; postcode: string | null;
+};
+export type PatientDetail = { id: number; name: string; dob: string; attributes: PatientAttr[] } & PatientContact;
 
-export async function createPatient(input: { name: string; dob: string; createdBy?: number }): Promise<number> {
+function contactArgs(input: Partial<PatientContact>) {
+  const norm = (v: string | null | undefined) => {
+    const t = (v ?? "").trim();
+    return t === "" ? null : t;
+  };
+  return [norm(input.email), norm(input.phone), norm(input.address1), norm(input.address2), norm(input.city), norm(input.postcode)];
+}
+
+export async function createPatient(input: { name: string; dob: string; createdBy?: number } & Partial<PatientContact>): Promise<number> {
   const rs = await execute(
-    "INSERT INTO patients (name, dob, created_by) VALUES (?, ?, ?)",
-    [input.name.trim(), input.dob.trim(), input.createdBy ?? null]
+    "INSERT INTO patients (name, dob, email, phone, address1, address2, city, postcode, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [input.name.trim(), input.dob.trim(), ...contactArgs(input), input.createdBy ?? null]
   );
   return Number(rs.lastInsertRowid);
 }
 
-export async function updatePatientBasics(id: number, input: { name: string; dob: string }): Promise<void> {
-  await execute("UPDATE patients SET name = ?, dob = ? WHERE id = ?", [input.name.trim(), input.dob.trim(), id]);
+export async function updatePatientBasics(id: number, input: { name: string; dob: string } & Partial<PatientContact>): Promise<void> {
+  await execute(
+    "UPDATE patients SET name = ?, dob = ?, email = ?, phone = ?, address1 = ?, address2 = ?, city = ?, postcode = ? WHERE id = ?",
+    [input.name.trim(), input.dob.trim(), ...contactArgs(input), id]
+  );
 }
 
 export async function listPatients(): Promise<{ id: number; name: string; dob: string }[]> {
   return query("SELECT id, name, dob FROM patients ORDER BY name");
 }
 
+export async function findPatientByEmail(email: string): Promise<{ id: number; name: string } | null> {
+  const e = email.trim().toLowerCase();
+  if (!e) return null;
+  const rows = await query<{ id: number; name: string }>("SELECT id, name FROM patients WHERE lower(email) = ? ORDER BY id LIMIT 1", [e]);
+  return rows[0] ?? null;
+}
+
 export async function getPatient(id: number): Promise<PatientDetail | null> {
-  const base = await query<{ id: number; name: string; dob: string }>("SELECT id, name, dob FROM patients WHERE id = ?", [id]);
+  const base = await query<{ id: number; name: string; dob: string } & PatientContact>(
+    "SELECT id, name, dob, email, phone, address1, address2, city, postcode FROM patients WHERE id = ?",
+    [id]
+  );
   if (!base[0]) return null;
   const attributes = await query<PatientAttr>(
     `SELECT t.id AS termId, t.label AS label, pa.attr_type AS attrType
@@ -36,7 +63,7 @@ export async function getPatient(id: number): Promise<PatientDetail | null> {
 // (which hold the frozen PDF + the client's email). Also purges the audit-log
 // rows for those plans/snapshots, since the "sent" entry records the email.
 // Runs as one write transaction so it's all-or-nothing.
-export async function deletePatient(id: number): Promise<void> {
+export async function deletePatient(id: number, actorId?: number): Promise<void> {
   const planIds = (await query<{ id: number }>("SELECT id FROM plans WHERE patient_id = ?", [id])).map((r) => r.id);
   const stmts: { sql: string; args: number[] }[] = [];
 
@@ -53,10 +80,18 @@ export async function deletePatient(id: number): Promise<void> {
     stmts.push({ sql: `DELETE FROM plan_guide WHERE plan_id IN (${ph})`, args: planIds });
     stmts.push({ sql: `DELETE FROM plans WHERE patient_id = ?`, args: [id] });
   }
+  stmts.push({ sql: `DELETE FROM portal_login_tokens WHERE patient_id = ?`, args: [id] });
+  stmts.push({ sql: `DELETE FROM appointments WHERE patient_id = ?`, args: [id] });
+  stmts.push({ sql: `DELETE FROM patient_intake WHERE patient_id = ?`, args: [id] });
+  stmts.push({ sql: `DELETE FROM consultation_notes WHERE patient_id = ?`, args: [id] });
+  stmts.push({ sql: `DELETE FROM patient_consents WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM patient_attributes WHERE patient_id = ?`, args: [id] });
   stmts.push({ sql: `DELETE FROM patients WHERE id = ?`, args: [id] });
 
-  await getDb().batch(stmts, "write");
+  await (await getActiveDb()).batch(stmts, "write");
+  // Proof-of-erasure: survives because we never delete entity='patient' audit rows,
+  // and carries no PII.
+  await recordAudit({ actorId, action: "erased", entity: "patient", entityId: id, detail: "patient record erased (GDPR)" });
 }
 
 export async function setPatientAttributes(patientId: number, attrs: { termId: number; attrType: AttrType }[]): Promise<void> {
