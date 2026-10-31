@@ -14,6 +14,7 @@ import { CONSENT_PURPOSES } from "./consent-config";
 import { grantConsentAction, withdrawConsentAction } from "./consent-actions";
 import ClinicalProfileForm, { type Section } from "@/components/ClinicalProfileForm";
 import DeletePatientButton from "@/components/DeletePatientButton";
+import ScribeRecorder from "@/components/ScribeRecorder";
 import Toaster from "@/components/Toaster";
 
 const ATTR_MAP: { attr: AttrType; term: TermType; label: string; hint: string }[] = [
@@ -100,6 +101,9 @@ export default async function PatientProfile({ params }: { params: { id: string 
           <h2 style={{ fontSize: 16, margin: 0 }}>Consultation notes</h2>
           <Link href={`/patients/${id}/notes/new`} className="btn--primary">+ Add note</Link>
         </div>
+        {consent["consultation_recording"]?.granted === 1
+          ? <ScribeRecorder patientId={id} />
+          : <p className="muted-xs">Grant “Recording consultations…” consent above to use the AI scribe.</p>}
         {notes.length === 0 ? (
           <p className="muted">No notes yet.</p>
         ) : (
